@@ -51,7 +51,7 @@ extern "C" {
 	bool __cdecl Detect_CMOV_Availability (void);
 
 	extern char CPUType;
-	extern char VendorID;
+	extern char VendorID[20];
 }
 
 
@@ -86,7 +86,7 @@ void Get_CPU_Type(int & cpu_type, bool & mmx, char * vendor_id, int vendor_id_le
 	cpu_type = (int)CPUType;
 
 	if (vendor_id != NULL) {
-		char * vendor_ptr = &VendorID;
+		char * vendor_ptr = VendorID;
 		strncpy(vendor_id, vendor_ptr, vendor_id_length);
 	}
 }

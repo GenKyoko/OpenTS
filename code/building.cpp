@@ -126,7 +126,9 @@
 #include "cell.h"
 #include "combat.h"
 #include "conquer.h"
+#include "data.h"
 #include "dbgprint.h"
+#include "dialog.h"
 #include "draw.h"
 #include "drive.h"
 #include "dsurface.h"
@@ -147,6 +149,7 @@
 #include "ipiggy.h"
 #include "isotile.h"
 #include "isotype.h"
+#include "language/language.h"
 #include "light.h"
 #include "lightcon.h"
 #include "mono.h"
@@ -1154,14 +1157,22 @@ void BuildingClass::Draw_Overlays(Point2D const & point, Rect const & cliprect) 
 		}
 	}
 
-	if (IsSelected && (House->Is_Ally(PlayerPtr) || SpiedBy & (1<<(PlayerPtr->Class->House)))) {
+	/*
+	**	The owner, an ally, the house being spied on and an observer may all
+	**	read the state of the building when it is selected.
+	*/
+	bool const can_view_info = House == PlayerPtr || House->Is_Ally(PlayerPtr)
+		|| PlayerPtr->IsObserver || (SpiedBy & (1 << (PlayerPtr->Class->House))) != 0;
+
+	if (IsSelected && can_view_info) {
 		Draw_Text_Overlay(point + Point2D(-10, 10), point, cliprect);
 	}
 
 	/*
-	**	If this is a factory that we're spying on, show what it's producing
+	**	When the building is selected and its owner may be watched, show what
+	**	its attached factory is producing.
 	*/
-	if (SpiedBy & (1<<(PlayerPtr->Class->House)) && IsSelected) {
+	if (IsSelected && can_view_info) {
 
 		/*
 		**	Fetch the factory that is associate with this building. For computer controlled buildings, the
@@ -1185,6 +1196,33 @@ void BuildingClass::Draw_Overlays(Point2D const & point, Rect const & cliprect) 
 				Draw_Shape(*LogicalSurface, *CameoDrawer, (ShapeSet const *)obj->TClass->Get_Cameo_Data(), 0, point, cliprect, ShapeFlags_Type(SHAPE_CENTER|SHAPE_WIN_REL|SHAPE_ALPHA), NULL);
 			}
 		}
+	}
+
+	// A selected power plant shows the state of its owner's grid the way the
+	// original readout did, so a watcher can read the balance without the sidebar.
+	if (IsSelected && can_view_info && Class->Power > 0 && !Map.Is_Shrouded(Center_Coord())
+		&& (!Scen->Special.IsFogOfWar || !IsFogged)) {
+		char buffer[128];
+		sprintf(buffer, Fetch_String(TXT_POWER_DRAIN), House->Power_Output(), House->Power_Drain());
+		Plain_Text_Print(buffer, *LogicalSurface, cliprect, point,
+			WHITE, TBLACK, TextPrintType(TPF_CENTER|TPF_FULLSHADOW|TPF_EFNT), 0, 1);
+	}
+
+	// A selected refinery or silo shows its owner's money, and how much tiberium
+	// the building holds when the type stores any. The refinery is tagged by
+	// Refinery=yes; the silo by a non-zero Storage on a type whose pips count
+	// tiberium.
+	bool is_silo = Class->Capacity > 0 && Class->PipScale == PIPSCALE_TIBERIUM;
+	if (IsSelected && can_view_info && (Class->IsRefinery || is_silo)
+		&& !Map.Is_Shrouded(Center_Coord()) && (!Scen->Special.IsFogOfWar || !IsFogged)) {
+		char buffer[128];
+		if (Class->Capacity > 0) {
+			sprintf(buffer, Fetch_String(TXT_CREDITS_STORAGE), House->Available_Money(), Storage.Get_Total_Value());
+		} else {
+			sprintf(buffer, Fetch_String(TXT_CREDITS), House->Available_Money());
+		}
+		Plain_Text_Print(buffer, *LogicalSurface, cliprect, point,
+			WHITE, TBLACK, TextPrintType(TPF_CENTER|TPF_FULLSHADOW|TPF_EFNT), 0, 1);
 	}
 }
 
@@ -8915,7 +8953,7 @@ VisualType BuildingClass::Visual_Character(bool raw, HouseClass const * house) c
 					}
 				}
 			} else {
-				if (IsOwnedByPlayer || Is_Sensed_By_Player() || !MainWindow || (Session.Type != GAME_NORMAL && House != NULL && PlayerPtr != NULL && PlayerPtr->Is_Ally(House) && House->Is_Ally(PlayerPtr))) {
+				if (IsOwnedByPlayer || Is_Sensed_By_Player() || !MainWindow || (Session.Type != GAME_NORMAL && House != NULL && PlayerPtr != NULL && PlayerPtr->Is_Ally_Or_Observer(House) && House->Is_Ally_Or_Observer(PlayerPtr))) {
 					return(VISUAL_SHADOWY);
 				}
 			}

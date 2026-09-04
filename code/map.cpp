@@ -11668,14 +11668,16 @@ bool MapClass::Is_Shrouded(Coord const & coord)
 /// Determines if a coordinate is hidden under the fog of war.
 /// Which cell a coordinate appears over depends on how high it is, so the height is folded
 /// into the lookup before the fog is consulted. A defeated player watching a multiplayer game
-/// under ObiWan sees through the fog, and nothing is reported as hidden from them.
+/// under ObiWan sees through the fog, and nothing is reported as hidden from them. An observer
+/// is handed the whole map rather than having its fog cleared, so it reads as fog-free here too.
 /// </summary>
 /// <returns>bool; Is the coordinate under the fog?</returns>
 bool MapClass::Is_Fogged(Coord const & coord)
 {
 	CellClass * cptr;
 
-	if (Session.Type == GAME_NORMAL || !PlayerPtr->IsDefeated || !Session.ObiWan) {
+	if (PlayerPtr != NULL && !PlayerPtr->IsObserver
+		&& (Session.Type == GAME_NORMAL || !PlayerPtr->IsDefeated || !Session.ObiWan)) {
 		int level_height = coord.Z / LEVEL_LEPTON_H;
 		if ((level_height & 1) != 0) {
 			int offset = level_height / 2 + 1;

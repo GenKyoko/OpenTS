@@ -20,7 +20,7 @@ extern "C" {
 	bool __cdecl Detect_CMOV_Availability(void);
 
 	extern char CPUType;
-	extern char VendorID;
+	extern char VendorID[20];
 }
 
 /*

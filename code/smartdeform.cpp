@@ -92,40 +92,9 @@ static int * _ramp_corners[RAMP_COUNT] = {
 };
 
 
-struct DeformPointStruct {
-
-	DeformPointStruct(void)
-	{
-		Height = 0;
-		Rigid = false;
-		Done = false;
-	};
-
-	DeformPointStruct(const DeformPointStruct & that)
-	{
-		Height = that.Height;
-		Rigid = that.Rigid;
-		Done = that.Done;
-	};
-
-	int Height;
-	bool Rigid;
-	bool Done;
-	bool CanForce;
-};
-
-
 extern "C" {
 
 DeformPointStruct * DeformPoints = NULL;
-
-extern int DeformPointXAdd;
-extern int DeformPointYAdd;
-
-extern int DeformPointWidth;
-extern int DeformPointHeight;
-
-extern bool Asm_Ripple_Deform_Points(int startpointx, int startpointy, int general_direction, bool forced);
 
 }
 

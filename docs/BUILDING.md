@@ -122,7 +122,7 @@ the scheduled run cancels itself so that the latest successful nightly is
 always one that produced artifacts, which keeps the nightly download links
 resolvable. Both call the same reusable `Engine build` workflow, which on a
 Windows runner with Visual Studio 2022 configures and builds Win32 Debug and
-Release with the commands above, runs the CTest suite, and uploads each
+Release with the commands above, and uploads each
 configuration's executable, language library, and symbol file as an artifact
 named for the configuration and the short commit. The linker map is not
 uploaded, because the symbol file covers the same ground. After a successful

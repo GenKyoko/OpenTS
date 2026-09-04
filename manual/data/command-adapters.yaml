@@ -538,6 +538,16 @@ launch_options:
     availability: *all
     sites:
       - { file: code/init.cpp, function: Parse_Command_Line, expression: 'literal:-WIN' }
+  - id: launch:spawn
+    title: Spawner launch
+    syntax: -SPAWN
+    description: >-
+      Starts the match described by a SPAWN.INI written by an external launcher,
+      skipping the menus, and closes the game when that match ends.
+    audience: developer
+    availability: *all
+    sites:
+      - { file: code/init.cpp, function: Parse_Command_Line, expression: 'literal:-SPAWN' }
   - id: launch:exception-test
     title: Exception reporting test
     syntax: -EXCEPTIONTEST=<fault>

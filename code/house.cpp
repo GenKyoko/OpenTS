@@ -200,9 +200,13 @@
 #include <cassert>
 #include <vector>
 
+#include "_macro100.h"
 
 DynamicVectorClass<HouseClass::BuildChoiceClass *> HouseClass::BuildChoice;
 
+std::vector<int> HouseClass::AIProduction_CreationFrames;
+std::vector<int> HouseClass::AIProduction_Values;
+std::vector<int> HouseClass::AIProduction_BestChoices;
 
 /***********************************************************************************************
  * HouseClass::HouseClass -- Constructor for a house object.                                   *
@@ -355,7 +359,8 @@ HouseClass::HouseClass(HouseTypeClass const * type) :
 	EnemyArmorForcePrediction(0.33f),
 	EnemyAirForcePrediction(0.33f),
 	EnemyInfantryForcePrediction(0.34f),
-	PowerSurplus(0)
+	PowerSurplus(0),
+	IsObserver(false)
 {
 	int index;
 
@@ -1230,7 +1235,15 @@ void HouseClass::AI(void)
 		RecalcRadar = true;
 	}
 	if (RecalcRadar) {
-		Recalc_Radar_Availability();
+		if (this == PlayerPtr && this->IsObserver) {
+			if (!Map.Is_Radar_Existing()) {
+				Map.Toggle_Radar(true);
+			}
+			Map.Reveal_The_Map();
+		}
+		else {
+			Recalc_Radar_Availability();
+		}
 	}
 
 	if ((Frame % 100) == 0) {
@@ -1490,7 +1503,7 @@ void HouseClass::AI(void)
 	**	may not properly set IScan etc for each house; you have to go
 	**	through each object's AI before it will be properly set.
 	*/
-	if (Session.Type != GAME_NORMAL && !IsDefeated && Frame > 0 && !Class->IsMultiplayPassive) {
+	if (Session.Type != GAME_NORMAL && !IsDefeated && !IsObserver && Frame > 0 && !Class->IsMultiplayPassive) {
 		bool defeated = false;
 		if (Session.Options.ShortGame) {
 			if (!CurBuildings && !UQuantity.Value(Rule->BaseUnit->HeapID)) {
@@ -3314,7 +3327,7 @@ void HouseClass::MPlayer_Defeated(void)
 	num_humans = 0;
 	for (i = 0; i < Houses.Count(); i++) {
 		hptr = Houses[i];
-		if (hptr && !hptr->IsDefeated && !hptr->Class->IsMultiplayPassive) {
+		if (hptr && !hptr->IsDefeated && !hptr->IsObserver && !hptr->Class->IsMultiplayPassive) {
 			if (hptr->Is_Human_Player()) {
 				num_humans++;
 			}
@@ -3334,7 +3347,7 @@ void HouseClass::MPlayer_Defeated(void)
 		**	Get a pointer to this house
 		*/
 		hptr = Houses[i];
-		if (!hptr || hptr->IsDefeated || (Session.Type != GAME_SKIRMISH && hptr->Class->IsMultiplayPassive))
+		if (!hptr || hptr->IsDefeated || hptr->IsObserver || (Session.Type != GAME_SKIRMISH && hptr->Class->IsMultiplayPassive))
 			continue;
 
 		/*
@@ -3347,7 +3360,7 @@ void HouseClass::MPlayer_Defeated(void)
 				continue;
 			}
 
-			if (!hptr2->IsDefeated && (Session.Type == GAME_SKIRMISH || !hptr2->Class->IsMultiplayPassive) && (!hptr->Is_Ally(hptr2) || !hptr2->Is_Ally(hptr))) {
+			if (!hptr2->IsDefeated && !hptr2->IsObserver && (Session.Type == GAME_SKIRMISH || !hptr2->Class->IsMultiplayPassive) && (!hptr->Is_Ally(hptr2) || !hptr2->Is_Ally(hptr))) {
 				all_allies = false;
 				break;
 			}
@@ -3993,7 +4006,8 @@ int HouseClass::Expert_AI(void)
 
 				for (HousesType house = HOUSE_FIRST; house < Houses.Count(); house++) {
 					HouseClass * h = Houses[house];
-					if (h != this && !h->Class->IsMultiplayPassive && !h->IsDefeated) {
+					if (h != this && !h->Class->IsMultiplayPassive && !h->IsDefeated
+						&& !Is_Ally(h) && !h->IsObserver) {
 
 						/*
 						**	Determine a priority value based on distance to the center of the
@@ -4558,106 +4572,232 @@ int HouseClass::AI_Unit(void)
 {
 	if (BuildUnit != UNIT_NONE) return(TICKS_PER_SECOND);
 
-	int harv = AUQuantity.Value(Rule->HarvesterUnit[0]->HeapID);
-	int ref = ABQuantity.Value(Rule->BuildRefinery[0]->HeapID);
-	int mult;
-	if (Session.Type == GAME_NORMAL || Difficulty == DIFF_HARD) {
-		mult = 1;
-	} else {
-		mult = 2;
-	}
+	//auto const pRules = Rule;
 
-	/*
-	**	A computer controlled house will try to build a replacement
-	**	harvester if possible.
-	*/
-	if (IQ >= Rule->IQHarvester && !IsTiberiumShort && !Is_Human_Player() && ref * mult > harv) {
-		if ((unsigned int)Rule->HarvesterUnit[0]->Level <= (unsigned int)Control.TechLevel) {
-			BuildUnit = Rule->HarvesterUnit[0]->HeapID;
-			return(TICKS_PER_SECOND);
+	//auto const AIDiff = static_cast<int>(this->Difficulty);
+
+	//auto const idxParentCountry = this->Class->FindParentCountryIndex();
+
+	//auto const pHarvester = HouseExt::FindOwned(
+	//	this, idxParentCountry, make_iterator(pRules->HarvesterUnit));
+
+	//if (pHarvester) {
+	//	//Buildable harvester found
+	//	auto const harvesters = pThis->CountResourceGatherers;
+
+	//	auto maxHarvesters = HouseExt::FindBuildable(
+	//		pThis, idxParentCountry, make_iterator(pRules->BuildRefinery))
+	//		? pRules->HarvestersPerRefinery[AIDiff] * pThis->CountResourceDestinations
+	//		: pRules->AISlaveMinerNumber[AIDiff];
+
+	//	if (pThis->IQLevel2 >= pRules->HarvesterUnit && !pThis->unknown_bool_242
+	//		&& !pThis->ControlledByHuman() && harvesters < maxHarvesters
+	//		&& pThis->TechLevel >= pHarvester->TechLevel)
+	//	{
+	//		pThis->ProducingUnitTypeIndex = pHarvester->ArrayIndex;
+	//		return(TICKS_PER_SECOND);
+	//	}
+	//}
+	//else {
+	//	//No buildable harvester found
+	//	auto const maxHarvesters = pRules->AISlaveMinerNumber[AIDiff];
+
+	//	if (pThis->CountResourceGatherers < maxHarvesters) {
+	//		auto const pRefinery = HouseExt::FindBuildable(
+	//			pThis, idxParentCountry, make_iterator(pRules->BuildRefinery));
+
+	//		if (pRefinery) {
+	//			//awesome way to find out whether this building is a slave miner, isn't it? ...
+	//			if (auto const pSlaveMiner = pRefinery->UndeploysInto) {
+	//				pThis->ProducingUnitTypeIndex = pSlaveMiner->ArrayIndex;
+	//				return(TICKS_PER_SECOND);
+	//			}
+	//		}
+	//	}
+	//}
+
+	auto& CreationFrames = HouseClass::AIProduction_CreationFrames;
+	auto& Values = HouseClass::AIProduction_Values;
+	auto& BestChoices = HouseClass::AIProduction_BestChoices;
+
+	auto const count = static_cast<unsigned int>(UnitTypes.Count());
+	CreationFrames.assign(count, 0x7FFFFFFF);
+	Values.assign(count, 0);
+
+	for (auto CurrentTeam : Teams) {
+		if (!CurrentTeam || CurrentTeam->House != this) {
+			continue;
 		}
-	}
 
-	std::vector<int> counter(UnitTypes.Count(), 0);
-	std::vector<int> value(UnitTypes.Count(), 0x7FFFFFFF);
+		int TeamCreationFrame = CurrentTeam->CreationFrame;
 
-	/*
-	**	Build a list of the maximum of each type we wish to produce. This will be
-	**	twice the number required to fill all teams.
-	*/
-	for (int i = 0; i < Teams.Count(); i++) {
-		TeamClass * tptr = Teams[i];
-		if (tptr != NULL) {
+		if ((!CurrentTeam->Class->IsReinforcable || CurrentTeam->IsFullStrength)
+			&& (CurrentTeam->IsForcedActive || CurrentTeam->IsHasBeen))
+		{
+			continue;
+		}
 
-			int val = tptr->CreationFrame;
-
-			if (((tptr->Class->IsReinforcable && !tptr->IsFullStrength) || (!tptr->IsForcedActive && !tptr->IsHasBeen)) && tptr->House == this) {
-				TEAM_MEMBER_LIST _members;
-				tptr->Team_Members(_members);
-
-				for (int subindex = 0; subindex < _members.Count(); subindex++) {
-
-					UnitTypeClass const * memtype = (UnitTypeClass const *)_members[subindex];
-
-					if (memtype->RTTI == RTTI_UNITTYPE
-						&& static_cast<unsigned>(memtype->HeapID) < counter.size()) {
-						counter[memtype->HeapID]++;
-						if (val < value[memtype->HeapID]) {
-							value[memtype->HeapID] = val;
-						}
-					}
+		DynamicVectorClass<const TechnoTypeClass*> TaskForceMembers;
+		CurrentTeam->Team_Members(TaskForceMembers);
+		for (auto CurrentMember : TaskForceMembers) {
+			if (CurrentMember->What_Am_I() != RTTIType::RTTI_UNITTYPE) {
+				continue;
+			}
+			auto const Idx = CurrentMember->Fetch_Heap_ID();
+			if (static_cast<unsigned int>(Idx) < count) {
+				++Values[Idx];
+				if (TeamCreationFrame < CreationFrames[Idx]) {
+					CreationFrames[Idx] = TeamCreationFrame;
 				}
 			}
 		}
 	}
 
-	/*
-	**	Reduce the theoretical maximum by the actual number of objects currently
-	**	in play.
-	*/
-	for (int oindex = 0; oindex < Units.Count(); oindex++) {
-		UnitClass * obj = Units[oindex];
-		if (obj != NULL && obj->Is_Recruitable(this)
-			&& static_cast<unsigned>(obj->Class->HeapID) < counter.size()
-			&& counter[obj->Class->HeapID] > 0) {
-			counter[obj->Class->HeapID]--;
+	for (auto T : Units) {
+		auto const Idx = T->Class->Fetch_Heap_ID();
+		if (static_cast<unsigned int>(Idx) < count && Values[Idx] > 0 && T->Is_Recruitable(this)) {
+			--Values[Idx];
 		}
 	}
 
-	/*
-	**	Pick to build the most needed object but don't consider those object that
-	**	can't be built because of scenario restrictions or insufficient cash.
-	*/
-	int bestval = -1;
-	UnitType lasttype = UNIT_NONE;
-	int lastval = 0x7FFFFFFF;
-	std::vector<UnitType> bestlist;
-	bestlist.reserve(UnitTypes.Count());
-	for (UnitType type = UnitType(0); type < UnitTypes.Count(); type++) {
-		if (counter[type] > 0 && Can_Build(UnitTypes[type], false, false) && UnitTypes[type]->Cost_Of(this) <= Available_Money()) {
-			if (bestval == -1 || bestval < counter[type]) {
-				bestval = counter[type];
-				bestlist.clear();
-			}
-			bestlist.push_back(type);
+	BestChoices.clear();
 
-			if (lasttype == UNIT_NONE || value[type] < lastval) {
-				lasttype = type;
-				lastval = value[type];
-			}
+	int BestValue = -1;
+	int EarliestTypenameIndex = -1;
+	int EarliestFrame = 0x7FFFFFFF;
+
+	for (auto i = 0u; i < count; ++i) {
+		auto const TT = UnitTypes[static_cast<int>(i)];
+		int CurrentValue = Values[i];
+		if (CurrentValue <= 0 || !this->Can_Build(TT, false, false)
+			|| TT->Cost_Of(this) > this->Available_Money())
+		{
+			continue;
+		}
+
+		if (BestValue < CurrentValue || BestValue == -1) {
+			BestValue = CurrentValue;
+			BestChoices.clear();
+		}
+		BestChoices.push_back(static_cast<int>(i));
+		if (EarliestFrame > CreationFrames[i] || EarliestTypenameIndex == -1) {
+			EarliestTypenameIndex = static_cast<int>(i);
+			EarliestFrame = CreationFrames[i];
 		}
 	}
 
-	if (Random_Double(0, 0x7FFFFFFE) < Rule->FillEarliestTeamProbability[Difficulty] / 100.0) {
-		BuildUnit = lasttype;
-	} else {
-		/*
-		**	The object type to build is now known. Fetch a pointer to the techno type class.
-		*/
-		if (!bestlist.empty()) {
-			BuildUnit = bestlist[Random_Pick(0, static_cast<int>(bestlist.size()) - 1)];
-		}
+	auto const AIDiff = static_cast<int>(this->Difficulty);
+	int EarliestOdds = Rule->FillEarliestTeamProbability[AIDiff];
+	if (Scen->RandomNumber(0, 99) < EarliestOdds) {
+		BuildUnit = static_cast<UnitType>(EarliestTypenameIndex);
 	}
+	else if (auto const size = static_cast<int>(BestChoices.size())) {
+		int RandomChoice = Scen->RandomNumber(0, size - 1);
+		BuildUnit = static_cast<UnitType>(BestChoices[static_cast<unsigned int>(RandomChoice)]);
+	}
+
+#pragma region AI_Unit_Old_Code
+	//int harv = AUQuantity.Value(Rule->HarvesterUnit[0]->HeapID);
+	//int ref = ABQuantity.Value(Rule->BuildRefinery[0]->HeapID);
+	//int mult;
+	//if (Session.Type == GAME_NORMAL || Difficulty == DIFF_HARD) {
+	//	mult = 1;
+	//} else {
+	//	mult = 2;
+	//}
+
+	///*
+	//**	A computer controlled house will try to build a replacement
+	//**	harvester if possible.
+	//*/
+	//if (IQ >= Rule->IQHarvester && !IsTiberiumShort && !Is_Human_Player() && ref * mult > harv) {
+	//	if ((unsigned int)Rule->HarvesterUnit[0]->Level <= (unsigned int)Control.TechLevel) {
+	//		BuildUnit = Rule->HarvesterUnit[0]->HeapID;
+	//		return(TICKS_PER_SECOND);
+	//	}
+	//}
+
+	//std::vector<int> counter(UnitTypes.Count(), 0);
+	//std::vector<int> value(UnitTypes.Count(), 0x7FFFFFFF);
+
+	///*
+	//**	Build a list of the maximum of each type we wish to produce. This will be
+	//**	twice the number required to fill all teams.
+	//*/
+	//for (int i = 0; i < Teams.Count(); i++) {
+	//	TeamClass * tptr = Teams[i];
+	//	if (tptr != NULL) {
+
+	//		int val = tptr->CreationFrame;
+
+	//		if (((tptr->Class->IsReinforcable && !tptr->IsFullStrength) || (!tptr->IsForcedActive && !tptr->IsHasBeen)) && tptr->House == this) {
+	//			TEAM_MEMBER_LIST _members;
+	//			tptr->Team_Members(_members);
+
+	//			for (int subindex = 0; subindex < _members.Count(); subindex++) {
+
+	//				UnitTypeClass const * memtype = (UnitTypeClass const *)_members[subindex];
+
+	//				if (memtype->RTTI == RTTI_UNITTYPE
+	//					&& static_cast<unsigned>(memtype->HeapID) < counter.size()) {
+	//					counter[memtype->HeapID]++;
+	//					if (val < value[memtype->HeapID]) {
+	//						value[memtype->HeapID] = val;
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+
+	///*
+	//**	Reduce the theoretical maximum by the actual number of objects currently
+	//**	in play.
+	//*/
+	//for (int oindex = 0; oindex < Units.Count(); oindex++) {
+	//	UnitClass * obj = Units[oindex];
+	//	if (obj != NULL && obj->Is_Recruitable(this)
+	//		&& static_cast<unsigned>(obj->Class->HeapID) < counter.size()
+	//		&& counter[obj->Class->HeapID] > 0) {
+	//		counter[obj->Class->HeapID]--;
+	//	}
+	//}
+
+	///*
+	//**	Pick to build the most needed object but don't consider those object that
+	//**	can't be built because of scenario restrictions or insufficient cash.
+	//*/
+	//int bestval = -1;
+	//UnitType lasttype = UNIT_NONE;
+	//int lastval = 0x7FFFFFFF;
+	//std::vector<UnitType> bestlist;
+	//bestlist.reserve(UnitTypes.Count());
+	//for (UnitType type = UnitType(0); type < UnitTypes.Count(); type++) {
+	//	if (counter[type] > 0 && Can_Build(UnitTypes[type], false, false) && UnitTypes[type]->Cost_Of(this) <= Available_Money()) {
+	//		if (bestval == -1 || bestval < counter[type]) {
+	//			bestval = counter[type];
+	//			bestlist.clear();
+	//		}
+	//		bestlist.push_back(type);
+
+	//		if (lasttype == UNIT_NONE || value[type] < lastval) {
+	//			lasttype = type;
+	//			lastval = value[type];
+	//		}
+	//	}
+	//}
+
+	//if (Random_Double(0, 0x7FFFFFFE) < Rule->FillEarliestTeamProbability[Difficulty] / 100.0) {
+	//	BuildUnit = lasttype;
+	//} else {
+	//	/*
+	//	**	The object type to build is now known. Fetch a pointer to the techno type class.
+	//	*/
+	//	if (!bestlist.empty()) {
+	//		BuildUnit = bestlist[Random_Pick(0, static_cast<int>(bestlist.size()) - 1)];
+	//	}
+	//}
+#pragma endregion
 
 	return(TICKS_PER_SECOND);
 }
@@ -4682,86 +4822,168 @@ int HouseClass::AI_Infantry(void)
 {
 	if (BuildInfantry != INFANTRY_NONE) return(TICKS_PER_SECOND);
 
-	std::vector<int> counter(InfantryTypes.Count(), 0);
-	std::vector<int> value(InfantryTypes.Count(), 0x7FFFFFFF);
+	auto& CreationFrames = HouseClass::AIProduction_CreationFrames;
+	auto& Values = HouseClass::AIProduction_Values;
+	auto& BestChoices = HouseClass::AIProduction_BestChoices;
 
-	/*
-	**	Build a list of the maximum of each type we wish to produce. This will be
-	**	twice the number required to fill all teams.
-	*/
-	for (int i = 0; i < Teams.Count(); i++) {
-		TeamClass * tptr = Teams[i];
-		if (tptr != NULL) {
+	auto const count = static_cast<unsigned int>(InfantryTypes.Count());
+	CreationFrames.assign(count, 0x7FFFFFFF);
+	Values.assign(count, 0);
 
-			int val = tptr->CreationFrame;
+	for (auto CurrentTeam : Teams) {
+		if (!CurrentTeam || CurrentTeam->House != this) {
+			continue;
+		}
 
-			if (((tptr->Class->IsReinforcable && !tptr->IsFullStrength) || (!tptr->IsForcedActive && !tptr->IsHasBeen)) && tptr->House == this) {
-				TEAM_MEMBER_LIST _members;
-				tptr->Team_Members(_members);
+		int TeamCreationFrame = CurrentTeam->CreationFrame;
 
-				for (int subindex = 0; subindex < _members.Count(); subindex++) {
+		if ((!CurrentTeam->Class->IsReinforcable || CurrentTeam->IsFullStrength)
+			&& (CurrentTeam->IsForcedActive || CurrentTeam->IsHasBeen))
+		{
+			continue;
+		}
 
-					InfantryTypeClass const * memtype = (InfantryTypeClass const *)_members[subindex];
-
-					if (memtype->RTTI == RTTI_INFANTRYTYPE
-						&& static_cast<unsigned>(memtype->HeapID) < counter.size()) {
-						counter[memtype->HeapID]++;
-						if (val < value[memtype->HeapID]) {
-							value[memtype->HeapID] = val;
-						}
-					}
+		DynamicVectorClass<const TechnoTypeClass*> TaskForceMembers;
+		CurrentTeam->Team_Members(TaskForceMembers);
+		for (auto CurrentMember : TaskForceMembers) {
+			if (CurrentMember->What_Am_I() != RTTIType::RTTI_INFANTRYTYPE) {
+				continue;
+			}
+			auto const Idx = CurrentMember->Fetch_Heap_ID();
+			if (static_cast<unsigned int>(Idx) < count) {
+				++Values[Idx];
+				if (TeamCreationFrame < CreationFrames[Idx]) {
+					CreationFrames[Idx] = TeamCreationFrame;
 				}
 			}
 		}
 	}
 
-	/*
-	**	Reduce the theoretical maximum by the actual number of objects currently
-	**	in play.
-	*/
-	for (int oindex = 0; oindex < Infantry.Count(); oindex++) {
-		InfantryClass * obj = Infantry[oindex];
-		if (obj != NULL && obj->Is_Recruitable(this)
-			&& static_cast<unsigned>(obj->Class->HeapID) < counter.size()
-			&& counter[obj->Class->HeapID] > 0) {
-			counter[obj->Class->HeapID]--;
+	for (auto T : Infantry) {
+		auto const Idx = T->Class->Fetch_Heap_ID();
+		if (static_cast<unsigned int>(Idx) < count && Values[Idx] > 0 && T->Is_Recruitable(this)) {
+			--Values[Idx];
 		}
 	}
 
-	/*
-	**	Pick to build the most needed object but don't consider those object that
-	**	can't be built because of scenario restrictions or insufficient cash.
-	*/
-	int bestval = -1;
-	InfantryType lasttype = INFANTRY_NONE;
-	int lastval = 0x7FFFFFFF;
-	std::vector<InfantryType> bestlist;
-	bestlist.reserve(InfantryTypes.Count());
-	for (InfantryType type = InfantryType(0); type < InfantryTypes.Count(); type++) {
-		if (counter[type] > 0 && Can_Build(InfantryTypes[type], false, false) && InfantryTypes[type]->Cost_Of(this) <= Available_Money()) {
-			if (bestval == -1 || bestval < counter[type]) {
-				bestval = counter[type];
-				bestlist.clear();
-			}
-			bestlist.push_back(type);
+	BestChoices.clear();
 
-			if (lasttype == INFANTRY_NONE || value[type] < lastval) {
-				lasttype = type;
-				lastval = value[type];
-			}
+	int BestValue = -1;
+	int EarliestTypenameIndex = -1;
+	int EarliestFrame = 0x7FFFFFFF;
+
+	for (auto i = 0u; i < count; ++i) {
+		auto const TT = InfantryTypes[static_cast<int>(i)];
+		int CurrentValue = Values[i];
+		if (CurrentValue <= 0 || !this->Can_Build(TT, false, false)
+			|| TT->Cost_Of(this) > this->Available_Money())
+		{
+			continue;
+		}
+
+		if (BestValue < CurrentValue || BestValue == -1) {
+			BestValue = CurrentValue;
+			BestChoices.clear();
+		}
+		BestChoices.push_back(static_cast<int>(i));
+		if (EarliestFrame > CreationFrames[i] || EarliestTypenameIndex == -1) {
+			EarliestTypenameIndex = static_cast<int>(i);
+			EarliestFrame = CreationFrames[i];
 		}
 	}
 
-	if (Random_Double(0, 0x7FFFFFFE) < Rule->FillEarliestTeamProbability[Difficulty] / 100.0) {
-		BuildInfantry = lasttype;
-	} else {
-		/*
-		**	The object type to build is now known. Fetch a pointer to the techno type class.
-		*/
-		if (!bestlist.empty()) {
-			BuildInfantry = bestlist[Random_Pick(0, static_cast<int>(bestlist.size()) - 1)];
-		}
+	auto const AIDiff = static_cast<int>(this->Difficulty);
+	int EarliestOdds = Rule->FillEarliestTeamProbability[AIDiff];
+	if (Scen->RandomNumber(0, 99) < EarliestOdds) {
+		BuildInfantry = static_cast<InfantryType>(EarliestTypenameIndex);
 	}
+	else if (auto const size = static_cast<int>(BestChoices.size())) {
+		int RandomChoice = Scen->RandomNumber(0, size - 1);
+		BuildInfantry = static_cast<InfantryType>(BestChoices[static_cast<unsigned int>(RandomChoice)]);
+	}
+
+#pragma region AI_Inf_Old_Code
+	//std::vector<int> counter(InfantryTypes.Count(), 0);
+	//std::vector<int> value(InfantryTypes.Count(), 0x7FFFFFFF);
+
+	///*
+	//**	Build a list of the maximum of each type we wish to produce. This will be
+	//**	twice the number required to fill all teams.
+	//*/
+	//for (int i = 0; i < Teams.Count(); i++) {
+	//	TeamClass * tptr = Teams[i];
+	//	if (tptr != NULL) {
+
+	//		int val = tptr->CreationFrame;
+
+	//		if (((tptr->Class->IsReinforcable && !tptr->IsFullStrength) || (!tptr->IsForcedActive && !tptr->IsHasBeen)) && tptr->House == this) {
+	//			TEAM_MEMBER_LIST _members;
+	//			tptr->Team_Members(_members);
+
+	//			for (int subindex = 0; subindex < _members.Count(); subindex++) {
+
+	//				InfantryTypeClass const * memtype = (InfantryTypeClass const *)_members[subindex];
+
+	//				if (memtype->RTTI == RTTI_INFANTRYTYPE
+	//					&& static_cast<unsigned>(memtype->HeapID) < counter.size()) {
+	//					counter[memtype->HeapID]++;
+	//					if (val < value[memtype->HeapID]) {
+	//						value[memtype->HeapID] = val;
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+
+	///*
+	//**	Reduce the theoretical maximum by the actual number of objects currently
+	//**	in play.
+	//*/
+	//for (int oindex = 0; oindex < Infantry.Count(); oindex++) {
+	//	InfantryClass * obj = Infantry[oindex];
+	//	if (obj != NULL && obj->Is_Recruitable(this)
+	//		&& static_cast<unsigned>(obj->Class->HeapID) < counter.size()
+	//		&& counter[obj->Class->HeapID] > 0) {
+	//		counter[obj->Class->HeapID]--;
+	//	}
+	//}
+
+	///*
+	//**	Pick to build the most needed object but don't consider those object that
+	//**	can't be built because of scenario restrictions or insufficient cash.
+	//*/
+	//int bestval = -1;
+	//InfantryType lasttype = INFANTRY_NONE;
+	//int lastval = 0x7FFFFFFF;
+	//std::vector<InfantryType> bestlist;
+	//bestlist.reserve(InfantryTypes.Count());
+	//for (InfantryType type = InfantryType(0); type < InfantryTypes.Count(); type++) {
+	//	if (counter[type] > 0 && Can_Build(InfantryTypes[type], false, false) && InfantryTypes[type]->Cost_Of(this) <= Available_Money()) {
+	//		if (bestval == -1 || bestval < counter[type]) {
+	//			bestval = counter[type];
+	//			bestlist.clear();
+	//		}
+	//		bestlist.push_back(type);
+
+	//		if (lasttype == INFANTRY_NONE || value[type] < lastval) {
+	//			lasttype = type;
+	//			lastval = value[type];
+	//		}
+	//	}
+	//}
+
+	//if (Random_Double(0, 0x7FFFFFFE) < Rule->FillEarliestTeamProbability[Difficulty] / 100.0) {
+	//	BuildInfantry = lasttype;
+	//} else {
+	//	/*
+	//	**	The object type to build is now known. Fetch a pointer to the techno type class.
+	//	*/
+	//	if (!bestlist.empty()) {
+	//		BuildInfantry = bestlist[Random_Pick(0, static_cast<int>(bestlist.size()) - 1)];
+	//	}
+	//}
+#pragma endregion
 
 	return(TICKS_PER_SECOND);
 }
@@ -4785,86 +5007,168 @@ int HouseClass::AI_Aircraft(void)
 {
 	if (BuildAircraft != AIRCRAFT_NONE) return(TICKS_PER_SECOND);
 
-	std::vector<int> counter(AircraftTypes.Count(), 0);
-	std::vector<int> value(AircraftTypes.Count(), 0x7FFFFFFF);
+	auto& CreationFrames = HouseClass::AIProduction_CreationFrames;
+	auto& Values = HouseClass::AIProduction_Values;
+	auto& BestChoices = HouseClass::AIProduction_BestChoices;
 
-	/*
-	**	Build a list of the maximum of each type we wish to produce. This will be
-	**	twice the number required to fill all teams.
-	*/
-	for (int i = 0; i < Teams.Count(); i++) {
-		TeamClass * tptr = Teams[i];
-		if (tptr != NULL) {
+	auto const count = static_cast<unsigned int>(AircraftTypes.Count());
+	CreationFrames.assign(count, 0x7FFFFFFF);
+	Values.assign(count, 0);
 
-			int val = tptr->CreationFrame;
+	for (auto CurrentTeam : Teams) {
+		if (!CurrentTeam || CurrentTeam->House != this) {
+			continue;
+		}
 
-			if (((tptr->Class->IsReinforcable && !tptr->IsFullStrength) || (!tptr->IsForcedActive && !tptr->IsHasBeen)) && tptr->House == this) {
-				TEAM_MEMBER_LIST _members;
-				tptr->Team_Members(_members);
+		int TeamCreationFrame = CurrentTeam->CreationFrame;
 
-				for (int subindex = 0; subindex < _members.Count(); subindex++) {
+		if ((!CurrentTeam->Class->IsReinforcable || CurrentTeam->IsFullStrength)
+			&& (CurrentTeam->IsForcedActive || CurrentTeam->IsHasBeen))
+		{
+			continue;
+		}
 
-					AircraftTypeClass const * memtype = (AircraftTypeClass const *)_members[subindex];
-
-					if (memtype->RTTI == RTTI_AIRCRAFTTYPE
-						&& static_cast<unsigned>(memtype->HeapID) < counter.size()) {
-						counter[memtype->HeapID]++;
-						if (val < value[memtype->HeapID]) {
-							value[memtype->HeapID] = val;
-						}
-					}
+		DynamicVectorClass<const TechnoTypeClass*> TaskForceMembers;
+		CurrentTeam->Team_Members(TaskForceMembers);
+		for (auto CurrentMember : TaskForceMembers) {
+			if (CurrentMember->What_Am_I() != RTTIType::RTTI_AIRCRAFTTYPE) {
+				continue;
+			}
+			auto const Idx = CurrentMember->Fetch_Heap_ID();
+			if (static_cast<unsigned int>(Idx) < count) {
+				++Values[Idx];
+				if (TeamCreationFrame < CreationFrames[Idx]) {
+					CreationFrames[Idx] = TeamCreationFrame;
 				}
 			}
 		}
 	}
 
-	/*
-	**	Reduce the theoretical maximum by the actual number of objects currently
-	**	in play.
-	*/
-	for (int oindex = 0; oindex < Aircraft.Count(); oindex++) {
-		AircraftClass * obj = Aircraft[oindex];
-		if (obj != NULL && obj->Is_Recruitable(this)
-			&& static_cast<unsigned>(obj->Class->HeapID) < counter.size()
-			&& counter[obj->Class->HeapID] > 0) {
-			counter[obj->Class->HeapID]--;
+	for (auto T : Aircraft) {
+		auto const Idx = T->Class->Fetch_Heap_ID();
+		if (static_cast<unsigned int>(Idx) < count && Values[Idx] > 0 && T->Is_Recruitable(this)) {
+			--Values[Idx];
 		}
 	}
 
-	/*
-	**	Pick to build the most needed object but don't consider those object that
-	**	can't be built because of scenario restrictions or insufficient cash.
-	*/
-	int bestval = -1;
-	AircraftType lasttype = AIRCRAFT_NONE;
-	int lastval = 0x7FFFFFFF;
-	std::vector<AircraftType> bestlist;
-	bestlist.reserve(AircraftTypes.Count());
-	for (AircraftType type = AircraftType(0); type < AircraftTypes.Count(); type++) {
-		if (counter[type] > 0 && Can_Build(AircraftTypes[type], false, false) && AircraftTypes[type]->Cost_Of(this) <= Available_Money()) {
-			if (bestval == -1 || bestval < counter[type]) {
-				bestval = counter[type];
-				bestlist.clear();
-			}
-			bestlist.push_back(type);
+	BestChoices.clear();
 
-			if (lasttype == AIRCRAFT_NONE || value[type] < lastval) {
-				lasttype = type;
-				lastval = value[type];
-			}
+	int BestValue = -1;
+	int EarliestTypenameIndex = -1;
+	int EarliestFrame = 0x7FFFFFFF;
+
+	for (auto i = 0u; i < count; ++i) {
+		auto const TT = AircraftTypes[static_cast<int>(i)];
+		int CurrentValue = Values[i];
+		if (CurrentValue <= 0 || !this->Can_Build(TT, false, false)
+			|| TT->Cost_Of(this) > this->Available_Money())
+		{
+			continue;
+		}
+
+		if (BestValue < CurrentValue || BestValue == -1) {
+			BestValue = CurrentValue;
+			BestChoices.clear();
+		}
+		BestChoices.push_back(static_cast<int>(i));
+		if (EarliestFrame > CreationFrames[i] || EarliestTypenameIndex == -1) {
+			EarliestTypenameIndex = static_cast<int>(i);
+			EarliestFrame = CreationFrames[i];
 		}
 	}
 
-	if (Random_Double(0, 0x7FFFFFFE) < Rule->FillEarliestTeamProbability[Difficulty] / (100.0)) {
-		BuildAircraft = lasttype;
-	} else {
-		/*
-		**	The object type to build is now known. Fetch a pointer to the techno type class.
-		*/
-		if (!bestlist.empty()) {
-			BuildAircraft = bestlist[Random_Pick(0, static_cast<int>(bestlist.size()) - 1)];
-		}
+	auto const AIDiff = static_cast<int>(this->Difficulty);
+	int EarliestOdds = Rule->FillEarliestTeamProbability[AIDiff];
+	if (Scen->RandomNumber(0, 99) < EarliestOdds) {
+		BuildAircraft = static_cast<AircraftType>(EarliestTypenameIndex);
 	}
+	else if (auto const size = static_cast<int>(BestChoices.size())) {
+		int RandomChoice = Scen->RandomNumber(0, size - 1);
+		BuildAircraft = static_cast<AircraftType>(BestChoices[static_cast<unsigned int>(RandomChoice)]);
+	}
+
+#pragma region AI_Air_Old_Code
+	//std::vector<int> counter(AircraftTypes.Count(), 0);
+	//std::vector<int> value(AircraftTypes.Count(), 0x7FFFFFFF);
+
+	///*
+	//**	Build a list of the maximum of each type we wish to produce. This will be
+	//**	twice the number required to fill all teams.
+	//*/
+	//for (int i = 0; i < Teams.Count(); i++) {
+	//	TeamClass * tptr = Teams[i];
+	//	if (tptr != NULL) {
+
+	//		int val = tptr->CreationFrame;
+
+	//		if (((tptr->Class->IsReinforcable && !tptr->IsFullStrength) || (!tptr->IsForcedActive && !tptr->IsHasBeen)) && tptr->House == this) {
+	//			TEAM_MEMBER_LIST _members;
+	//			tptr->Team_Members(_members);
+
+	//			for (int subindex = 0; subindex < _members.Count(); subindex++) {
+
+	//				AircraftTypeClass const * memtype = (AircraftTypeClass const *)_members[subindex];
+
+	//				if (memtype->RTTI == RTTI_AIRCRAFTTYPE
+	//					&& static_cast<unsigned>(memtype->HeapID) < counter.size()) {
+	//					counter[memtype->HeapID]++;
+	//					if (val < value[memtype->HeapID]) {
+	//						value[memtype->HeapID] = val;
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+
+	///*
+	//**	Reduce the theoretical maximum by the actual number of objects currently
+	//**	in play.
+	//*/
+	//for (int oindex = 0; oindex < Aircraft.Count(); oindex++) {
+	//	AircraftClass * obj = Aircraft[oindex];
+	//	if (obj != NULL && obj->Is_Recruitable(this)
+	//		&& static_cast<unsigned>(obj->Class->HeapID) < counter.size()
+	//		&& counter[obj->Class->HeapID] > 0) {
+	//		counter[obj->Class->HeapID]--;
+	//	}
+	//}
+
+	///*
+	//**	Pick to build the most needed object but don't consider those object that
+	//**	can't be built because of scenario restrictions or insufficient cash.
+	//*/
+	//int bestval = -1;
+	//AircraftType lasttype = AIRCRAFT_NONE;
+	//int lastval = 0x7FFFFFFF;
+	//std::vector<AircraftType> bestlist;
+	//bestlist.reserve(AircraftTypes.Count());
+	//for (AircraftType type = AircraftType(0); type < AircraftTypes.Count(); type++) {
+	//	if (counter[type] > 0 && Can_Build(AircraftTypes[type], false, false) && AircraftTypes[type]->Cost_Of(this) <= Available_Money()) {
+	//		if (bestval == -1 || bestval < counter[type]) {
+	//			bestval = counter[type];
+	//			bestlist.clear();
+	//		}
+	//		bestlist.push_back(type);
+
+	//		if (lasttype == AIRCRAFT_NONE || value[type] < lastval) {
+	//			lasttype = type;
+	//			lastval = value[type];
+	//		}
+	//	}
+	//}
+
+	//if (Random_Double(0, 0x7FFFFFFE) < Rule->FillEarliestTeamProbability[Difficulty] / (100.0)) {
+	//	BuildAircraft = lasttype;
+	//} else {
+	//	/*
+	//	**	The object type to build is now known. Fetch a pointer to the techno type class.
+	//	*/
+	//	if (!bestlist.empty()) {
+	//		BuildAircraft = bestlist[Random_Pick(0, static_cast<int>(bestlist.size()) - 1)];
+	//	}
+	//}
+#pragma endregion
 
 	return(TICKS_PER_SECOND);
 }
@@ -6491,6 +6795,7 @@ void HouseClass::Serialize(SaveStreamClass & stream)
 	stream.Serialize(EnemyAirForcePrediction);
 	stream.Serialize(EnemyInfantryForcePrediction);
 	stream.Serialize(PowerSurplus);
+	stream.Serialize(IsObserver);
 }
 
 

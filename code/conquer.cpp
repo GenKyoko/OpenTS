@@ -104,12 +104,14 @@
 #include "session.h"
 #include "sidebar.h"
 #include "sounddlg.h"
+#include "spawner.h"
 #include "stats.h"
 #include "surface.h"
 #include "tactical.h"
 #include "theme.h"
 #include "voc.h"
 #include "vox.h"
+#include "winstub.h"
 #include "wolapi\wolapi.h"
 #include "wonline.h"
 #include "wsproto.h"
@@ -347,7 +349,25 @@ void Main_Game(int argc, char * argv[])
 	**	2) Invoke either the main-loop routine, or the editor-loop routine,
 	**		until they indicate that the user wants to exit the scenario.
 	*/
-	while (Select_Game(fade)) {
+	for (;;) {
+		/*
+		**	A spawned session runs exactly one match. When the launcher asked
+		**	for one, start the game straight from SPAWN.INI instead of showing
+		**	the menus, and leave the process when the match ends so that the
+		**	client can relaunch the next one.
+		*/
+		if (Spawner::Is_Requested() && !Spawner::Is_Active()) {
+			if (!Spawner::Init()) {
+				MessageBox(MainWindow, "Unable to read SPAWN.INI.", Fetch_String(TXT_SHORT_TITLE), MB_OK | MB_ICONERROR);
+				break;
+			}
+		}
+
+		bool const started = Spawner::Is_Active() ? Spawner::Start_Game() : Select_Game(fade);
+		if (!started) {
+			break;
+		}
+
 		fade = false;
 		ScenarioInit = 0;		// Kludge.
 		fade = true;
@@ -367,7 +387,7 @@ void Main_Game(int argc, char * argv[])
 			TeamNumber = 0;
 		}
 
-		if (Session.Type == GAME_INTERNET) {
+		if (Session.Are_Statistics_Enabled()) {
 			Register_Game_Start_Time();
 			GameStatisticsPacketSent = false;
 			PacketLater = NULL;
@@ -399,6 +419,16 @@ void Main_Game(int argc, char * argv[])
 					break;
 				}
 
+				/*
+				 * A close request in a spawned match answers with the exit
+				 * the options menu's abort sends, so the match resolves
+				 * through the event system and the session winds down to
+				 * the launcher's exit.
+				 */
+				if (Game_Close_Requested()) {
+					Queue_Exit();
+				}
+
 				Ingame_Menu_Dialog();
 			} else {
 
@@ -420,6 +450,15 @@ void Main_Game(int argc, char * argv[])
 			*/
 			if (Main_Loop()) {
 				break;
+			}
+
+			/*
+			 * A close request in a spawned match answers with the exit the
+			 * options menu's abort sends, so the match resolves through the
+			 * event system and the session winds down to the launcher's exit.
+			 */
+			if (Game_Close_Requested()) {
+				Queue_Exit();
 			}
 
 			/*
@@ -467,6 +506,10 @@ void Main_Game(int argc, char * argv[])
 			Session.Type = GAME_NORMAL;
 			Session.Play = 0;
 			Show_Mouse();
+		}
+
+		if (Spawner::Is_Active()) {
+			break;
 		}
 	}
 
@@ -1419,7 +1462,7 @@ char const * Name_From_Speed(SpeedType speed)
 /// </summary>
 void Print_MP_Stats(void)
 {
-	if (Session.Type == GAME_INTERNET) {
+	if (Session.Are_Statistics_Enabled()) {
 		FILE *file = fopen("mpstats.txt", "wt");
 		if (file != NULL) {
 			fprintf(file, "Frames: %d\n", Frame);

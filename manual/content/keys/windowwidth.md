@@ -10,6 +10,8 @@ This is the size of the window's drawable area rather than its outer size, so th
 
 Setting it takes the window out of the game's hands: a window sized by the player keeps its size when the rendering resolution changes, and the picture is scaled to fit it instead. Leave both this and [`WindowHeight`](/keys/windowheight/) unset — or at zero or below — and the window follows [`ScreenWidth`](/keys/screenwidth/) and [`ScreenHeight`](/keys/screenheight/) instead, resizing about its own middle each time the resolution changes.
 
+A CnCNet-style launcher for the ts-patches client set can supply the size instead, writing `Video.WindowedScreenWidth` and `Video.WindowedScreenHeight` under `[Video]` in `sun.ini`. The game reads them into this setting and its partner when both are left unset, so the native assignments always win. The same launcher can write `NoWindowFrame=yes` to open the window with no border or title bar, making its drawable area exactly the size named.
+
 The value applies only while the game is windowed. A full-screen game covers the desktop and ignores it. Resizing the window by dragging its edge does not write a new value back; the size stored here is the one the window opens at.
 
 The picture keeps its shape whatever the window's proportions are, so a window that does not match adds bars on two sides rather than stretching. [`ScaleMode`](/keys/scalemode/) chooses how the picture is filtered on the way up.

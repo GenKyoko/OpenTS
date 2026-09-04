@@ -47,6 +47,8 @@
 #include "dialog.hh"
 #include "diff.hh"
 
+#include <optional>
+
 //---------------------------------------------------------------------------
 // Forward declarations
 //---------------------------------------------------------------------------
@@ -476,6 +478,12 @@ class SessionClass
 		bool Log_To_File(FILE *out);
 
 		//---------------------------------------------------------------------
+		// Spawner
+		//---------------------------------------------------------------------
+		bool Are_Statistics_Enabled() const;
+		bool Are_Extra_Statistics_Enabled() const;
+
+		//---------------------------------------------------------------------
 		// Public Data
 		//---------------------------------------------------------------------
 		//.....................................................................
@@ -740,6 +748,161 @@ class SessionClass
 		CellClass * TrapCell;       // Ptr to cell to trap (watch)
 		int TrapCheckHeap;          // true = check the heap as of TrapFrame
 		int TrapPrintCRC;          // Frame # to print CRC state file
+
+public: // spawner
+	/**
+	*  Should the MCV unit auto deploy on game start?
+	*/
+	bool IsAutoDeployMCV;
+
+	/**
+	 *  Are construction yards pre-placed on the map rather than a MCV given to the player?
+	 */
+	bool IsPrePlacedConYards;
+
+	/**
+	 *  Can players build their own structures adjacent to structures owned by their allies?
+	 */
+	bool IsBuildOffAlly;
+
+	/**
+	 *  Autosave interval for multiplayer spawner sessions.
+	 */
+	int MultiplayerAutoSaveInterval;
+
+	/**
+	 *  Should player identity be hidden for quick match?
+	 */
+	bool IsQuickMatch;
+
+	/**
+	 *  Should statistics be written for the current match?
+	 */
+	bool IsWriteStatistics;
+
+	/**
+	 *  Should the multiplayer score screen be skipped when the game ends?
+	 */
+	bool IsSkipScoreScreen;
+
+	/**
+	 *  Should disconnected players be eliminated instead of handed to the AI?
+	 */
+	bool IsAutoSurrender;
+
+	/**
+	 *  Can armed units attack multiplayer neutral houses?
+	 */
+	bool IsAttackNeutralUnits;
+
+	/**
+	 *  Should defeated players be denied observer vision?
+	 */
+	bool IsCoachMode;
+
+	/**
+	 *  Should the game continue when no human players remain?
+	 */
+	bool IsContinueWithoutHumans;
+
+	/**
+	 *  Should destroyed technos use scrap explosions?
+	 */
+	bool IsScrapMetal;
+
+	/**
+	 *  Should AI players be renamed according to their selected difficulty?
+	 */
+	bool IsAINamesByDifficulty;
+
+	/**
+	 *  Should scenario movies be played in multiplayer?
+	 */
+	bool IsPlayMoviesInMultiplayer;
+
+	bool IsSpawnerSession;
+	bool MultiplayerSavesInitializedForThisSession;
+
+	/**
+	*  Has an autosave been queued to run from the main-loop safe point?
+	*/
+	bool IsToSave;
+
+	/**
+	 *  Is the next multiplayer save a manual save?
+	 */
+	bool IsNextMultiplayerSaveManual;
+
+	/**
+	 *  Frame on which the next periodic autosave should trigger.
+	 */
+	int NextAutoSaveFrame;
+
+	/**
+	 *  Next rotating campaign autosave slot, stored as a 0-based index.
+	 */
+	int NextCampaignAutoSaveSlot;
+
+	/**
+	 *  Next rotating skirmish autosave slot, stored as a 0-based index.
+	 */
+	int NextSkirmishAutoSaveSlot;
+
+	/**
+	 *  Have multiplayer saves been suppressed for the current session
+	 *  (usually due to desync or player disconnnection)?
+	 */
+	bool IsMultiplayerSaveSuppressed;
+
+	/**
+			 *  Map identifier reported in the statistics packet "SCEN" field.
+			 */
+	std::string StatsMapName;
+
+	/**
+	 *  Map hash reported in the statistics packet "HASH" field.
+	 */
+	std::string StatsMapHash;
+
+	/**
+	 *  Custom difficulty name shown in the in-game difficulty banner;
+	 *  empty means fall back to the stock difficulty name.
+	 */
+	std::string DifficultyName;
+
+	/**
+	 *  Loading-screen filename (including extension) that overrides the
+	 *  scenario/UIControls pick; empty means no override.
+	 */
+	std::string CustomLoadScreen;
+
+	/**
+	 *  Optional override for the loading-screen progress-bar position.
+	 */
+	std::optional<Point2D> CustomLoadScreenPos;
+
+	struct SpawnerSlotInfoType {
+		bool IsConfigured = false;
+		bool IsHuman = false;
+		int Color = -1;
+		int House = -1;
+		int Difficulty = -1;
+		bool IsObserver = false;
+		int SpawnLocation = -1;
+		int Alliances[MAX_PLAYERS] = { -1, -1, -1, -1, -1, -1, -1, -1 };
+
+		/*
+		 * The house the scenario start built for this slot, recorded as the
+		 * houses are assigned; slots name their allies, and this is what turns
+		 * a slot number into the house to ally with.
+		 */
+		int HouseID = -1;
+	};
+
+	bool ProtocolZeroEnabled = false;
+	unsigned char ProtocolZeroMaxLatencyLevel = 0xFF;
+	int ConnTimeout = 0;
+	SpawnerSlotInfoType SlotInfo[MAX_PLAYERS];
 };
 
 extern SessionClass Session;

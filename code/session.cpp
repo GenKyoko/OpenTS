@@ -239,6 +239,33 @@ SessionClass::SessionClass(void)
 	TrapCell = NULL;            // for trapping a cell
 	TrapCheckHeap = 0;          // start checking the Heap
 	TrapPrintCRC = 0;           // output CRC file
+
+	// spawner
+	IsAutoDeployMCV = false;
+	IsPrePlacedConYards = false;
+	IsBuildOffAlly = true;
+	MultiplayerAutoSaveInterval = 0;
+	IsQuickMatch = false;
+	IsWriteStatistics = false;
+	IsSkipScoreScreen = false;
+	IsAutoSurrender = false;
+	IsAttackNeutralUnits = false;
+	IsCoachMode = false;
+	IsContinueWithoutHumans = false;
+	IsScrapMetal = false;
+	IsAINamesByDifficulty = false;
+	IsPlayMoviesInMultiplayer = false;
+
+	IsSpawnerSession = false;
+	MultiplayerSavesInitializedForThisSession = false;
+
+	// AutoSave
+	IsToSave = false;
+	IsNextMultiplayerSaveManual = false;
+	NextAutoSaveFrame = -1;
+	NextCampaignAutoSaveSlot = 0;
+	NextSkirmishAutoSaveSlot = 0;
+	IsMultiplayerSaveSuppressed = false;
 }	// end of SessionClass
 
 
@@ -1333,6 +1360,26 @@ void SessionClass::Init_Fixed_Alliances(void)
 	Scen->Special.IsAllianceFixed = true;
 }
 
+/**
+ *  Is statistics collection enabled?
+ *
+ *  @author: ZivDero
+ */
+bool SessionClass::Are_Statistics_Enabled() const
+{
+	return Type == GAME_INTERNET || (Type == GAME_IPX && IsWriteStatistics);
+}
+
+
+/**
+ *  Is extra statistics collection enabled?
+ *
+ *  @author: ZivDero
+ */
+bool SessionClass::Are_Extra_Statistics_Enabled() const
+{
+	return Type == GAME_IPX && IsWriteStatistics;
+}
 
 /// <summary>
 /// Saves the game options to a save game.

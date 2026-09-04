@@ -12,6 +12,7 @@
 
 #include "bgfxbackend.h"
 
+#include "dbgprint.h"
 #include "except.h"
 
 #include <bgfx/bgfx.h>
@@ -56,6 +57,13 @@ static int _WindowWidth = 0;
 static int _WindowHeight = 0;
 static unsigned int _ResetFlags = BGFX_RESET_FLIP_AFTER_RENDER;
 
+// True while the engine is shutting the renderer down on its own initiative. The
+// renderer counts the references its objects carry and reports any it does not expect,
+// and an injected layer that wrapped the window -- an overlay, say -- legitimately
+// holds one of its own. Nothing can act on that once the window is going away, and
+// ending the process for it turns a clean exit into a crash report.
+static bool _ShuttingDown = false;
+
 // True while the frame texture holds the game's own 565 layout. When the hardware cannot
 // sample that format the frame is widened to 32 bits on the way in instead.
 static bool _FrameIs565 = false;
@@ -82,6 +90,12 @@ class BackendCallback : public bgfx::CallbackI
 
 		virtual void fatal(const char * filepath, uint16_t line, bgfx::Fatal::Enum code, const char * str) override
 		{
+			if (_ShuttingDown) {
+				DebugString("Renderer error %d at %s(%u): %s\n", (int)code,
+							filepath != NULL ? filepath : "", (unsigned)line, str != NULL ? str : "");
+				return;
+			}
+
 			Fatal("Renderer error %d at %s(%u): %s", (int)code,
 						filepath != NULL ? filepath : "", (unsigned)line, str != NULL ? str : "");
 		}
@@ -230,6 +244,18 @@ static bool Ensure_Prescale_Target(int width, int height)
 
 
 /// <summary>
+/// Stops the renderer, having it report anything it objects to on the way out rather
+/// than end the process.
+/// </summary>
+static void Shutdown_Renderer(void)
+{
+	_ShuttingDown = true;
+	bgfx::shutdown();
+	_ShuttingDown = false;
+}
+
+
+/// <summary>
 /// Starts the renderer on an existing window.
 /// </summary>
 /// <param name="window">The window the frame is presented into.</param>
@@ -297,7 +323,7 @@ bool Backend_Init(HWND window, int windowwidth, int windowheight, BackendRendere
 	bgfx::ShaderHandle fragmentshader = bgfx::createEmbeddedShader(_EmbeddedShaders, type, "fs_ocornut_imgui");
 
 	if (!bgfx::isValid(vertexshader) || !bgfx::isValid(fragmentshader)) {
-		bgfx::shutdown();
+		Shutdown_Renderer();
 		return(false);
 	}
 
@@ -305,7 +331,7 @@ bool Backend_Init(HWND window, int windowwidth, int windowheight, BackendRendere
 	_TextureSampler = bgfx::createUniform("s_tex", bgfx::UniformType::Sampler);
 
 	if (!bgfx::isValid(_Program) || !bgfx::isValid(_TextureSampler)) {
-		bgfx::shutdown();
+		Shutdown_Renderer();
 		return(false);
 	}
 
@@ -341,7 +367,7 @@ void Backend_Shutdown(void)
 	delete [] _ConvertBuffer;
 	_ConvertBuffer = NULL;
 
-	bgfx::shutdown();
+	Shutdown_Renderer();
 
 	_FrameWidth = 0;
 	_FrameHeight = 0;

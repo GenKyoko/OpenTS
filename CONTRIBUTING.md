@@ -144,8 +144,8 @@ current warning set as clean.
 Behavior changes need focused, reproducible evidence. Automated checks must not
 depend on proprietary game assets or original executables.
 
-Continuous integration builds Win32 Debug and Release and runs the CTest suite
-for every pull request that touches the engine and is ready for review; a draft
+Continuous integration builds Win32 Debug and Release for every pull request
+that touches the engine and is ready for review; a draft
 pull request runs no checks until it is marked ready. It reports the same class
 of result a local build does, so it does not replace the runtime evidence a
 behavior change needs.

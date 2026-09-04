@@ -472,6 +472,17 @@ static void Emit(char const * buffer, bool with_prefix)
 
 
 /// <summary>
+/// Emits one finished message and records the current errno as the thread's
+/// last error, which is what the DebugFmt helper asks for.
+/// </summary>
+void Debug_Emit_Line(char const * buffer, bool with_prefix)
+{
+	Emit(buffer, with_prefix);
+	SetLastError(errno);
+}
+
+
+/// <summary>
 /// Runs first time initialisation under the logging lock.
 /// </summary>
 static void Init_Once(bool with_console)

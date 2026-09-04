@@ -47,6 +47,7 @@
 #include "gscreen.h"
 
 #include "_bench.h"
+#include "_convert.h"
 #include "_keyboar.h"
 #include "_map.h"
 #include "_rect.h"
@@ -56,12 +57,17 @@
 #include "_xmouse.h"
 #include "bench.h"
 #include "cctooltip.h"
+#include "dialog.h"
+#include "draw.h"
 #include "gadget.h"
 #include "goptions.h"
 #include "keyboard.h"
 #include "savestream.h"
+#include "scheme.h"
 #include "session.h"
 #include "surface.h"
+#include "uifonts.h"
+#include "tab.h"
 #include "tactical.h"
 #include "video.h"
 
@@ -70,6 +76,10 @@
 #include <algorithm>
 
 GadgetClass * GScreenClass::Buttons = NULL;
+
+extern unsigned LastFramesPerSecond;
+extern unsigned TotalFrames;
+extern unsigned SecondsPassed;
 
 
 /***********************************************************************************************
@@ -381,6 +391,8 @@ void GScreenClass::Remove_A_Button(GadgetClass & gadget)
  * HISTORY:                                                                                    *
  *   12/15/1994 JLB : Created.                                                                 *
  *=============================================================================================*/
+#define	EVA_WIDTH		80
+#define	TAB_HEIGHT		8
 void GScreenClass::Render(void)
 {
 	BStart(BENCH_GSCREEN_RENDER);
@@ -417,6 +429,21 @@ void GScreenClass::Render(void)
 	if (ToolTips != NULL) {
 		ToolTips->Draw_Current();
 	}
+
+	// draw fps
+	char buffers[32] = { 0 };
+	sprintf(buffers, "FPS: %-4u Avg: %.2f", LastFramesPerSecond,
+		(SecondsPassed ? static_cast<double>(TotalFrames) / static_cast<double>(SecondsPassed)
+			: 0.0f)
+	);
+	int sidex = LogicalSurface->Get_Width()/*RESFACTOR*/;
+	Fancy_Text_Print(buffers, *CompositeSurface, CompositeSurface->Get_Rect(), Point2D(sidex /*RESFACTOR*/, TAB_HEIGHT * 2), ColorSchemes[0], TBLACK, TextPrintType(TPF_USE_GRAD_PAL | TPF_RIGHT | TPF_METAL12));
+
+	/*
+	** The wide text path's test sample rides the composite surface too: anything drawn
+	** here lands on screen with this frame, unlike a call made after Render returns.
+	*/
+	Paint_Wide_Text_Sample();
 
 	Blit_Display();
 	DrawFlags = GS_REDRAW_DIRTY;

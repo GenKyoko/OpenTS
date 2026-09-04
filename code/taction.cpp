@@ -1208,7 +1208,9 @@ bool TActionClass::TAction_BASE_BUILDING(HouseClass * house, ObjectClass * , Tri
 /// </summary>
 bool TActionClass::TAction_CREEP_SHADOW(HouseClass * , ObjectClass * , TriggerClass * , Cell const & )
 {
-	Map.Encroach_Shadow();
+	if (!PlayerPtr->IsObserver) {
+		Map.Encroach_Shadow();
+	}
 	return(true);
 }
 

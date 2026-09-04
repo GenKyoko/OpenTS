@@ -202,7 +202,7 @@ bool ScrollClass::Resolve_Point(Point2D const & point, Cell & cell, Coord & coor
 				/*
 				**	Special case check to ignore cloaked object if not owned by the player.
 				*/
-				if (!techno->IsOwnedByPlayer && ((techno->Cloak == CLOAKED && !Map[techno->Center_Coord()].Is_Sensed(PlayerPtr->HeapID)) || techno->TClass->IsInvisible)) {
+				if (!(PlayerPtr->IsObserver) && !techno->IsOwnedByPlayer && ((techno->Cloak == CLOAKED && !Map[techno->Center_Coord()].Is_Sensed(PlayerPtr->HeapID)) || techno->TClass->IsInvisible)) {
 					object = NULL;
 				}
 			}
@@ -213,7 +213,7 @@ bool ScrollClass::Resolve_Point(Point2D const & point, Cell & cell, Coord & coor
 				/*
 				**	Special case check to ignore cloaked object if not owned by the player.
 				*/
-				if (!building->IsOwnedByPlayer && ((building->TranslucencyLevel == 15 && !Map[techno->Center_Coord()].Is_Sensed(PlayerPtr->HeapID)) || building->Class->IsInvisibleInGame)) {
+				if (!(PlayerPtr->IsObserver) && !building->IsOwnedByPlayer && ((building->TranslucencyLevel == 15 && !Map[techno->Center_Coord()].Is_Sensed(PlayerPtr->HeapID)) || building->Class->IsInvisibleInGame)) {
 					object = NULL;
 				}
 			}
@@ -258,7 +258,7 @@ ActionType ScrollClass::What_Action(Cell const & cell, ObjectClass * object, boo
 		/*
 		**	Special case check to ignore cloaked object if not owned by the player.
 		*/
-		if (techno != NULL && !techno->IsOwnedByPlayer && ((techno->Cloak == CLOAKED && !Map[techno->Center_Coord()].Is_Sensed(PlayerPtr->HeapID)) || techno->TClass->IsInvisible)) {
+		if (!(PlayerPtr->IsObserver) && techno != NULL && !techno->IsOwnedByPlayer && ((techno->Cloak == CLOAKED && !Map[techno->Center_Coord()].Is_Sensed(PlayerPtr->HeapID)) || techno->TClass->IsInvisible)) {
 			visible = false;
 		}
 
@@ -268,7 +268,7 @@ ActionType ScrollClass::What_Action(Cell const & cell, ObjectClass * object, boo
 			/*
 			**	Special case check to ignore cloaked object if not owned by the player.
 			*/
-			if (!building->IsOwnedByPlayer && (building->TranslucencyLevel == 15 && !Map[techno->Center_Coord()].Is_Sensed(PlayerPtr->HeapID))) {
+			if (!(PlayerPtr->IsObserver) && !building->IsOwnedByPlayer && (building->TranslucencyLevel == 15 && !Map[techno->Center_Coord()].Is_Sensed(PlayerPtr->HeapID))) {
 				visible = false;
 			}
 		}

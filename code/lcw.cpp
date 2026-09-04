@@ -163,7 +163,7 @@ int LCW_Uncomp(void const * source, void * dest, unsigned long )
 }
 
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && defined(_M_IX86)
 
 
 /***********************************************************************************************
@@ -435,5 +435,157 @@ outofhere:
 
 	return(retval);
 }
+
+
+#else
+
+
+// C translation of the assembly LCW_Comp above, used on platforms without x86
+// inline assembly. The algorithm and its output stream are identical; the only
+// difference is that the run-length probe of the byte sixty-four ahead is
+// bounded to the input, so an out-of-bounds read can never extend a run beyond
+// the data. For incompressible input the output can exceed the input: literals
+// cost one length-code byte per 63 bytes plus the leading code and first byte,
+// so the destination must hold roughly datasize + datasize/63 + 3 bytes.
+/*ARGSUSED*/
+#if defined(_MSC_VER)
+int LCW_Comp(void const * source, void * dest, int datasize)
+#else
+extern "C" int __cdecl LCW_Comp(void const * source, void * dest, int datasize)
+#endif
+{
+	int inlen = 0;
+	int a1stdest = 0;
+	int a1stsrc = 0;
+	int lenoff = 0;
+	int ndest = 0;
+	int count = 0;
+	int matchoff = 0;
+	int end_of_data = 0;
+	int retval = 0;
+
+	unsigned char * esi = (unsigned char *)source;
+	unsigned char * edi = (unsigned char *)dest;
+	unsigned char * endptr = esi + datasize;
+	unsigned char al = 0;
+
+	end_of_data = (int)endptr;
+	inlen = 1;
+	a1stdest = (int)edi;
+	a1stsrc = (int)esi;
+	lenoff = (int)edi;
+	*edi++ = 0x81;		// The first byte is always a length code.
+	*edi++ = *esi++;
+
+loopstart:
+	ndest = (int)edi;
+	edi = (unsigned char *)a1stsrc;
+	count = 1;
+
+searchloop:
+	al = *esi;		// Get the current byte of data.
+	if (esi + 64 < endptr && al == esi[64]) {
+		unsigned char * ebx = edi;
+		unsigned char * scan = esi;
+		while (scan < endptr && *scan == al) scan++;
+		scan--;			// dec edi; ecx below is the run length minus one.
+		int runlen = (int)(scan - esi);
+		if (runlen >= 65) {
+			inlen = 0;
+			esi = scan;
+			edi = (unsigned char *)ndest;
+			*edi++ = 0xFE;
+			*edi++ = (unsigned char)runlen;
+			*edi++ = (unsigned char)(runlen >> 8);
+			*edi++ = al;
+			ndest = (int)edi;
+			edi = ebx;
+			goto searchloop;
+		}
+		edi = ebx;
+	}
+oploop:
+	{
+		int ecx = (int)esi - (int)edi;
+		if (ecx == 0) goto searchdone;
+
+		unsigned char * scan = edi;
+		while (ecx > 0 && *scan != al) { scan++; ecx--; }
+		if (ecx == 0) goto searchdone;	// No match found.
+		edi = scan;
+
+		if (esi[count - 1] != edi[count - 2]) goto oploop;
+
+		{
+			unsigned char * edx = esi;
+			unsigned char * ebx2 = edi;
+			edi--;			// Back up to the match start.
+			int ecx2 = (int)endptr - (int)esi;
+			while (ecx2 > 0 && *edi == *esi) { edi++; esi++; ecx2--; }
+			if (ecx2 != 0) goto notend;	// Mismatch: count the matched bytes.
+			edi++;			// Matched to the end; count one past.
+		notend:
+			esi = edx;		// Restore the source position.
+			int eax = (int)edi - (int)ebx2;
+			edi = ebx2;
+			if (eax < count) goto searchloop;
+			count = eax;
+			ebx2--;			// Back up for the actual match offset.
+			matchoff = (int)ebx2;
+			goto searchloop;
+		}
+	}
+searchdone:
+	{
+		int ecx = count;
+		edi = (unsigned char *)ndest;
+		if (ecx <= 2) goto lenin;	// Too short to encode as a run.
+		if (ecx > 10) goto medrun;
+		{
+			unsigned int dist = (unsigned int)(esi - (unsigned char *)matchoff);
+			if (dist > 0xFFFu) goto medrun;	// Offset does not fit the short form.
+			*edi++ = (unsigned char)(((count - 3) << 4) | (dist >> 8));
+			*edi++ = (unsigned char)dist;
+			goto srunnxt;
+		}
+	}
+medrun:
+	if (count > 64) goto longrun;
+	*edi++ = (unsigned char)(0xC0 | (count - 3));
+	*edi++ = (unsigned char)(matchoff - a1stsrc);
+	*edi++ = (unsigned char)((matchoff - a1stsrc) >> 8);
+	goto srunnxt;
+lenin:
+	if (inlen != 0) goto len;
+lenin1:
+	lenoff = (int)edi;
+	*edi++ = 0x80;			// Start a fresh length code.
+len:
+	{
+		unsigned char * ebx = (unsigned char *)lenoff;
+		if (*ebx == 0xBF) goto lenin1;	// Length code full; start a new one.
+		(*ebx)++;
+		al = *esi++;
+		*edi++ = al;
+		inlen = 1;
+		goto nxt;
+	}
+longrun:
+	*edi++ = 0xFF;
+	*edi++ = (unsigned char)count;
+	*edi++ = (unsigned char)(count >> 8);
+srunnxt:
+	esi += count;
+	inlen = 0;
+nxt:
+	if (esi >= endptr) goto outofhere;
+	goto loopstart;
+outofhere:
+	*edi++ = 0x80;			// End of data code.
+	retval = (int)(edi - (unsigned char *)a1stdest);
+	return retval;
+}
+
+
 #endif
 

@@ -1045,7 +1045,9 @@ void Do_Win(void)
 	if (Session.Type != GAME_NORMAL) {
 		if (!Session.Play) {
 			Session.GamesPlayed++;
-			Multi_Score_Presentation();
+			if (!Session.IsSkipScoreScreen) {
+				Multi_Score_Presentation();
+			}
 			Session.CurGame++;
 			if (Session.CurGame >= MAX_MULTI_GAMES) {
 				Session.CurGame = MAX_MULTI_GAMES - 1;
@@ -1208,7 +1210,9 @@ void Do_Lose(void)
 	if (Session.Type != GAME_NORMAL) {
 		if (!Session.Play) {
 			Session.GamesPlayed++;
-			Multi_Score_Presentation();
+			if (!Session.IsSkipScoreScreen) {
+				Multi_Score_Presentation();
+			}
 			Session.CurGame++;
 
 			if (Session.CurGame >= MAX_MULTI_GAMES) {
@@ -2160,6 +2164,13 @@ void Assign_Houses(void)
 
 		housep->Assign_Handicap(DIFF_NORMAL);
 
+		// In a spawned session the launcher can mark this slot as a spectator.
+		// The human slots line up by colour, the order the launcher sorted them into.
+		if (Session.IsSpawnerSession && i < MAX_PLAYERS && Session.SlotInfo[i].IsConfigured) {
+			housep->IsObserver = Session.SlotInfo[i].IsObserver;
+			Session.SlotInfo[i].HouseID = housep->HeapID;
+		}
+
 		//.....................................................................
 		// Record where we placed this player
 		//.....................................................................
@@ -2172,15 +2183,31 @@ void Assign_Houses(void)
 	// Now assign computer players to the remaining houses.
 	//------------------------------------------------------------------------
 	for (i = Session.Players.Count(); i < Session.Players.Count() + Session.Options.AIPlayers; i++) {
-		pref_house = (HousesType)Random_Pick(0, 1);
+
+		/*
+		**	In a spawned session the launcher names every slot, AI included, so
+		**	its side, color and difficulty come from the slot data rather than
+		**	the draws below. The draws stay for the fallback, so the assignment
+		**	stays deterministic on every machine.
+		*/
+		bool use_slot = Session.IsSpawnerSession && i < MAX_PLAYERS
+			&& Session.SlotInfo[i].IsConfigured && !Session.SlotInfo[i].IsHuman;
+
+		pref_house = (HousesType)(use_slot ? Session.SlotInfo[i].House : Random_Pick(0, 1));
 
 		// Pick a color for this house; keep looping until we find one.
 		int color = -1;
 		for (;;) {
-			color = Random_Pick(0, 7);
+			if (color == -1) {
+				color = use_slot && Session.SlotInfo[i].Color >= 0
+					&& Session.SlotInfo[i].Color < (int)ARRAY_SIZE(color_used)
+					? Session.SlotInfo[i].Color : Random_Pick(0, 7);
+			}
 			if (color_used[color] == false) {
 				break;
 			}
+			use_slot = false;
+			color = -1;
 		}
 		color_used[color] = true;
 
@@ -2197,12 +2224,20 @@ void Assign_Houses(void)
 		housep->Initialize_Radar_Color();
 		housep->IniName = Fetch_String(TXT_COMPUTER);
 
+		if (use_slot) {
+			Session.SlotInfo[i].HouseID = housep->HeapID;
+		}
+
 		if (Session.Type != GAME_NORMAL) {
 			housep->IQ = Rule->MaxIQ;
 		}
 
 		DiffType difficulty = Scen->CDifficulty;
-		if (Session.Players.Count() > 1 && Rule->IsCompEasyBonus && difficulty > DIFF_EASY) {
+		if (use_slot && Session.SlotInfo[i].Difficulty >= DIFF_FIRST && Session.SlotInfo[i].Difficulty < DIFF_COUNT) {
+			difficulty = (DiffType)Session.SlotInfo[i].Difficulty;
+		} else if (Session.IsSpawnerSession && Session.Options.AIDifficulty >= DIFF_FIRST && Session.Options.AIDifficulty < DIFF_COUNT) {
+			difficulty = Session.Options.AIDifficulty;
+		} else if (Session.Players.Count() > 1 && Rule->IsCompEasyBonus && difficulty > DIFF_EASY) {
 			difficulty = (DiffType)(difficulty - 1);
 		}
 		housep->Assign_Handicap(difficulty);
@@ -2250,58 +2285,19 @@ static void Remove_AI_Players(void)
 
 /// <summary>
 /// Fetches the starting locations available to a multiplayer game.
-/// The scenario's own waypoints are preferred, but a map that does not supply enough of
-/// them for everyone playing has the shortfall made up with random spots on open ground.
+/// Only the start waypoints the map actually defines are offered; a player
+/// whose slot carries no spawn location shares one of them rather than
+/// starting anywhere the map never meant as a start.
 /// </summary>
-/// <param name="official">Is this one of the maps that shipped with the game?</param>
 /// <returns>Returns with the list of cells that players may be started from.</returns>
-static DynamicVectorClass<Cell> Build_Start_Waypoint_List(bool official)
+static DynamicVectorClass<Cell> Build_Start_Waypoint_List(void)
 {
 	DynamicVectorClass<Cell> waypts;
 
-	int num_waypts = 0;
-	for (int i = 0; i < 8; i++) {
-		if (Scen->Is_Valid_Waypoint(i)) {
-			num_waypts++;
-		} else {
-			break;
-		}
-	}
-
-	/*
-	**	Calculate the number of waypoints (as a minimum) that will be lifted from the
-	**	mission file. Bias this number so that only the first 4 waypoints are used
-	**	if there are 4 or fewer players. Unofficial maps will pick from all the
-	**	available waypoints.
-	*/
-	int look_for = std::max(num_waypts, Session.Players.Count()+Session.Options.AIPlayers);
-	if (!official) {
-		look_for = 8;
-	}
-
-	for (int waycount = 0; waycount < look_for; waycount++) {
+	for (int waycount = 0; waycount < 8; waycount++) {
 		if (Scen->Is_Valid_Waypoint(waycount)) {
 			waypts.Add(Scen->Get_Waypoint_Cell(waycount));
 			DebugString("Multiplayer start waypoint found at cell %d,%d\n", Scen->Get_Waypoint_Cell(waycount).X, Scen->Get_Waypoint_Cell(waycount).Y);
-		}
-	}
-
-	/*
-	**	If there are insufficient waypoints to account for all players, then randomly assign
-	**	starting points until there is enough.
-	*/
-	int deficiency = look_for - waypts.Count();
-	if (deficiency > 0) {
-		DebugString("Multiplayer start waypoint deficiency - looking for more start positions\n");
-
-		while (waypts.Count() < look_for) {
-			Cell trycell = Cell(Map.MapRect.X + Random_Pick(10, Map.MapRect.Width - 10), Map.MapRect.Y + 10 + Random_Pick(0, Map.MapRect.Height - 10));
-
-			trycell = Map.Nearby_Location(trycell, SPEED_TRACK, -1, MZONE_NORMAL, false, Point2D(8, 8));
-			if (trycell != CELL_NONE) {
-				waypts.Add(trycell);
-				DebugString("Random multiplayer start waypoint added at cell %d,%d\n", trycell.X, trycell.Y);
-			}
 		}
 	}
 
@@ -2372,10 +2368,30 @@ static void Create_Units(bool official)
 	**	valid locations to the first N waypoints, but just in case, this
 	**	loop verifies that.
 	*/
-	DynamicVectorClass<Cell> waypts = Build_Start_Waypoint_List(official);
+	DynamicVectorClass<Cell> waypts = Build_Start_Waypoint_List();
 	bool taken[16];
 	for (int index = 0; index < ARRAY_SIZE(taken); index++) {
 		taken[index] = false;
+	}
+
+	/*
+	**	A spawned session may pin its slots to particular start waypoints. Every
+	**	waypoint a fighting slot has been promised is held out of the random and
+	**	distance picks from the start, so a house that picks before its turn
+	**	cannot land on a start the launcher promised to someone else.
+	*/
+	bool reserved[16];
+	for (int index = 0; index < ARRAY_SIZE(reserved); index++) {
+		reserved[index] = false;
+	}
+	if (Session.IsSpawnerSession) {
+		for (int slot = 0; slot < MAX_PLAYERS; ++slot) {
+			const SessionClass::SpawnerSlotInfoType& slot_info = Session.SlotInfo[slot];
+			if (slot_info.IsConfigured && !slot_info.IsObserver && slot_info.HouseID >= 0
+				&& slot_info.SpawnLocation >= 0 && slot_info.SpawnLocation < ARRAY_SIZE(reserved)) {
+				reserved[slot_info.SpawnLocation] = true;
+			}
+		}
 	}
 
 	/*
@@ -2391,7 +2407,11 @@ static void Create_Units(bool official)
 		*/
 		HouseClass * hptr = Houses[house];
 
-		if (hptr->Class->IsMultiplayPassive) continue;
+		/*
+		**	An observer fields no side and holds no ground, so it takes no
+		**	starting point away from the houses that actually fight.
+		*/
+		if (hptr->Class->IsMultiplayPassive || hptr->IsObserver) continue;
 
 		DebugString("Generating units for house %d (%s)\n", (int)house, (char const *)hptr->Class->IniName);
 
@@ -2425,8 +2445,42 @@ static void Create_Units(bool official)
 		**	one of the valid locations at random. The other houses pick the furthest
 		**	wapoint from the existing houses.
 		*/
-		if (numtaken == 0) {
+
+		/*
+		**	A spawned session lets the launcher place every player: the slot's
+		**	spawn location names one of the start waypoints, and the house each
+		**	slot was built into was recorded when the houses were assigned. Slots
+		**	the launcher left unplaced fall through to the engine's own pick.
+		*/
+		int forced = -1;
+		if (Session.IsSpawnerSession) {
+			for (int slot = 0; slot < MAX_PLAYERS; ++slot) {
+				const SessionClass::SpawnerSlotInfoType& slot_info = Session.SlotInfo[slot];
+				if (slot_info.HouseID == hptr->HeapID && slot_info.SpawnLocation >= 0
+					&& slot_info.SpawnLocation < waypts.Count() && !taken[slot_info.SpawnLocation]) {
+					forced = slot_info.SpawnLocation;
+					break;
+				}
+			}
+		}
+
+		if (forced >= 0) {
+			centroid = waypts[forced];
+			taken[forced] = true;
+			numtaken++;
+		} else if (numtaken == 0) {
 			int pick = Random_Pick(0, waypts.Count() - 1);
+			if (taken[pick] || reserved[pick]) {
+				DynamicVectorClass<int> free;
+				for (int index = 0; index < waypts.Count(); index++) {
+					if (!taken[index] && !reserved[index]) {
+						free.Add(index);
+					}
+				}
+				if (free.Count() > 0) {
+					pick = free[Random_Pick(0, free.Count() - 1)];
+				}
+			}
 			centroid = waypts[pick];
 			taken[pick] = true;
 			numtaken++;
@@ -2446,11 +2500,11 @@ static void Create_Units(bool official)
 			for (int index = 0; index < waypts.Count(); index++) {
 
 				/*
-				**	If this waypoint has not already been taken, then accumulate the
-				**	sum of the distance between this waypoint and all other taken
-				**	waypoints.
+				**	If this waypoint has not already been taken or held for another
+				**	house, then accumulate the sum of the distance between this
+				**	waypoint and all other taken waypoints.
 				*/
-				if (!taken[index]) {
+				if (!taken[index] && !reserved[index]) {
 					for (int trypoint = 0; trypoint < waypts.Count(); trypoint++) {
 
 						if (taken[trypoint]) {
@@ -2467,7 +2521,7 @@ static void Create_Units(bool official)
 			int best = 0;
 			int bestvalue = 0;
 			for (int searchindex = 0; searchindex < waypts.Count(); searchindex++) {
-				if (score[searchindex] > bestvalue || bestvalue == 0) {
+				if (!reserved[searchindex] && (score[searchindex] > bestvalue || bestvalue == 0)) {
 					bestvalue = score[searchindex];
 					best = searchindex;
 				}

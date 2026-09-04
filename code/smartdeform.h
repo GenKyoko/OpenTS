@@ -13,6 +13,42 @@
 
 class CellClass;
 
+
+struct DeformPointStruct {
+
+	DeformPointStruct(void)
+	{
+		Height = 0;
+		Rigid = false;
+		Done = false;
+	};
+
+	DeformPointStruct(const DeformPointStruct & that)
+	{
+		Height = that.Height;
+		Rigid = that.Rigid;
+		Done = that.Done;
+	};
+
+	int Height;
+	bool Rigid;
+	bool Done;
+	bool CanForce;
+};
+
+
+extern "C" {
+
+extern DeformPointStruct * DeformPoints;
+extern int DeformPointXAdd;
+extern int DeformPointYAdd;
+extern int DeformPointWidth;
+extern int DeformPointHeight;
+
+extern bool Asm_Ripple_Deform_Points(int startpointx, int startpointy, int general_direction, bool forced);
+
+}
+
 bool Deform_Cell(Cell cell, int dir, bool forced = true, int mask = 15);
 void Init_Deform_Grid(Cell center, bool forced);
 void Init_Deform_Grid_RMG(void);

@@ -143,7 +143,7 @@ void TabClass::Draw_It(bool complete)
 			Draw_Credits_Tab();
 			LogicalSurface->Draw_Line(Point2D(0, tab_height-(1* 2)), Point2D(rightx, tab_height-(1 * 2/*RESFACTOR*/)), TBLACK);
 			Fancy_Text_Print(TXT_TAB_BUTTON_CONTROLS, *LogicalSurface, LogicalSurface->Get_Rect(), Point2D(sidex + (EVA_WIDTH/2) * 2/*RESFACTOR*/, 0), ColorSchemes[0], TBLACK, TextPrintType(TPF_USE_GRAD_PAL | TPF_CENTER | TPF_METAL12));
-
+			
 			if (LogicalSurface != TileSurface) {
 				TileSurface->Blit_From(Rect(0, 0, TileSurface->Get_Width(), tab_height), *LogicalSurface, Rect(0, 0, TileSurface->Get_Width(), tab_height));
 			}

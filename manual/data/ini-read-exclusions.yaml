@@ -13,8 +13,16 @@ reader_exclusions:
   - path: code/overlay.cpp
     function: OverlayClass::Read_INI
     reason: The overlay pack fields are compressed scenario payloads, not authored scalar settings.
+  - path: code/spawnerconfig.cpp
+    function: SpawnerConfig::Read_INI
+    reason: This reads the file an external launcher writes to request a match, so its settings are the launcher's request rather than game or mod configuration.
 
 site_exclusions:
+  - path: code/spawnerconfig.cpp
+    function: SpawnerConfig::PlayerConfig::Read_Player_INI
+    keys: [Name, Color, Side, Ip, Port]
+    classification: excluded
+    reason: The player slots of the spawner file are filled in by an external launcher to describe the match it wants, so they are not game or mod configuration.
   - path: code/preview.cpp
     function: MapPreviewClass::Read_INI
     keys: [Size]

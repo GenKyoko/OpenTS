@@ -942,6 +942,15 @@ int DSAudio::Play_Sample_Handle(void const *sample, int priority, int volume, in
 		return(-1);
 	}
 
+	/*
+	**	Nothing new is played while the window is unfocused. The logic keeps
+	**	running there, and the effects it fires would either pile up unheard
+	**	or burst out all at once when the focus came back.
+	*/
+	if (!GameInFocus) {
+		return(-1);
+	}
+
 	LOCK_SECONDARY_MUTEX(id);
 
 	bool reuse_buffer = false;
@@ -2476,17 +2485,19 @@ bool DSAudio::Start_Primary_Sound_Buffer (bool forced)
  *                                                                                             *
  *                                                                                             *
  *                                                                                             *
- * INPUT:    Nothing                                                                           *
+ * INPUT:    stop_samples -- Should every playing sample be stopped as well? Silence alone     *
+ *                           leaves the samples in place, so a piece of music that streams     *
+ *                           from a file resumes where the primary buffer silenced it.         *
  *                                                                                             *
  * OUTPUT:   Nothing                                                                           *
  *                                                                                             *
- * WARNINGS: This stops all sound playback                                                     *
+ * WARNINGS: With samples stopped, this stops all sound playback                               *
  *                                                                                             *
  * HISTORY:                                                                                    *
  *    2/1/96 12:28PM ST : Created                                                              *
  *=============================================================================================*/
 
-void DSAudio::Stop_Primary_Sound_Buffer (void)
+void DSAudio::Stop_Primary_Sound_Buffer (bool stop_samples)
 {
 	LOCK_GLOBAL_MUTEX();
 
@@ -2497,8 +2508,10 @@ void DSAudio::Stop_Primary_Sound_Buffer (void)
 		PrimaryBufferPtr->Stop();			// So much.....
 	}
 
-	for ( int index = 0; index < MAX_SFX; index++) {
-		Stop_Sample(index);
+	if (stop_samples) {
+		for ( int index = 0; index < MAX_SFX; index++) {
+			Stop_Sample(index);
+		}
 	}
 
 	UNLOCK_GLOBAL_MUTEX();

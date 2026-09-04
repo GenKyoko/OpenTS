@@ -29,6 +29,8 @@ bool Parse_Command_Line(int argc, char * argv[]);
 int Init_Game(int argc, char * argv[]);
 bool Select_Game(bool fade);
 
+void Init_Random(void);
+
 int Main_Menu(unsigned int timeout);
 
 bool Allocate_Surfaces(const Rect & hidden_rect, const Rect & composite_rect, const Rect & tile_rect, const Rect & sidebar_rect, bool hidden_first = false);

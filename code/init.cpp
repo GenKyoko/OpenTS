@@ -104,6 +104,7 @@
 #include "dsurface.h"
 #include "egos.h"
 #include "empulse.h"
+#include "uifonts.h"
 #include "enviro.h"
 #include "except.h"
 #include "expand.h"
@@ -155,6 +156,7 @@
 #include "side.h"
 #include "skirmish.h"
 #include "smudtype.h"
+#include "spawner.h"
 #include "stimer.h"
 #include "tactical.h"
 #include "tag.h"
@@ -381,24 +383,36 @@ int Init_Game(int , char * [])
 	Anim_Init();
 
 	/*
-	**	Play the startup animation.
-	*/
-	if (Special.IsFromInstall == true) {
-		DebugString("Playing first time intro sequence.\n");
-		Play_Movie("EVA.VQA", THEME_NONE, false);
-	}
+	 * A spawned session starts straight from SPAWN.INI, so the startup
+	 * cinematics would only delay the match the launcher asked for.
+	 */
+	if (!Spawner::Is_Requested()) {
+		/*
+		**	Play the startup animation.
+		*/
+		if (Special.IsFromInstall == true) {
+			DebugString("Playing first time intro sequence.\n");
+			Play_Movie("EVA.VQA", THEME_NONE, false);
+		}
 
-	DebugString("Playing startup movies.\n");
-	Play_Movie("WWLOGO.VQA", THEME_NONE);
-	if (!Get_New_Menu()->MixFile) {
-		if (CCFileClass("FS_TITLE.VQA").Is_Available() == true) {
-			Play_Movie("FS_TITLE.VQA", THEME_NONE, false);
-		} else {
-			Play_Movie("STARTUP.VQA", THEME_NONE, false);
+		DebugString("Playing startup movies.\n");
+		Play_Movie("WWLOGO.VQA", THEME_NONE);
+		if (!Get_New_Menu()->MixFile) {
+			if (CCFileClass("FS_TITLE.VQA").Is_Available() == true) {
+				Play_Movie("FS_TITLE.VQA", THEME_NONE, false);
+			} else {
+				Play_Movie("STARTUP.VQA", THEME_NONE, false);
+			}
 		}
 	}
 
-	Draw_Menu_Background();
+	/*
+	 * A spawned session never shows the menus, so the title page behind them
+	 * would only flash between the initializations and the loading screen.
+	 */
+	if (!Spawner::Is_Requested()) {
+		Draw_Menu_Background();
+	}
 	Call_Back();
 
 	/*
@@ -1811,6 +1825,15 @@ bool Parse_Command_Line(int argc, char * argv[])
 		}
 
 		/*
+		**	The Spawner launcher starts the game with this switch and a
+		**	SPAWN.INI waiting in the game directory.
+		*/
+		if (stricmp(string, "-SPAWN") == 0) {
+			Spawner::Request_Spawn();
+			continue;
+		}
+
+		/*
 		**	Set the Net Stealth option
 		*/
 		if (strstr(string, "-STEALTH")) {
@@ -2721,6 +2744,12 @@ static bool Bootstrap(void)
 		DebugString("Failed to initialize fonts!\n");
 		return(false);
 	}
+
+	/*
+	**	Register the TrueType fonts of UI.INI's registry and pick the wide text
+	**	path's default face from it.
+	*/
+	Init_UI_Fonts();
 
 	/*
 	**	Setup the keyboard processor in preparation for the game.

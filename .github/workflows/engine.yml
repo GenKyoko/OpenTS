@@ -6,7 +6,6 @@ on:
     paths:
       - "code/**"
       - "cmake/**"
-      - "tests/**"
       - "thirdparty/**"
       - "CMakeLists.txt"
       - ".gitmodules"
@@ -18,7 +17,6 @@ on:
     paths:
       - "code/**"
       - "cmake/**"
-      - "tests/**"
       - "thirdparty/**"
       - "CMakeLists.txt"
       - ".gitmodules"

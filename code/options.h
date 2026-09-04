@@ -148,6 +148,13 @@ class OptionsClass {
 		int WindowHeight;
 
 		/*
+		 * If a windowed game is to open without a border or a title bar, then this flag will
+		 * be true. It is read from the key the ts-patches style launchers write, and the
+		 * window is created without a frame when they ask for one.
+		 */
+		bool NoWindowFrame;
+
+		/*
 		 * This is how the frame is filtered when the window is larger than it, as one of
 		 * the VideoScaleMode values.
 		 */

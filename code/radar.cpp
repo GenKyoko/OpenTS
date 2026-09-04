@@ -100,6 +100,7 @@
 #include "rules.h"
 #include "savestream.h"
 #include "scheme.h"
+#include "session.h"
 #include "tactical.h"
 #include "voc.h"
 #include "vox.h"
@@ -800,7 +801,12 @@ void RadarClass::Draw_Names(void)
 		**	Initialize our message
 		*/
 		txt[0] = 0;
-		sprintf(txt, "%s", (char const *)ptr->IniName);
+		if (Session.IsQuickMatch) {
+			sprintf(txt, "%s", "Player");
+		}
+		else {
+			sprintf(txt, "%s", (char const*)ptr->IniName);
+		}
 
 		if (strlen(txt) == 0) {
 			strcpy(txt,"________");

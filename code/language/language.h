@@ -821,6 +821,8 @@
 #define TXT_UNKNOWN_PING                1042
 #define TXT_MANUAL_PLACE                1043
 #define TXT_MANUAL_PLACE_DESC           1044
+#define TXT_CREDITS_STORAGE             1045
+#define TXT_CREDITS                     1046
 #define IDC_LADDER_TYPE                 1043
 #define IDC_LADDER_LOCATION             1044
 #define IDC_FINDGAME_LOCATION           1046

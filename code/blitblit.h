@@ -2315,7 +2315,7 @@ class BlitTranslucentWriteAlpha : public Blitter {
 **	does not allow inline-assembly to be part of an inline function -- go figure.
 **	It will still compile, it just generates warning messages.
 */
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && defined(_M_IX86)
 
 #pragma optimize("", off)
 
@@ -2482,6 +2482,53 @@ again:
 
 
 #endif
-#endif
 
 #pragma optimize("", on)
+
+#else
+
+
+/*
+**	C implementations of the specializations above for targets without x86 inline
+**	assembly. Each is the generic template body written out, so behavior is identical.
+*/
+template <>
+inline void BlitTrans<unsigned char>::BlitForward(void * dest, void const * source, int len, int z_min, void *z_buff, void *a_buff, int alpha_level, int warp_offset) const
+{
+	unsigned char const * sptr = (unsigned char const *)source;
+	unsigned char * dptr = (unsigned char *)dest;
+	for (int index = 0; index < len; index++) {
+		unsigned char color = *sptr++;
+		if (color != 0) *dptr = color;
+		dptr++;
+	}
+}
+
+
+template <>
+inline void BlitTransXlat<unsigned short>::BlitForward(void * dest, void const * source, int len, int z_min, void *z_buff, void *a_buff, int alpha_level, int warp_offset) const
+{
+	unsigned char const * sptr = (unsigned char const *)source;
+	unsigned short * dptr = (unsigned short *)dest;
+	for (int index = 0; index < len; index++) {
+		unsigned char color = *sptr++;
+		if (color != 0) *dptr = TranslateTable[color];
+		dptr++;
+	}
+}
+
+
+template <>
+inline void BlitTransRemapXlat<unsigned short>::BlitForward(void * dest, void const * source, int len, int z_min, void *z_buff, void *a_buff, int alpha_level, int warp_offset) const
+{
+	unsigned char const * sptr = (unsigned char const *)source;
+	unsigned short * dptr = (unsigned short *)dest;
+	for (int index = 0; index < len; index++) {
+		unsigned char color = *sptr++;
+		if (color != 0) *dptr = TranslateTable[RemapTable[color]];
+		dptr++;
+	}
+}
+
+
+#endif

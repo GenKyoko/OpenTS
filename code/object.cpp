@@ -316,7 +316,15 @@ void ObjectClass::AI(void)
 				}
 			}
 		} else {
-			Map.Remove(this);
+			/*
+			** A falling object that lost its active state has already been pulled
+			** from the rendering system -- removing it again trips the removal
+			** asserts. Just stop the fall for the dead leftover and move on.
+			*/
+			if (IsActive) {
+				Map.Remove(this);
+			}
+			IsFalling = false;
 		}
 	}
 }

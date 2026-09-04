@@ -71,7 +71,7 @@ BEGIN
             VALUE "FileDescription", "Tiberian Sun Language Definitions\0"
             VALUE "FileVersion", OPENTS_VERSION "\0"
             VALUE "InternalName", "English Resources\0"
-            VALUE "LegalCopyright", "Copyright © 2000 Westwood Studios, © 2026 OpenTS contributors\0"
+            VALUE "LegalCopyright", "Copyright ï¿½ 2000 Westwood Studios, ï¿½ 2026 OpenTS contributors\0"
             VALUE "LegalTrademarks", "Command & Conquer is a trademark of Westwood Studios\0"
             VALUE "OriginalFilename", "Language.dll\0"
             VALUE "PrivateBuild", OPENTS_BUILD_DESCRIPTION "\0"
@@ -3017,6 +3017,8 @@ BEGIN
     TXT_UNKNOWN_PING        "Unknown Ping"
     TXT_MANUAL_PLACE        "Place Building"
     TXT_MANUAL_PLACE_DESC   "Enters placement mode for the completed building waiting on the sidebar."
+    TXT_CREDITS_STORAGE     "Credits = %d\rStorage = %d"
+    TXT_CREDITS             "Credits = %d"
 END
 
 #endif    // English (U.S.) resources

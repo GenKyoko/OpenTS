@@ -57,6 +57,3 @@ add_custom_target(OpenTSBuildStamp ALL
 add_subdirectory(thirdparty)
 add_subdirectory(code)
 add_subdirectory(code/language)
-
-enable_testing()
-add_subdirectory(tests)

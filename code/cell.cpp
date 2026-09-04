@@ -6037,6 +6037,10 @@ bool CellClass::Is_Cloaked(HousesType house) const
 /// <returns>bool; Is the cell sensed by that house?</returns>
 bool CellClass::Is_Sensed(HousesType house) const
 {
+	// An observer senses every cell, so cloaked objects are shown and clickable.
+	if (PlayerPtr != NULL && PlayerPtr->IsObserver && house == PlayerPtr->HeapID) {
+		return(true);
+	}
 	return((SensedBy & (1 << house)) != 0);
 }
 

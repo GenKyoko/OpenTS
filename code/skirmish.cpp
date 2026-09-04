@@ -375,8 +375,8 @@ BOOL Skirmish_On_WM_INITDIALOG(HWND window, WPARAM wparam, LPARAM lparam)
 
 	handle = GetDlgItem(window, IDC_SKIRMISH_AIPLAYERS);
 	if (handle) {
-		Slider_SetRange(handle, 1, 7);
-		Slider_SetPos(handle, Session.Options.AIPlayers > 1 ? Session.Options.AIPlayers : 1);
+		Slider_SetRange(handle, 0, 7);
+		Slider_SetPos(handle, Session.Options.AIPlayers);
 	}
 
 	handle = GetDlgItem(window, IDC_GAME_SPEED_SLIDER);

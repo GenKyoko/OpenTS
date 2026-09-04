@@ -264,7 +264,39 @@ void Send_Statistics_Packet(void)
 	/*
 	**	Scenario
 	*/
-	stats.Add_Field(FIELD_SCENARIO, Session.ScenarioFileName);
+	if (Session.Are_Extra_Statistics_Enabled()) {
+		stats.Add_Field(FIELD_SCENARIO, Session.StatsMapName.c_str());
+		stats.Add_Field("ACCN", PlayerPtr->IniName);
+		stats.Add_Field("HASH", Session.StatsMapHash.c_str());
+	}
+	else {
+		stats.Add_Field(FIELD_SCENARIO, Session.ScenarioFileName);
+	}
+
+	if (Session.Are_Extra_Statistics_Enabled()) {
+		auto& field_player_handle = "NAM?";
+		const char id = field_player_handle[3] - '0';
+
+		const HouseClass* house = Houses[id];
+
+		if (house == PlayerPtr) {
+			stats.Add_Field("MYID", id);
+			stats.Add_Field("NKEY", 0);
+			stats.Add_Field("SKEY", 0);
+		}
+
+		char field_player_allies[] = "ALY?";
+		field_player_allies[3] = static_cast<char>('0' + id);
+		stats.Add_Field(field_player_allies, house->Allies);
+
+		//char field_player_spawn[] = "BSP?";
+		//field_player_spawn[3] = static_cast<char>('0' + id);
+		//stats.Add_Field(field_player_spawn, static_cast<unsigned long>(house->Allies));
+
+		char field_player_observer[] = "SPC?";
+		field_player_observer[3] = static_cast<char>('0' + id);
+		stats.Add_Field(field_player_observer, house->IsObserver);
+	}
 
 	/*
 	 * Pings sent
@@ -289,6 +321,11 @@ void Send_Statistics_Packet(void)
 	HouseClass *houses[MAX_PLAYERS];
 	for (int h = 0; h < Houses.Count(); h++) {
 		HouseClass *ptr = Houses[h];
+
+		if (ptr->IsObserver) {
+			continue;
+		}
+
 		if (ptr->IsHuman){
 			houses[playercount] = ptr;
 			playercount++;
@@ -611,11 +648,20 @@ void Send_Statistics_Packet(void)
 	**	Create the comms packet to be sent
 	*/
 	packet = stats.Create_Comms_Packet(packet_size);
+	if (Session.Are_Extra_Statistics_Enabled()) {
+		CCFileClass stats_file("stats.dmp");
+		if (stats_file.Open(FileClass::WRITE)) {
+			stats_file.Write(packet, packet_size);
+			stats_file.Close();
+		}
+
+		GameStatisticsPacketSent = true;
+	}
 
 	/*
 	**	Send it.....
 	*/
-	g_pNetUtil->RequestGameresSend(g_GameServerHost, g_GameServerPort, (unsigned char*)packet, packet_size);
+	//g_pNetUtil->RequestGameresSend(g_GameServerHost, g_GameServerPort, (unsigned char*)packet, packet_size);
 
 	/*
 	**	Save it to disk as well so I can see it

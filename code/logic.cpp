@@ -85,9 +85,16 @@
 ULONG COMRefCount = 0;
 
 
+// 
 unsigned FramesThisSecond=0;
+
+// CurrentFrameRate
 unsigned LastFramesPerSecond=0;
+
+// TotalFramesElapsed
 unsigned TotalFrames=0;
+
+// TotalTimeElapsed
 unsigned SecondsPassed=0;
 
 
@@ -299,12 +306,18 @@ void LogicClass::AI(void)
 	*/
 	if (Rule->IsShroudGrow && Rule->ShroudRate != 0 && Scen->ShroudTimer == 0) {
 		Scen->ShroudTimer = TICKS_PER_MINUTE * Rule->ShroudRate;
-		Map.Encroach_Shadow();
+
+		if (!PlayerPtr->IsObserver) {
+			Map.Encroach_Shadow();
+		}
 	}
 
 	if (Scen->Special.IsFogOfWar && Rule->FogRate != 0 && Scen->FogTimer == 0) {
 		Scen->FogTimer = TICKS_PER_MINUTE * Rule->FogRate;
-		Map.Encroach_Fog();
+
+		if (!PlayerPtr->IsObserver) {
+			Map.Encroach_Fog();
+		}
 	}
 
 	if (Scen->DesiredAmbientLight != Scen->CurrentAmbientLight && Rule->AmbientLightChangeRate != 0 && Scen->AmbientChangeTimer == 0) {
@@ -428,12 +441,18 @@ void LogicClass::Environment_AI(void)
 {
 	if (Rule->IsShroudGrow && Rule->ShroudRate != 0 && Scen->ShroudTimer == 0) {
 		Scen->ShroudTimer = TICKS_PER_MINUTE * Rule->ShroudRate;
-		Map.Encroach_Shadow();
+
+		if (!PlayerPtr->IsObserver) {
+			Map.Encroach_Shadow();
+		}
 	}
 
 	if (Scen->Special.IsFogOfWar && Rule->FogRate != 0 && Scen->FogTimer == 0) {
 		Scen->FogTimer = TICKS_PER_MINUTE * Rule->FogRate;
-		Map.Encroach_Fog();
+
+		if (!PlayerPtr->IsObserver) {
+			Map.Encroach_Fog();
+		}
 	}
 
 	if (Scen->Theater == THEATER_SNOW && Rule->IceGrowthRate != 0 && Scen->IceGrowthTimer == 0) {

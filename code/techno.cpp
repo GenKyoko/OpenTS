@@ -1430,7 +1430,7 @@ void TechnoClass::Draw_Health_Bar(Point2D const & xpoint, Rect const & cliprect,
 			yoff -= 2;
 		}
 
-		if (House->Is_Ally(PlayerPtr) || (SpiedBy & (1<<(PlayerPtr->Class->House)))) {
+		if (House->Is_Ally_Or_Observer(PlayerPtr) || (SpiedBy & (1<<(PlayerPtr->Class->House)))) {
 			Draw_Pips(xpoint + p2, xpoint, cliprect);
 		}
 
@@ -1482,7 +1482,7 @@ void TechnoClass::Draw_Health_Bar(Point2D const & xpoint, Rect const & cliprect,
 			Draw_Shape(*LogicalSurface, *NormalDrawer, (ShapeSet const *)ObjectTypeClass::PipShapes, shapenum, point, cliprect, ShapeFlags_Type(SHAPE_WIN_REL|SHAPE_CENTER));
 		}
 
-		if (House->Is_Ally(PlayerPtr) || (SpiedBy & (1<<(PlayerPtr->Class->House)))) {
+		if (House->Is_Ally_Or_Observer(PlayerPtr) || (SpiedBy & (1<<(PlayerPtr->Class->House)))) {
 			Draw_Pips(xpoint + Point2D(-10, +10), xpoint, cliprect);
 		}
 	}
@@ -3332,7 +3332,7 @@ bool TechnoClass::Is_Ready_To_Cloak(void) const
  *=============================================================================================*/
 bool TechnoClass::Select(void)
 {
-	if (!IsDiscoveredByPlayer && !House->Is_Player_Control() && MainWindow) {
+	if (!IsDiscoveredByPlayer && !House->Is_Player_Control() && MainWindow && (PlayerPtr == NULL || !PlayerPtr->IsObserver)) {
 		return(false);
 	}
 
@@ -5454,7 +5454,8 @@ void TechnoClass::Do_Shimmer(void)
 VisualType TechnoClass::Visual_Character(bool raw, HouseClass const * house) const
 {
 	if (TClass->IsInvisible && IsOwnedByPlayer) return(VISUAL_NORMAL);
-	if (TClass->IsInvisible && !IsOwnedByPlayer && !Debug_Map) return(VISUAL_HIDDEN);
+	// An observer sees through the field that hides otherwise invisible types.
+	if (TClass->IsInvisible && !IsOwnedByPlayer && !Debug_Map && (PlayerPtr == NULL || !PlayerPtr->IsObserver)) return(VISUAL_HIDDEN);
 
 	/*
 	**	When uncloaked or in map editor mode, always draw the object normally.
@@ -5470,7 +5471,7 @@ VisualType TechnoClass::Visual_Character(bool raw, HouseClass const * house) con
 		if (!raw && !MainWindow) return(VISUAL_SHADOWY);
 		if (!raw && IsOwnedByPlayer) return(VISUAL_SHADOWY);
 		if (!raw && Map[Get_Coord().As_Cell()].Is_Sensed(PlayerPtr->HeapID)) return(VISUAL_SHADOWY);
-		if (!raw && (Session.Type != GAME_NORMAL && House != NULL && PlayerPtr != NULL && PlayerPtr->Is_Ally(House) && House->Is_Ally(PlayerPtr))) return(VISUAL_SHADOWY);
+		if (!raw && (Session.Type != GAME_NORMAL && House != NULL && PlayerPtr != NULL && PlayerPtr->Is_Ally_Or_Observer(House) && House->Is_Ally_Or_Observer(PlayerPtr))) return(VISUAL_SHADOWY);
 		return(VISUAL_HIDDEN);
 	}
 
@@ -7578,19 +7579,12 @@ void TechnoClass::Draw_Pips(Point2D const & bottomleft, Point2D const & center, 
 
 /// <summary>
 /// Draws the text that is overlaid on top of the object.
-/// This routine handles the power output and drain figures shown against a building that
-/// generates power, and the "Primary" tag worn by a leader object. The tag is abbreviated
+/// This routine shows the "Primary" tag worn by a leader object. The tag is abbreviated
 /// when the building is too narrow to carry the whole word.
 /// </summary>
 /// <param name="point2">The point the text is centered on.</param>
 void TechnoClass::Draw_Text_Overlay(Point2D const & point1, Point2D const & point2, Rect const & cliprect) const
 {
-	if (RTTI == RTTI_BUILDING && ((BuildingClass*)this)->Class->Power > 0) {
-		char buffer[128];
-		sprintf(buffer, Fetch_String(TXT_POWER_DRAIN), House->Power_Output(), House->Power_Drain());
-		Plain_Text_Print(buffer, *LogicalSurface, cliprect, point2, WHITE, TBLACK, TextPrintType(TPF_CENTER|TPF_FULLSHADOW|TPF_EFNT), 0, 1);
-	}
-
 	/*
 	**	Display whether this unit is a leader unit or not.
 	*/
@@ -8878,11 +8872,18 @@ void TechnoClass::Update_Radar_Position(bool force_update)
 
 	if (detected != DETECTED_NONE) {
 		if (visible && (!Is_Foot() || ((FootClass *)this)->CurrentTube < TUBE_FIRST)) {
-			if (Submit_Radar_Event(RADAREVENT_ENEMY_SENSED, Get_Coord().As_Cell())) {
-				if (detected == DETECTED_CLOAKED) {
-					Speak(VOX_CLOAKED_DETECTED);
-				} else if (detected == DETECTED_SUBTERRANEAN) {
-					Speak(VOX_SUBTERRANEAN_DETECTED);
+			/*
+			**	An observer sees the whole map all the time, so the first
+			**	sighting of a cloaked or subterranean unit is no news: no
+			**	radar ping marks it and no warning announces it.
+			*/
+			if (PlayerPtr == NULL || !PlayerPtr->IsObserver) {
+				if (Submit_Radar_Event(RADAREVENT_ENEMY_SENSED, Get_Coord().As_Cell())) {
+					if (detected == DETECTED_CLOAKED) {
+						Speak(VOX_CLOAKED_DETECTED);
+					} else if (detected == DETECTED_SUBTERRANEAN) {
+						Speak(VOX_SUBTERRANEAN_DETECTED);
+					}
 				}
 			}
 		}

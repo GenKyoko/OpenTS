@@ -66,6 +66,7 @@
 #include "msgroute.h"
 #include "pcx.h"
 #include "resource.h"
+#include "spawner.h"
 #include "theme.h"
 #include "video.h"
 #include "win.h"
@@ -80,6 +81,7 @@
 
 #include <algorithm>
 #include <commctrl.h>
+#include <imm.h>
 
 int		ShowCommand;
 HWND	MainWindow;
@@ -110,8 +112,6 @@ bool _MouseWheel;
 extern	void VQA_PauseAudio(void);
 extern	void VQA_ResumeAudio(void);
 
-ThemeType OldTheme = THEME_NONE;
-
 
 /***********************************************************************************************
  * Focus_Loss -- this function is called when a library function detects focus loss            *
@@ -132,9 +132,12 @@ void Focus_Loss(void)
 {
 	DebugString("Focus_Loss()\n");
 	Pause_Ingame_Movie(true);
-	OldTheme = Theme.What_Is_Playing();
-	Theme.Suspend();
-	if (Audio_Available()) Audio.Stop_Primary_Sound_Buffer();
+	/*
+	**	Silence the mixer but leave the samples in place, so the theme streaming
+	**	from a file keeps its place and picks up where it left off instead of
+	**	being stopped and started over.
+	*/
+	if (Audio_Available()) Audio.Stop_Primary_Sound_Buffer(false);
 	if (MouseCursor) {
 		_MouseCaptured = MouseCursor->Is_Captured();
 		DebugString("Focus_Loss(): _MouseCaptured = %s\n", _MouseCaptured ? "true" : "false");
@@ -160,7 +163,6 @@ void Focus_Restore(void)
 	Heal_Dialog_Controls();
 	Map.Flag_To_Redraw(GS_REDRAW_ALL);
 	InvalidateRect(MainWindow, 0, 0);
-	Theme.Play_Song(OldTheme);
 	Pause_Ingame_Movie(false);
 	if (WS_Top_Window()) {
 		SetActiveWindow(WS_Top_Window());
@@ -170,6 +172,60 @@ void Focus_Restore(void)
 
 
 extern bool InMovie;
+
+/*
+ * A close request in a spawned match is answered with the exit event the
+ * options menu's abort sends, so the match resolves through the event system
+ * and the session winds down to the launcher's clean exit. Asking takes the
+ * request, so one close sends one exit.
+ */
+static bool _CloseRequested = false;
+
+bool Game_Close_Requested(void)
+{
+	bool const requested = _CloseRequested;
+	_CloseRequested = false;
+	return(requested);
+}
+
+void Request_Game_Close(void)
+{
+	_CloseRequested = true;
+}
+
+
+/// <summary>
+/// Reports whether drawing should hold off.
+/// The game keeps running while another window holds the input focus, but a
+/// minimised window has no drawable area, and a full-screen window that lost
+/// the focus has had its display mode taken away, so painting is paused until
+/// the window comes back.
+/// </summary>
+bool Should_Skip_Drawing(void)
+{
+	if (MainWindow == NULL) {
+		return(false);
+	}
+	return(IsIconic(MainWindow) || (!WindowedMode && !GameInFocus));
+}
+
+/*
+ * The close button is a request to end the run. A match the launcher
+ * spawned winds down through the game loop, so the network and the
+ * libraries shut down before the clean exit. Any other close takes the
+ * quick exit without the shutdown sweep, which belongs to the menu exit
+ * path and would tear down state a game closed mid-play is still inside;
+ * the operating system reclaims the rest and the process still reports a
+ * clean exit to whatever started it.
+ */
+static void Close_Request_Handler(void)
+{
+	if (Spawner::Is_Active() && ScenarioActive) {
+		Request_Game_Close();
+	} else {
+		ExitProcess(EXIT_SUCCESS);
+	}
+}
 
 /// <summary>
 /// Handles the Windows messages sent to the main game window.
@@ -285,7 +341,8 @@ LRESULT CALLBACK /*_export*/ Windows_Procedure(HWND hwnd, UINT message, UINT wPa
 			break;
 
 		case WM_CLOSE:
-			break;
+			Close_Request_Handler();
+			return(0);
 
 		case WM_CREATE:
 			ToolTips = new CCToolTip(hwnd);
@@ -364,9 +421,10 @@ LRESULT CALLBACK /*_export*/ Windows_Procedure(HWND hwnd, UINT message, UINT wPa
 
 				case SC_CLOSE:
 					/*
-					**	Windows sent us a close message. Probably in response to Alt-F4. Ignore it by
-					**	pretending to handle the message and returning true;
-					*/
+					 * The title bar button and Alt-F4 arrive here; treat them
+					 * as the close request they are.
+					 */
+					Close_Request_Handler();
 					return(0);
 
 				case SC_SCREENSAVE:
@@ -465,11 +523,17 @@ void Create_Main_Window ( HINSTANCE instance , int command_show , int width , in
 		int clientwidth = (Options.WindowWidth > 0) ? Options.WindowWidth : width;
 		int clientheight = (Options.WindowHeight > 0) ? Options.WindowHeight : height;
 
+		/*
+		 * A window the launcher asked to be frameless is created without a border or a
+		 * title bar, so its drawable area is exactly the requested size.
+		 */
+		DWORD const style = Options.NoWindowFrame ? WS_POPUP : WS_OVERLAPPEDWINDOW;
+
 		MainWindow = CreateWindowEx (
 								0,
 								WINDOW_NAME,
 								WINDOW_NAME,
-								WS_OVERLAPPEDWINDOW,
+								style,
 								0,
 								0,
 								0,
@@ -479,16 +543,24 @@ void Create_Main_Window ( HINSTANCE instance , int command_show , int width , in
 								instance,
 								NULL );
 
-		RECT rect;
-		SetRect(&rect, 0, 0, clientwidth, clientheight);
-		AdjustWindowRectEx(&rect, GetWindowLong(MainWindow, GWL_STYLE), FALSE, GetWindowLong(MainWindow, GWL_EXSTYLE));
+		if (Options.NoWindowFrame) {
+			int x = (GetSystemMetrics(SM_CXSCREEN) - clientwidth) / 2;
+			int y = (GetSystemMetrics(SM_CYSCREEN) - clientheight) / 2;
 
-		int windowwidth = rect.right - rect.left;
-		int windowheight = rect.bottom - rect.top;
-		int x = (GetSystemMetrics(SM_CXSCREEN) - windowwidth) / 2;
-		int y = (GetSystemMetrics(SM_CYSCREEN) - windowheight) / 2;
+			MoveWindow(MainWindow, std::max(x, 0), std::max(y, 0), clientwidth, clientheight, 1);
 
-		MoveWindow(MainWindow, std::max(x, 0), std::max(y, 0), windowwidth, windowheight, 1);
+		} else {
+			RECT rect;
+			SetRect(&rect, 0, 0, clientwidth, clientheight);
+			AdjustWindowRectEx(&rect, GetWindowLong(MainWindow, GWL_STYLE), FALSE, GetWindowLong(MainWindow, GWL_EXSTYLE));
+
+			int windowwidth = rect.right - rect.left;
+			int windowheight = rect.bottom - rect.top;
+			int x = (GetSystemMetrics(SM_CXSCREEN) - windowwidth) / 2;
+			int y = (GetSystemMetrics(SM_CYSCREEN) - windowheight) / 2;
+
+			MoveWindow(MainWindow, std::max(x, 0), std::max(y, 0), windowwidth, windowheight, 1);
+		}
 
 	} else {
 		/*
@@ -514,6 +586,20 @@ void Create_Main_Window ( HINSTANCE instance , int command_show , int width , in
 	ShowCommand = command_show;
 	UpdateWindow (MainWindow);
 	SetFocus (MainWindow);
+
+	/*
+	 * The game has no Input Method Editor support of its own: an IME left in its native
+	 * (Chinese etc.) mode swallows keystrokes into a composition window the game never
+	 * sees. Switch the IME into its alphanumeric pass-through mode for the session and
+	 * detach it from the main window so text input always reaches the game directly.
+	 */
+	HIMC himc = ImmGetContext(MainWindow);
+	if (himc != NULL) {
+		ImmSetOpenStatus(himc, FALSE);
+		ImmSetConversionStatus(himc, IME_CMODE_ALPHANUMERIC, IME_SMODE_NONE);
+		ImmReleaseContext(MainWindow, himc);
+	}
+	ImmAssociateContext(MainWindow, NULL);
 
 	RegisterHotKey(MainWindow, 1, MOD_ALT|MOD_CONTROL|MOD_SHIFT, VK_M);
 

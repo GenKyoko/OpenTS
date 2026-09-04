@@ -152,6 +152,8 @@ class WinsockInterfaceClass {
 
 	protected:
 
+		friend class CnCNet5UDPInterfaceClass;
+
 		/*
 		**	This struct contains the information needed for each incoming and outgoing packet.
 		**	It acts as a temporary control for these packets.
@@ -171,6 +173,29 @@ class WinsockInterfaceClass {
 		*/
 		void *Get_New_Out_Buffer(void);
 		void *Get_New_In_Buffer(void);
+
+		void Delete_In_Buffer(WinsockBufferType* buf)
+		{
+			if (buf->IsAllocated) {
+				delete buf;
+			}
+			else {
+				buf->InUse = false;
+				--InBuffersUsed;
+			}
+		}
+
+
+		void Delete_Out_Buffer(WinsockBufferType* buf)
+		{
+			if (buf->IsAllocated) {
+				delete buf;
+			}
+			else {
+				buf->InUse = false;
+				--OutBuffersUsed;
+			}
+		}
 
 		/*
 		**	Packet CRCs.

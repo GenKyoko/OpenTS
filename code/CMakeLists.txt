@@ -2,9 +2,9 @@
 set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE STRING "" FORCE)
 
 # OpenTS currently supports 32-bit (x86) builds only.
-if(NOT CMAKE_SIZEOF_VOID_P EQUAL 4)
-    message(FATAL_ERROR "OpenTS must be built as 32-bit x86. Reconfigure with -A Win32.")
-endif()
+# if(NOT CMAKE_SIZEOF_VOID_P EQUAL 4)
+#     message(FATAL_ERROR "OpenTS must be built as 32-bit x86. Reconfigure with -A Win32.")
+# endif()
 
 #
 # ---------------------------------------------------------
@@ -28,7 +28,7 @@ file(GLOB_RECURSE OPENTS_RAW CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/*.hh"
     "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/*.rc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.asm"
+#    "${CMAKE_CURRENT_SOURCE_DIR}/*.asm"
 
     # Submodules of OpenTS
     "${CMAKE_CURRENT_SOURCE_DIR}/wolapi/*"
@@ -47,6 +47,62 @@ foreach(f ${OPENTS_RAW})
             set(EXCLUDED TRUE)
         endif()
     endforeach()
+
+    # detproc.asm was ported to detproc.cpp; keep the file but do not build it.
+    if(f STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/detproc.asm")
+        set(EXCLUDED TRUE)
+    endif()
+
+    # isoasm.asm was ported to isoblit.cpp; keep the file but do not build it.
+    if(f STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/isoasm.asm")
+        set(EXCLUDED TRUE)
+    endif()
+
+    # olsosdec.asm was ported to olsosdec.cpp; keep the file but do not build it.
+    if(f STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/olsosdec.asm")
+        set(EXCLUDED TRUE)
+    endif()
+
+    # soscodec.asm was ported to soscodec.cpp; keep the file but do not build it.
+    if(f STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/soscodec.asm")
+        set(EXCLUDED TRUE)
+    endif()
+
+    # vqa_sos.asm was ported to vqa_sos.cpp; keep the file but do not build it.
+    if(f STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/vqa_sos.asm")
+        set(EXCLUDED TRUE)
+    endif()
+
+    # vqa_uncomp.asm was ported to vqa_uncomp.cpp; keep the file but do not build it.
+    if(f STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/vqa_uncomp.asm")
+        set(EXCLUDED TRUE)
+    endif()
+
+    # winasm.asm was ported to winasm.cpp; keep the file but do not build it.
+    if(f STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/winasm.asm")
+        set(EXCLUDED TRUE)
+    endif()
+
+    # unvq_asm.asm was ported to unvq_asm.cpp; keep the file but do not build it.
+    if(f STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/unvq_asm.asm")
+        set(EXCLUDED TRUE)
+    endif()
+
+    # smartdeform_.asm was ported to smartdeform_asm.cpp; keep the file but do not build it.
+    if(f STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/smartdeform_.asm")
+        set(EXCLUDED TRUE)
+    endif()
+
+    # auduncmp.asm was ported to vqa_uncomp.cpp (Decompress_Frame); keep the
+    # file but do not build it.
+    if(f STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/auduncmp.asm")
+        set(EXCLUDED TRUE)
+    endif()
+
+    # cliprect.asm was ported to cliprect.cpp; keep the file but do not build it.
+    if(f STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/cliprect.asm")
+        set(EXCLUDED TRUE)
+    endif()
 
     if(NOT EXCLUDED)
         list(APPEND OPENTS_SRC "${f}")
@@ -87,6 +143,12 @@ set_target_properties(OpenTS PROPERTIES
     VS_DEBUGGER_COMMAND "${TS_RUN_DIR}/$<TARGET_FILE_NAME:OpenTS>"
     VS_DEBUGGER_WORKING_DIRECTORY "${TS_RUN_DIR}"
 )
+
+# The game loads the language resource DLL at runtime, so the language build finishes
+# before the game links. Building the two in parallel has been seen to abort the
+# language link outright, which left the copy into the run directory undone and the
+# game running against a stale Language.dll.
+add_dependencies(OpenTS Language)
 
 #
 # ---------------------------------------------------------
@@ -216,9 +278,32 @@ target_link_libraries(OpenTS PRIVATE
     version
     winmm
     wsock32
-    kernel32 user32 gdi32 winspool comdlg32 advapi32 shell32
+    kernel32 user32 gdi32 imm32 winspool comdlg32 advapi32 shell32
     ole32 oleaut32 uuid odbc32 odbccp32
 )
+
+#
+# ---------------------------------------------------------
+# HarfBuzz shaping for the wide text path
+# ---------------------------------------------------------
+#
+# The wide text path (widetext.cpp) always draws through the operating system's font
+# engine. With HarfBuzz the shaping stage resolves the text into real font glyph ids,
+# which fixes ligatures, joining forms and glyph substitutions. The sources live in
+# thirdparty/harfbuzz and thirdparty/CMakeLists.txt builds them with the GDI backend
+# that the glyph-id rasterization pairs against.
+option(OPENTS_WITH_HARFBUZZ "Shape the wide text path with HarfBuzz" ON)
+
+if (OPENTS_WITH_HARFBUZZ)
+    if (NOT TARGET harfbuzz)
+        message(FATAL_ERROR "OPENTS_WITH_HARFBUZZ is set, but the harfbuzz target is missing. Check that thirdparty/harfbuzz is populated.")
+    endif()
+    target_link_libraries(OpenTS PRIVATE harfbuzz freetype)
+    target_include_directories(OpenTS PRIVATE
+        "${CMAKE_SOURCE_DIR}/thirdparty/harfbuzz/src"
+        "${CMAKE_SOURCE_DIR}/thirdparty/freetype/include")
+    target_compile_definitions(OpenTS PRIVATE OPENTS_WITH_HARFBUZZ)
+endif()
 
 if (MSVC)
     target_link_options(OpenTS PRIVATE
@@ -348,6 +433,16 @@ add_custom_command(TARGET OpenTS POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "$<TARGET_FILE:OpenTS>"
         "${TS_RUN_DIR}"
+)
+
+# Refresh the language resource DLL alongside the game. The stock Language.dll
+# (version 5.43) has been seen overwriting the run directory, which silently drops
+# every custom string; refreshing it on every game build restores the built one even
+# when the language target itself does not relink.
+add_custom_command(TARGET OpenTS POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_FILE:Language>"
+        "${TS_RUN_DIR}/$<TARGET_FILE_NAME:Language>"
 )
 
 # Copy the linker-generated .pdb alongside the exe

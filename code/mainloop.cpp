@@ -57,6 +57,7 @@
 #include "stimer.h"
 #include "surface.h"
 #include "tactical.h"
+#include "winstub.h"
 #include "theme.h"
 #include "timer.h"
 #include "tracker.h"
@@ -151,26 +152,12 @@ void Motion_Capture(void)
 }
 
 
-/// <summary>
-/// Handles the game losing the input focus.
-/// This routine parks the main loop while another application holds the focus, pumping
-/// the Windows message queue so that the game can be restored. A network game cannot
-/// afford to stall, so it pumps the queue once and lets play carry on regardless.
-/// </summary>
-static void Check_For_Focus_Loss(void)
-{
-	while (!GameInFocus) {
-		if (Session.Type == GAME_NORMAL || Session.Type == GAME_SKIRMISH) {
-			Sleep(500);
-			Windows_Message_Handler();
-		} else {
-			Sleep(10);
-			Windows_Message_Handler();
-			break;
-		}
-	}
-	return;
-}
+/*
+** The game keeps simulating and drawing while another window holds the input
+** focus; only a minimised window has nothing worth drawing into. The stall
+** loop the original engine ran here (parking the loop until the focus came
+** back) is gone along with the helper that served it.
+*/
 
 bool InMainLoop = false;
 
@@ -200,24 +187,6 @@ bool Main_Loop(void)
 	if (!GameActive) {return(!GameActive);}
 
 	InMainLoop = true;
-
-	/*
-	**	Call the focus loss handler
-	*/
-	#if 0
-	Check_For_Focus_Loss();
-	#else
-	while (!GameInFocus) {
-		if (Session.Type == GAME_NORMAL || Session.Type == GAME_SKIRMISH) {
-			Sleep(500);
-			Windows_Message_Handler();
-		} else {
-			Sleep(10);
-			Windows_Message_Handler();
-			break;
-		}
-	}
-	#endif
 
 	/*
 	**	Sync-bug trapping code
@@ -297,21 +266,23 @@ bool Main_Loop(void)
 	}
 
 	/*
-	**	Update the display, unless we're inside a dialog.
+	**	Update the display, unless we're inside a dialog. The map keeps taking
+	**	input and drawing while the window is unfocused; only a minimised
+	**	window has nothing to paint.
 	*/
-	if (!Session.Play) {
-		if (SpecialDialog == SDLG_NONE && GameInFocus) {
-			Map.Input(input, x, y);
-			if (input) {
-				Keyboard_Process(input);
-			}
-			if (Session.ShowInternetDebug) {
-				Multiplayer_Debug_Print(false);
-			}
-			if ((Frame & 7) == 7 && Session.Type == GAME_INTERNET) {
-				Ipx.Store_Stats();
-			}
-			Update_Fogged_Objects();
+	if (!Session.Play && SpecialDialog == SDLG_NONE) {
+		Map.Input(input, x, y);
+		if (input) {
+			Keyboard_Process(input);
+		}
+		if (Session.ShowInternetDebug) {
+			Multiplayer_Debug_Print(false);
+		}
+		if ((Frame & 7) == 7 && Session.Type == GAME_INTERNET) {
+			Ipx.Store_Stats();
+		}
+		Update_Fogged_Objects();
+		if (!Should_Skip_Drawing()) {
 			Map.Render();
 		}
 	}
@@ -369,7 +340,7 @@ bool Main_Loop(void)
 			/*
 			**	Send the game statistics to WChat.
 			*/
-			if (Session.Type == GAME_INTERNET && !GameStatisticsPacketSent) {
+			if (Session.Are_Statistics_Enabled() && !GameStatisticsPacketSent) {
 				if (WestwoodOnline_Tournament) {
 					Session.SawGameCompletion = true;
 				}
@@ -386,7 +357,7 @@ bool Main_Loop(void)
 			/*
 			**	Send the game statistics to WChat.
 			*/
-			if (Session.Type == GAME_INTERNET && !GameStatisticsPacketSent) {
+			if (Session.Are_Statistics_Enabled() && !GameStatisticsPacketSent) {
 				if (WestwoodOnline_Tournament) {
 					Session.SawGameCompletion = true;
 				}
@@ -596,14 +567,16 @@ void Sync_Delay(void)
 	if (Session.Type != GAME_NORMAL && Session.Type != GAME_SKIRMISH) {
 		while (NetFrameTimer) {
 			Call_Back();
-			if (SpecialDialog == SDLG_NONE && GameInFocus == true) {
+			if (SpecialDialog == SDLG_NONE) {
 				KeyNumType input = KN_NONE;
 				int x, y;
 				if (NetFrameTimer > 10) {
 					Map.Input(input, x, y);
 					Keyboard_Process(input);
 					TacticalMap->AI();
-					Map.Render();
+					if (!Should_Skip_Drawing()) {
+						Map.Render();
+					}
 				} else {
 					Sleep(0);
 				}
@@ -616,21 +589,23 @@ void Sync_Delay(void)
 	} else {
 		while (FrameTimer) {
 			Call_Back();
-			if (SpecialDialog == SDLG_NONE && GameInFocus == true) {
+			if (SpecialDialog == SDLG_NONE) {
 				KeyNumType input = KN_NONE;
 				int x, y;
 				Map.Input(input, x, y);
 				Keyboard_Process(input);
 				TacticalMap->AI();
-				Map.Render();
 				if (!FrameTimer) {
 					break;
 				}
+				if (!Should_Skip_Drawing()) {
+					Map.Render();
+				}
 			}
-			if (GameInFocus || (Session.Type != GAME_NORMAL && Session.Type != GAME_SKIRMISH)) {
-				Sleep(0);
+			if (Should_Skip_Drawing()) {
+				Sleep(1);
 			} else {
-				Sleep(16 * FrameTimer);
+				Sleep(0);
 			}
 		}
 	}

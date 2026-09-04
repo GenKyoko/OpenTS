@@ -3748,7 +3748,7 @@ char const * DisplayClass::Help_Text(int id)
 			if (object->RTTI != RTTI_BUILDING || !((BuildingClass *)object)->IsNominal) {
 				if (!dynamic_cast<TechnoTypeClass const *>(object->Class_Of())->IsNominal) {
 
-					if (!techno->House->Is_Ally(PlayerPtr)) {
+					if (!techno->House->Is_Ally_Or_Observer(PlayerPtr)) {
 						switch ((RTTIType)object->RTTI) {
 							case RTTI_INFANTRY:
 								text = Fetch_String(TXT_ENEMY_SOLDIER);

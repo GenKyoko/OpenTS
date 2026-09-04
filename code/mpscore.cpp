@@ -153,7 +153,7 @@ bool MultiScore::Single_Presentation(HouseClass * house)
 	int bestIndex = -1;
 
 	for (int i = 0; i < Houses.Count(); i++) {
-		if (Houses[i] != NULL && !Houses[i]->Class->IsMultiplayPassive) {
+		if (Houses[i] != NULL && !Houses[i]->Class->IsMultiplayPassive && !Houses[i]->IsObserver) {
 			if (bestIndex == -1 || bestScore < Session.Score[i].Score[0]) {
 				bestScore = Session.Score[i].Score[0];
 				bestIndex = i;
@@ -363,9 +363,10 @@ void MultiScore::Tally_Score(void)
 		hptr = Houses[house];
 
 		/*
-		**	Skip this house if it's not human.
+		**	Skip this house if it's not a fighting player; an observer holds
+		**	no side in the match and has no score to present.
 		*/
-		if (!hptr || hptr->Class->IsMultiplayPassive == true) {
+		if (!hptr || hptr->Class->IsMultiplayPassive == true || hptr->IsObserver) {
 			continue;
 		}
 
@@ -511,7 +512,7 @@ void MultiScore::Process_Scores(void)
 
 	for (i = 0; i < Houses.Count(); i++) {
 		HouseClass *house = Houses[i];
-		if (house != NULL && !house->Class->IsMultiplayPassive) {
+		if (house != NULL && !house->Class->IsMultiplayPassive && !house->IsObserver) {
 			totalPoints += house->PointTotal;
 			playerCount++;
 		}

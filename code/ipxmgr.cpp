@@ -632,6 +632,9 @@ int IPXManagerClass::Connection_ID(int index)
  *=========================================================================*/
 char *IPXManagerClass::Connection_Name(int id)
 {
+	if (Session.IsQuickMatch)
+		return const_cast<char*>("Player");
+
 	int i;
 
 	for (i = 0; i < NumConnections; i++) {

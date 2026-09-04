@@ -540,6 +540,50 @@ int CALLBACK WinMain ( HINSTANCE instance , HINSTANCE , char * command_line , in
 			WindowedMode = !Options.Fullscreen;
 		}
 
+		/*
+		 * The ts-patches style launchers write these keys into the file before they start the
+		 * game. A launcher forces a window for its session, names the size that window opens
+		 * at, and may ask for a window without a frame. A size the native settings already
+		 * name wins over the one the launcher offers; the window request and the frame belong
+		 * to this run alone, so they do not overwrite the player's stored preference.
+		 */
+		if (ConfigINI.Get_Bool("Video", "Video.Windowed", false)) {
+			WindowedMode = true;
+		}
+		if (Options.WindowWidth <= 0) {
+			Options.WindowWidth = ConfigINI.Get_Int("Video", "Video.WindowedScreenWidth", -1);
+		}
+		if (Options.WindowHeight <= 0) {
+			Options.WindowHeight = ConfigINI.Get_Int("Video", "Video.WindowedScreenHeight", -1);
+		}
+		Options.NoWindowFrame = ConfigINI.Get_Bool("Video", "NoWindowFrame", false);
+
+		/*
+		 * cnc-ddraw keeps its own copy of the launcher's window choices in
+		 * ddraw.ini, and a launcher may express the window through that file
+		 * rather than through [Video]. When the file is present, honor its
+		 * fullscreen, size, and border settings the same way, so a session
+		 * the launcher runs windowed stays windowed.
+		 */
+		CCFileClass ddraw_file("ddraw.ini");
+		if (ddraw_file.Is_Available()) {
+			CCINIClass ddraw_ini;
+			if (ddraw_ini.Load(ddraw_file, false)) {
+				if (!ddraw_ini.Get_Bool("ddraw", "fullscreen", true)) {
+					WindowedMode = true;
+				}
+				if (Options.WindowWidth <= 0) {
+					Options.WindowWidth = ddraw_ini.Get_Int("ddraw", "width", 0);
+				}
+				if (Options.WindowHeight <= 0) {
+					Options.WindowHeight = ddraw_ini.Get_Int("ddraw", "height", 0);
+				}
+				if (!ddraw_ini.Get_Bool("ddraw", "border", true)) {
+					Options.NoWindowFrame = true;
+				}
+			}
+		}
+
 		Keyboard = new KeyboardClass();
 
 		/*

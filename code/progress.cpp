@@ -172,7 +172,13 @@ void ProgressScreenClass::Set_Graphic_Data(const char * progbar, const char * ba
 			rect = Shape->Get_Rect(0);
 			pt = Point2D((Pos.X - rect.Width / 2) - 1, Pos.Y - (rect.Height / 2)) + Point2D(-80, 89);
 		}
-		Fancy_Text_Print(String, *HiddenSurface, HiddenSurface->Get_Rect(), pt, scheme, TBLACK, TextPrintType(TPF_FULLSHADOW|TPF_6PT_GRAD));
+		
+		if (Session.IsQuickMatch) {
+			Fancy_Text_Print("Player", *HiddenSurface, HiddenSurface->Get_Rect(), pt, scheme, TBLACK, TextPrintType(TPF_FULLSHADOW | TPF_6PT_GRAD));
+		}
+		else {
+			Fancy_Text_Print(String, *HiddenSurface, HiddenSurface->Get_Rect(), pt, scheme, TBLACK, TextPrintType(TPF_FULLSHADOW | TPF_6PT_GRAD));
+		}
 	}
 	Update_Visible_Surface();
 }

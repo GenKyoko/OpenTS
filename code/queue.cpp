@@ -2603,7 +2603,12 @@ BOOL CALLBACK Reconnect_Dialog_Proc(HWND window, UINT message, WPARAM wparam, LP
 				HWND button = GetDlgItem(window, SyncNameButtonControlsIDs[i]);
 				HWND bar = GetDlgItem(window, SyncBarControlIDs[i]);
 				if (i < Session.Players.Count()) {
-					SendMessage(button, WM_SETTEXT, 0, (LPARAM)Session.Players[i]->Name);
+					if (Session.IsQuickMatch) {
+						SendMessage(button, WM_SETTEXT, 0, (LPARAM)"Player");
+					}
+					else {
+						SendMessage(button, WM_SETTEXT, 0, (LPARAM)Session.Players[i]->Name);
+					}
 					EnableWindow(button, TRUE);
 					EnableWindow(bar, TRUE);
 				} else {
@@ -2748,7 +2753,7 @@ void Kick_Player_Now(ConnManClass *net, int kickee, FrameSyncStruct * their, boo
 
 	Houses[id]->LostConnection = true;
 
-	if (CountAliveTeams(Houses[id]) == 1 && Session.Type == GAME_INTERNET && !GameStatisticsPacketSent) {
+	if (CountAliveTeams(Houses[id]) == 1 && Session.Are_Statistics_Enabled() && !GameStatisticsPacketSent) {
 		Register_Game_End_Time();
 		ConnectionLost = true;
 		if (!spamkick) {

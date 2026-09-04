@@ -129,6 +129,7 @@ OptionsClass::OptionsClass(void) :
 	Fullscreen(true),
 	WindowWidth(-1),
 	WindowHeight(-1),
+	NoWindowFrame(false),
 	ScaleMode(VIDEO_SCALE_PIXELART),
 	IntegerScaling(false),
 	VSync(false),

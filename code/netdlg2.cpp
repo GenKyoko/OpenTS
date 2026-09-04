@@ -892,11 +892,11 @@ bool Net2Remote_Connect(void)
 					//...............................................................
 					//	If there are at least 2 players, go ahead & play; error otherwise
 					//...............................................................
-					if (Session.Players.Count() == 1) {
-						PMessagePrintf(-1, Fetch_String(TXT_ONLY_ONE));
-						_netresponse = 0;
-						EnableWindow(GetDlgItem(WS_Top_Window(), IDC_GO), TRUE);
-					}
+					//if (Session.Players.Count() == 1) {
+					//	PMessagePrintf(-1, Fetch_String(TXT_ONLY_ONE));
+					//	_netresponse = 0;
+					//	EnableWindow(GetDlgItem(WS_Top_Window(), IDC_GO), TRUE);
+					//}
 
 					if (_netresponse == IDC_GO) {
 						for (int i = 0; i < Session.Players.Count(); i++) {

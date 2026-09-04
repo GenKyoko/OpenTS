@@ -38,6 +38,10 @@
 
 #include <math.h>
 
+#if defined(_MSC_VER)
+#include <intrin.h>
+#endif
+
 typedef union {
 	LARGE_INTEGER LargeInt;
 	struct QuadPart {
@@ -131,8 +135,6 @@ unsigned int Get_CPU_Clock(unsigned int & high)
 **
 */
 
-#define ASM_RDTSC _asm _emit 0x0f _asm _emit 0x31
-
 // Max # of samplings to allow before giving up and returning current average.
 #define MAX_TRIES			20
 #define ROUND_THRESHOLD		6
@@ -148,15 +150,23 @@ static unsigned long TSC_High;
 /// This routine executes the RDTSC opcode and stashes the two halves of the 64 bit cycle
 /// count in the module's time stamp globals, where the timing code can pick them up.
 /// </summary>
-/// <remarks>Only call this routine on a processor that supports the RDTSC opcode.</remarks>
+/// <remarks>Only call this routine on a processor that supports the RDTSC opcode. On
+/// architectures without a time stamp counter the globals are set to zero.</remarks>
 void RDTSC(void)
 {
-	_asm
-	{
-		ASM_RDTSC;
-		mov	TSC_Low, eax
-		mov	TSC_High, edx
-	}
+#if defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_X64))
+	unsigned __int64 stamp = __rdtsc();
+	TSC_Low = (unsigned long)stamp;
+	TSC_High = (unsigned long)(stamp >> 32);
+#elif (defined(__GNUC__) || defined(__clang__)) && (defined(__i386__) || defined(__x86_64__))
+	unsigned int lo, hi;
+	__asm__ __volatile__("rdtsc" : "=a"(lo), "=d"(hi));
+	TSC_Low = lo;
+	TSC_High = hi;
+#else
+	TSC_Low = 0;
+	TSC_High = 0;
+#endif
 }
 
 
@@ -233,8 +243,8 @@ int Get_RDTSC_CPU_Speed(void)
 			QueryPerformanceCounter(&t1);
 		}
 
-		ASM_RDTSC;
-		_asm	mov	stamp0, EAX
+		RDTSC();
+		stamp0 = TSC_Low;
 
 		t0.LowPart = t1.LowPart;		// Reset Initial Time
 		t0.HighPart = t1.HighPart;
@@ -247,8 +257,8 @@ int Get_RDTSC_CPU_Speed(void)
 			QueryPerformanceCounter(&t1);
 		}
 
-		ASM_RDTSC;
-		_asm	mov	stamp1, EAX
+		RDTSC();
+		stamp1 = TSC_Low;
 
 
 		cycles = stamp1 - stamp0;					// # of cycles passed between reads

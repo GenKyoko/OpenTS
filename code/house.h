@@ -64,6 +64,8 @@
 #include "urgency.hh"
 #include "zone.hh"
 
+#include <vector>
+
 template<class T> class DynamicVectorClass;
 class TriggerClass;
 class FootClass;
@@ -1001,6 +1003,7 @@ class HouseClass : public AbstractClass
 		int AI_Infantry(void);
 		int AI_Aircraft(void);
 
+	public:
 		/*
 		**	This is a bit field record of all the other houses that are allies with
 		**	this house. It is presumed that any house that isn't an ally, is therefore
@@ -1008,6 +1011,7 @@ class HouseClass : public AbstractClass
 		*/
 		unsigned Allies;
 
+	private:
 		/*
 		**	General low-power related damaged is doled out whenever this timer
 		**	expires.
@@ -1113,6 +1117,19 @@ class HouseClass : public AbstractClass
 		 * afford another power hungry structure, so that it stops before the base browns out.
 		 */
 		int PowerSurplus;
+
+		bool IsObserver;
+
+public:
+		// temporary storage for the 100-unit bug fix
+		static std::vector<int> AIProduction_CreationFrames;
+		static std::vector<int> AIProduction_Values;
+		static std::vector<int> AIProduction_BestChoices;
+
+		inline bool Is_Ally_Or_Observer(const HouseClass* house) const
+		{
+			return Is_Ally(house) || PlayerPtr->IsObserver;
+		}
 };
 
 HouseClass * House_From_HousesType(HousesType house);

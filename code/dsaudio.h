@@ -51,7 +51,7 @@ class DSAudio
 		void Restore_Sound_Buffers (void);
 		bool Set_Primary_Buffer_Format(void);
 		bool Start_Primary_Sound_Buffer (bool forced);
-		void Stop_Primary_Sound_Buffer (void);
+		void Stop_Primary_Sound_Buffer (bool stop_samples = true);
 
 		int Get_Playing_Sample_Handle(void const *sample);
 		void Set_Volume_All(int volume);

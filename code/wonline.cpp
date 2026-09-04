@@ -8880,10 +8880,10 @@ BOOL CALLBACK WOL_Game_Options_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM l
 					Draw_Player_List();
 
 					/// Need at least two players to start.
-					if (g_UserList.length() < 2) {
-						PMessagePrintf(-1, Fetch_String(TXT_ONLY_ONE));
-						return(false);
-					}
+					//if (g_UserList.length() < 2) {
+					//	PMessagePrintf(-1, Fetch_String(TXT_ONLY_ONE));
+					//	return(false);
+					//}
 
 					/// Every player must have accepted the current game options.
 					for (i = 0; i < g_UserList.length(); i++) {
