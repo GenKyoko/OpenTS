@@ -2300,7 +2300,7 @@ static int Process_Reconnect_Dialog(CDTimerClass<SystemTimerClass> *timeout_time
 
 		HWND item = GetDlgItem(disconnect_dialog, IDC_DISCONNECT_TIME_REMAINING);
 		if (item) {
-			sprintf(buf, Fetch_String(TXT_TIME_ALLOWED), displayed_time);
+			sprintf(buf, Localize("TXT_TIME_ALLOWED"), displayed_time);
 			SendMessage(item, WM_SETTEXT, 0, (LPARAM)buf);
 		}
 		if (!(displayed_time & 1)) {
@@ -2334,29 +2334,29 @@ static int Process_Reconnect_Dialog(CDTimerClass<SystemTimerClass> *timeout_time
 						}
 					}
 					if (Session.Type == GAME_IPX || Session.Type == GAME_INTERNET) {
-						sprintf(buf, Fetch_String(TXT_RECONNECTING_TO), Ipx.Connection_Name(Ipx.Connection_ID(oldest_index)));
+						sprintf(buf, Localize("TXT_RECONNECTING_TO"), Ipx.Connection_Name(Ipx.Connection_ID(oldest_index)));
 					} else {
-						sprintf(buf, Fetch_String(TXT_RECONNECTING_TO), Session.Players[1]->Name);
+						sprintf(buf, Localize("TXT_RECONNECTING_TO"), Session.Players[1]->Name);
 					}
 					ListBox_AddString(listbox, buf);
 					ListBox_AddString(listbox, "");
 					if (Session.Type == GAME_INTERNET) {
-						ListBox_AddString(listbox, Fetch_String(TXT_RECONNECT_HELP3));
-						ListBox_AddString(listbox, Fetch_String(TXT_RECONNECT_HELP3B));
-						ListBox_AddString(listbox, Fetch_String(TXT_RECONNECT_HELP3C));
+						ListBox_AddString(listbox, Localize("TXT_RECONNECT_HELP3"));
+						ListBox_AddString(listbox, Localize("TXT_RECONNECT_HELP3B"));
+						ListBox_AddString(listbox, Localize("TXT_RECONNECT_HELP3C"));
 					}
-					ListBox_AddString(listbox, Fetch_String(TXT_RECONNECT_HELP2));
+					ListBox_AddString(listbox, Localize("TXT_RECONNECT_HELP2"));
 					if (Session.Type == GAME_INTERNET) {
-						ListBox_AddString(listbox, Fetch_String(TXT_RECONNECT_HELP2B));
+						ListBox_AddString(listbox, Localize("TXT_RECONNECT_HELP2B"));
 					} else if (Session.Type == GAME_IPX) {
-						ListBox_AddString(listbox, Fetch_String(TXT_RECONNECT_HELP4));
+						ListBox_AddString(listbox, Localize("TXT_RECONNECT_HELP4"));
 					}
 					ListBox_AddString(listbox, "");
-					ListBox_AddString(listbox, Fetch_String(TXT_RECONNECT_HELP5));
-					ListBox_AddString(listbox, Fetch_String(TXT_RECONNECT_HELP1));
+					ListBox_AddString(listbox, Localize("TXT_RECONNECT_HELP5"));
+					ListBox_AddString(listbox, Localize("TXT_RECONNECT_HELP1"));
 					ListBox_AddString(listbox, "");
 				} else {
-					sprintf(buf, Fetch_String(TXT_WAITING_FOR_CONNECTIONS));
+					sprintf(buf, Localize("TXT_WAITING_FOR_CONNECTIONS"));
 					ListBox_AddString(listbox, buf);
 				}
 			}
@@ -2480,13 +2480,13 @@ void Propose_Kick_Player(HWND window, int id)
 	HWND listbox = GetDlgItem(window, IDC_DISCONNECT_MESSAGES);
 
 	if (id == 0) {
-		ListBox_AddString(listbox, Fetch_String(TXT_RECONNECT_KICK_SELF));
+		ListBox_AddString(listbox, Localize("TXT_RECONNECT_KICK_SELF"));
 		ListBox_Trim(listbox);
 		return;
 	}
 
 	if (Session.Type == GAME_INTERNET && WestwoodOnline_Tournament) {
-		ListBox_AddString(listbox, Fetch_String(TXT_CANT_KICK));
+		ListBox_AddString(listbox, Localize("TXT_CANT_KICK"));
 		ListBox_Trim(listbox);
 		return;
 	}
@@ -2549,7 +2549,7 @@ void Cast_Kick_Vote(int kicker, int kickee)
 		}
 
 		DebugString("Player %s votes to kick player %s from the game\n", kicker_name, Ipx.Connection_Name(kickee));
-		sprintf(buffer, Fetch_String(TXT_RECONNECT_KICK_RECEIVED), kicker_name, Ipx.Connection_Name(kickee));
+		sprintf(buffer, Localize("TXT_RECONNECT_KICK_RECEIVED"), kicker_name, Ipx.Connection_Name(kickee));
 
 		HWND topwindow = WS_Top_Window();
 		HWND listbox = GetDlgItem(topwindow, IDC_DISCONNECT_MESSAGES);
@@ -3900,7 +3900,7 @@ static int Execute_DoList(int max_houses, HousesType base_house,
 							hptr->IsHuman = false;
 							hptr->IQ = Rule->MaxIQ;
 							hptr->Computer_Paranoid();
-							hptr->IniName = Fetch_String(TXT_COMPUTER);
+							hptr->IniName = Localize("TXT_COMPUTER");
 							DebugString("Removing a player %s:%d\n", __FILE__, __LINE__);
 							Session.NumPlayers--;
 						}

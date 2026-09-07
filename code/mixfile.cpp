@@ -183,7 +183,7 @@ MixFileClass::MixFileClass(char const * filename, PKey const * key) :
 //	DataStart = file.Seek(0, SEEK_CUR);
 
 	/*
-	**	Attach to list of mixfiles.
+	**	Attach to the list of mixfiles.
 	*/
 	List.Add_Tail(this);
 }

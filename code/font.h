@@ -35,6 +35,7 @@
 
 class Surface;
 class ConvertClass;
+class ColorScheme;
 
 /*
 **	A font object represent the data that comprises the individual characters as well
@@ -51,7 +52,13 @@ class FontClass
 		virtual void String_Pixel_Bounds(const char * string, Rect & bounds) const = 0;
 		virtual int Get_Width(void) const = 0;
 		virtual int Get_Height(void) const = 0;
-		virtual Point2D Print(char const * string, Surface & surface, Rect const & cliprect, Point2D const & point, ConvertClass const & converter, unsigned char const * remap=NULL) const = 0;
+
+		/*
+		**	scheme, when given, lets a vector font shade its glyph edges through the
+		**	scheme's sixteen entry color ramp (palette indexes 16..31); the embedded
+		**	bitmap fonts ignore it.
+		*/
+		virtual Point2D Print(char const * string, Surface & surface, Rect const & cliprect, Point2D const & point, ConvertClass const & converter, unsigned char const * remap=NULL, ColorScheme const * scheme=NULL) const = 0;
 
 		virtual int Set_XSpacing(int x) = 0;
 		virtual int Set_YSpacing(int y) = 0;

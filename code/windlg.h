@@ -14,6 +14,19 @@
 
 BOOL Get_Display_Rect(HWND window, LPRECT rect);
 
+// The display rect mapped into the game surface's coordinate space: the client
+// position is carried through the presentation letterbox and scale, so content
+// drawn onto the game surfaces at this rect lands exactly over the window.
+BOOL Get_Game_Rect(HWND window, LPRECT rect);
+
+// Returns a heap copy of a dialog template whose style is patched from WS_CHILD to
+// WS_POPUP, so CreateDialogIndirectParam brings the dialog into the world as a popup
+// owned by the window it is created against -- a child cannot become a popup after
+// creation, and a popup owns the presentation surface it composes with under every
+// renderer. The caller frees the buffer with delete[] once the dialog has been
+// created. NULL is returned when the resource is missing.
+LPDLGTEMPLATE Fetch_Popup_Template(int id);
+
 HWND WS_Create_Dialog(HINSTANCE instance, int id, HWND parent, DLGPROC proc, BOOL force_show);
 bool WS_Destroy_Dialog(HWND window, int id);
 

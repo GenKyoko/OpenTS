@@ -630,15 +630,22 @@ void TerrainClass::AI(void)
 	if (StageClass::Graphic_Logic()) {
 
 		/*
+		**	The crumbling and tiberium-spawning animation both compare the stage
+		**	against the artwork's frame count. A type whose artwork failed to load
+		**	has no frame count, and its animation is skipped rather than crashed on.
+		*/
+		ShapeSet const * images = (ShapeSet const *)Class->Get_Image_Data();
+
+		/*
 		**	If the terrain object is in the process of crumbling, then when at the
 		**	last stage of the crumbling animation, delete the terrain object.
 		*/
-		if (IsCrumbling && Fetch_Stage() == (((ShapeSet const *)Class->Get_Image_Data())->Get_Count())-1) {
+		if (images != NULL && IsCrumbling && Fetch_Stage() == images->Get_Count()-1) {
 			Delete_Me();
 			return;
 		}
 
-		if (Class->IsTiberiumSpawn && Class->IsAnimated && Fetch_Stage() == (((ShapeSet const *)Class->Get_Image_Data())->Get_Count() / 2)) {
+		if (images != NULL && Class->IsTiberiumSpawn && Class->IsAnimated && Fetch_Stage() == images->Get_Count() / 2) {
 			Set_Stage(0);
 			Set_Rate(0);
 			Map[Get_Coord()].Spread_Tiberium(true);

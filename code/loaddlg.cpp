@@ -530,7 +530,7 @@ bool LoadOptionsClass::Dialog(void)
 						**	to delete multiple files.
 						*/
 						case WWDELETE: {
-							sprintf(buffer, "%s\n%s", Fetch_String(TXT_DELETE_FILE_QUERY), entry->Descr);
+							sprintf(buffer, "%s\n%s", Localize("TXT_DELETE_FILE_QUERY"), entry->Descr);
 
 							if (!WWMessageBox()._Process(buffer, 1, TXT_YES, TXT_NO, TXT_NONE)) {
 								Delete_File(entry->Filename);
@@ -637,7 +637,7 @@ void LoadOptionsClass::Fill_List(HWND window)
 	*/
 	if (Style == SAVE) {
 		fdata = new FileEntryClass;
-		strcpy(fdata->Descr, Fetch_String(TXT_EMPTY_SLOT));
+		strcpy(fdata->Descr, Localize("TXT_EMPTY_SLOT"));
 		if (PlayerPtr != NULL) {
 			fdata->Scenario = Scen->Scenario;
 			fdata->House = Scen->PlayerHouse;
@@ -840,7 +840,7 @@ int __cdecl LoadOptionsClass::Compare(const void * p1, const void * p2)
 /// <returns>bool; Was the game loaded?</returns>
 bool LoadOptionsClass::Load_File(const char * file_name)
 {
-	HWND dialog = OwnerDraw::Custom_Message_Box(Fetch_String(TXT_LOADING), NULL, NULL);
+	HWND dialog = OwnerDraw::Custom_Message_Box(Localize("TXT_LOADING"), NULL, NULL);
 	if (dialog != 0) {
 		OwnerDraw::Display_Dialog(dialog);
 	}
@@ -863,7 +863,7 @@ bool LoadOptionsClass::Load_File(const char * file_name)
 /// <returns>bool; Was the game saved?</returns>
 bool LoadOptionsClass::Save_File(const char * file_name, const char * descr)
 {
-	HWND dialog = OwnerDraw::Custom_Message_Box(Fetch_String(TXT_SAVING_GAME), NULL, NULL);
+	HWND dialog = OwnerDraw::Custom_Message_Box(Localize("TXT_SAVING_GAME"), NULL, NULL);
 	if (dialog != 0) {
 		OwnerDraw::Display_Dialog(dialog);
 	}

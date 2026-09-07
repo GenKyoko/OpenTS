@@ -494,7 +494,7 @@ void SessionClass::Read_MultiPlayer_Settings(void)
 	CCFileClass file(CONFIG_FILE_NAME);
 
 	// Get the player's last-used Handle
-	ConfigINI.Get_String("MultiPlayer", "Handle", Fetch_String(TXT_NONAME), Handle, sizeof(Handle));
+	ConfigINI.Get_String("MultiPlayer", "Handle", Localize("TXT_NONAME"), Handle, sizeof(Handle));
 
 	// Get the player's last-used Color
 	PrefColor = ConfigINI.Get_Int("MultiPlayer", "Color", 0);

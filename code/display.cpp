@@ -3717,7 +3717,7 @@ char const * DisplayClass::Help_Text(int id)
 	**	Give a generic help message when over shadow terrain.
 	*/
 	if (!Map[coord].IsMapped && MainWindow) {
-		return(Fetch_String(TXT_SHADOW));
+		return(Localize("TXT_SHADOW"));
 	}
 
 	TechnoClass * techno = Dynamic_Cast<TechnoClass *>(object);
@@ -3751,16 +3751,16 @@ char const * DisplayClass::Help_Text(int id)
 					if (!techno->House->Is_Ally_Or_Observer(PlayerPtr)) {
 						switch ((RTTIType)object->RTTI) {
 							case RTTI_INFANTRY:
-								text = Fetch_String(TXT_ENEMY_SOLDIER);
+								text = Localize("TXT_ENEMY_SOLDIER");
 								break;
 
 							case RTTI_UNIT:
 							case RTTI_AIRCRAFT:
-								text = Fetch_String(TXT_ENEMY_VEHICLE);
+								text = Localize("TXT_ENEMY_VEHICLE");
 								break;
 
 							case RTTI_BUILDING:
-								text = Fetch_String(TXT_ENEMY_STRUCTURE);
+								text = Localize("TXT_ENEMY_STRUCTURE");
 								break;
 						}
 					}

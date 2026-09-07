@@ -61,7 +61,11 @@ class AbstractTypeClass : public AbstractClass
 		virtual bool Read_INI(CCINIClass const & ini);
 		virtual bool Write_INI(CCINIClass & ini) const;
 
-		const char * Full_Name(void) const {return(GivenName);}
+		/*
+		**	The name shown for this object type in the user interface. Derived
+		**	classes may replace it; the base answer is the Name tag's text.
+		*/
+		virtual char const * Full_Name(void) const {return(GivenName);}
 		char const * Name(void) const {return(IniName);}
 };
 

@@ -312,7 +312,7 @@ bool ToolTipManager::Process(void)
 {
 	ToolTip const * cur = CurrentToolTip;
 	if (cur != NULL) {
-		const char *str = cur->Text == 0 ? ToolTip_Text(cur->ID) : Fetch_String(cur->Text);
+		const char *str = cur->Text == 0 ? ToolTip_Text(cur->ID) : Localize(cur->Text);
 
 		if (str != NULL && strlen(str) > 0) {
 

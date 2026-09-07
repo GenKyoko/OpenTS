@@ -2,13 +2,9 @@
  *                                O P E N  T S
  ******************************************************************************
  * SPDX-License-Identifier: GPL-3.0-or-later
- * Copyright 2025 Electronic Arts Inc.
- * Copyright 2026 OpenTS contributors
+ * Copyright 2026 <AUTHOR>
  *
- * Contains material derived from Electronic Arts source code.
- * Modified by OpenTS contributors, 2026.
- * EA's GPLv3 Section 7 additional terms and supplemental warranty
- * disclaimers apply; see LICENSE.md.
+ * Part of the OpenTS engine.
  ******************************************************************************/
 
 #pragma once
@@ -91,6 +87,19 @@ int Wide_Text_Pixel_Height(TextPrintType flag);
 ** a Latin face with a CJK one. An empty chain falls back to the Windows system fonts.
 */
 void Wide_Text_Set_Font_Chain(std::vector<std::string> const & ttf_paths);
+
+/*
+** Opens one extra FreeType face over a TTF file, for the TtfFontClass replacements of the
+** legacy bitmap fonts. The face is loaded through the game file system (game directory or
+** mixfiles) and lives independently of the wide text chain. Returns a handle to pass to
+** Wide_Text_Release_Face, or null when the file is missing or cannot be opened.
+*/
+void * Wide_Text_Acquire_Face(char const * ttf_path);
+
+/*
+** Releases a face acquired through Wide_Text_Acquire_Face. Null is ignored.
+*/
+void Wide_Text_Release_Face(void * face);
 
 /*
 ** Prints UTF-16 text onto the surface with the same styling conventions as

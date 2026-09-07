@@ -127,9 +127,7 @@ void WWMouseClass::Calc_Confining_Rect(void)
 int WWMouseClass::Get_Mouse_State(void) const
 {
 	if (!Is_Captured()) {
-		ShowCursor(FALSE);
-		int state = ShowCursor(TRUE);
-		return(state);
+		return(Win_Cursor_Display_Count());
 	}
 	return(MouseState);
 }
@@ -182,7 +180,7 @@ void WWMouseClass::Set_Cursor(Point2D const & hotspot, ShapeSet const * cursor, 
 void WWMouseClass::Show_Mouse(void)
 {
 	if (!Is_Captured()) {
-		ShowCursor(TRUE);
+		Win_Cursor_Show_OS(TRUE);
 	} else {
 		MouseState++;
 		if (MouseState > 0) MouseState = 0;
@@ -209,7 +207,7 @@ void WWMouseClass::Show_Mouse(void)
 void WWMouseClass::Hide_Mouse(void)
 {
 	if (!Is_Captured()) {
-		ShowCursor(FALSE);
+		Win_Cursor_Show_OS(FALSE);
 	} else {
 		MouseState--;
 		Win_Cursor_Set_Visible(!Is_Hidden());
@@ -241,10 +239,9 @@ void WWMouseClass::Capture_Mouse(void)
 		IsCaptured = true;
 
 		/*
-		 * The game's pointer is now the O/S pointer, so its display count has to come
-		 * back up; it was left negative while the game drew a pointer of its own.
+		 * The game's pointer takes over as the O/S pointer; SDL's visibility follows
+		 * through the Set_Visible call Show_Mouse makes below.
 		 */
-		while (ShowCursor(TRUE) < 0) {}
 
 		/*
 		 * There is no exclusive display mode any more, so the pointer is kept inside
@@ -292,7 +289,14 @@ void WWMouseClass::Release_Mouse(void)
 		IsCaptured = false;
 		ClipCursor(NULL);
 		if (GetCapture() == Window) ReleaseCapture();
-		while (ShowCursor(TRUE) < 0) {}
+
+		/*
+		 * The system arrow takes over for the game's pointer, and it shows: whatever
+		 * hide nesting the game was in while it drew its own pointer, the dialog or
+		 * menu that took the mouse wants a visible cursor.
+		 */
+		Win_Cursor_Use_Default();
+		Win_Cursor_Show_OS(TRUE);
 		Show_Mouse();
 	}
 }

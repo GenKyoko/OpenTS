@@ -1,14 +1,10 @@
-﻿/*******************************************************************************
+/*******************************************************************************
  *                                O P E N  T S
  ******************************************************************************
  * SPDX-License-Identifier: GPL-3.0-or-later
- * Copyright 2025 Electronic Arts Inc.
- * Copyright 2026 OpenTS contributors
+ * Copyright 2026 <AUTHOR>
  *
- * Contains material derived from Electronic Arts source code.
- * Modified by OpenTS contributors, 2026.
- * EA's GPLv3 Section 7 additional terms and supplemental warranty
- * disclaimers apply; see LICENSE.md.
+ * Part of the OpenTS engine.
  ******************************************************************************/
 
 /***********************************************************************************************
@@ -23,6 +19,7 @@
 
 #include "widetext.h"
 
+#include "ccfile.h"
 #include "convert.h"
 #include "dbgprint.h"
 #include "gadget.h"
@@ -67,6 +64,7 @@ namespace {
 	struct ChainFace {
 		FT_Face Face;
 		int PixelSize;
+		std::vector<unsigned char> Buffer;   // The file bytes the face reads from (FT_OPEN_MEMORY).
 	};
 	std::vector<ChainFace> Chain;
 	int CachedHeight = 0;
@@ -550,14 +548,50 @@ void Wide_Text_Set_Font_Chain(std::vector<std::string> const & ttf_paths)
 	Chain.clear();
 
 	for (std::string const & path : ttf_paths) {
-		FT_Face face = NULL;
-		if (FT_New_Face(FreeTypeLibrary, path.c_str(), 0, &face) == 0 && face != NULL) {
-			ChainFace entry;
-			entry.Face = face;
+		/*
+		** The font file is loaded through CCFileClass into memory -- the same file
+		** system the rest of the engine uses, so fonts can also ship inside mixfiles
+		** -- and FreeType opens the face over that memory block.
+		**
+		** The chain entry must be appended before the face is opened: FT_OPEN_MEMORY
+		** records the address of the byte buffer inside the face, so the buffer has to
+		** live at its final address first. Copying the entry afterwards (as a plain
+		** push_back of a fully built entry would) leaves the face pointing at a
+		** destroyed local buffer.
+		*/
+		CCFileClass file(path.c_str());
+		if (!file.Is_Available()) {
+			DebugString("WideText: font '%s' not found\n", path.c_str());
+			continue;
+		}
+
+		int size = file.Size();
+		if (size <= 0) {
+			DebugString("WideText: font '%s' is empty\n", path.c_str());
+			continue;
+		}
+
+		ChainFace & entry = Chain.emplace_back();
+		entry.Buffer.resize(size);
+		if (file.Read(entry.Buffer.data(), size) != size) {
+			DebugString("WideText: failed to read font '%s'\n", path.c_str());
+			Chain.pop_back();
+			continue;
+		}
+
+		FT_Open_Args args;
+		memset(&args, 0, sizeof(args));
+		args.flags = FT_OPEN_MEMORY;
+		args.memory_base = entry.Buffer.data();
+		args.memory_size = (FT_Long)entry.Buffer.size();
+
+		if (FT_Open_Face(FreeTypeLibrary, &args, 0, &entry.Face) == 0 && entry.Face != NULL) {
 			entry.PixelSize = -1;
-			Chain.push_back(entry);
+			DebugString("WideText: font '%s' loaded (%d bytes)\n", path.c_str(), size);
 		} else {
-			DebugString("WideText: failed to load font '%s'\n", path.c_str());
+			DebugString("WideText: FreeType failed to open font '%s'\n", path.c_str());
+			entry.Face = NULL;
+			Chain.pop_back();
 		}
 	}
 
@@ -594,37 +628,88 @@ void Wide_Text_Set_Font_Chain(std::vector<std::string> const & ttf_paths)
 
 
 /***********************************************************************************************
- * (reserved)                                                                                  *
+ * Wide_Text_Acquire_Face -- Opens one extra FreeType face over a TTF file.                     *
  *                                                                                             *
- * INPUT:   none                                                                              *
+ *    Used by the TtfFontClass replacements of the legacy bitmap fonts. The face is loaded     *
+ *    through CCFileClass -- the same file system the rest of the engine uses -- and opened    *
+ *    over its own memory block, independent of the wide text chain.                           *
  *                                                                                             *
- * OUTPUT:  none                                                                              *
+ * INPUT:   ttf_path -- TTF file path relative to the game directory.                          *
  *                                                                                             *
- * WARNINGS:   none                                                                           *
+ * OUTPUT:  Returns a face handle for Wide_Text_Release_Face, or null on failure.              *
  *                                                                                             *
- * HISTORY:                                                                                   *
- *   09/04/2026 OpenTS : Created.                                                             *
+ * WARNINGS:   The handle must not be released with FT_Done_Face directly; the buffer the      *
+ *             face reads from is owned by the face and freed with it.                         *
+ *                                                                                             *
+ * HISTORY:                                                                                    *
+ *   09/05/2026 OpenTS : Created.                                                              *
  *=============================================================================================*/
-void Wide_Text_Clear_Font_Faces_obsolete(void)
+void * Wide_Text_Acquire_Face(char const * ttf_path)
 {
+	if (!Ensure_FreeType() || ttf_path == NULL || *ttf_path == '\0') {
+		return(NULL);
+	}
+
+	CCFileClass file(ttf_path);
+	if (!file.Is_Available()) {
+		DebugString("WideText: font '%s' not found\n", ttf_path);
+		return(NULL);
+	}
+
+	int size = file.Size();
+	if (size <= 0) {
+		DebugString("WideText: font '%s' is empty\n", ttf_path);
+		return(NULL);
+	}
+
+	std::vector<unsigned char> buffer(size);
+	if (file.Read(buffer.data(), size) != size) {
+		DebugString("WideText: failed to read font '%s'\n", ttf_path);
+		return(NULL);
+	}
+
+	/*
+	** FT_OPEN_MEMORY records the buffer address inside the face, so the byte block
+	** must outlive the face. The block is heap allocated and kept for the process
+	** lifetime -- replacement fonts are singletons created once -- which keeps the
+	** ownership trivial.
+	*/
+	static std::vector<std::vector<unsigned char> *> AcquiredBuffers;
+
+	std::vector<unsigned char> * storage = new std::vector<unsigned char>(std::move(buffer));
+
+	FT_Open_Args args;
+	memset(&args, 0, sizeof(args));
+	args.flags = FT_OPEN_MEMORY;
+	args.memory_base = storage->data();
+	args.memory_size = (FT_Long)storage->size();
+
+	FT_Face face = NULL;
+	if (FT_Open_Face(FreeTypeLibrary, &args, 0, &face) == 0 && face != NULL) {
+		AcquiredBuffers.push_back(storage);
+		DebugString("WideText: face '%s' loaded (%d bytes)\n", ttf_path, size);
+		return((void *)face);
+	}
+
+	DebugString("WideText: FreeType failed to open font '%s'\n", ttf_path);
+	delete storage;
+	return(NULL);
 }
 
 
 /***********************************************************************************************
- * (reserved)                                                                                  *
+ * Wide_Text_Release_Face -- Releases a face acquired through Wide_Text_Acquire_Face.           *
  *                                                                                             *
- * INPUT:   face -- The family name to append.                                                *
- *                                                                                             *
- * OUTPUT:  none                                                                              *
- *                                                                                             *
- * WARNINGS:   none                                                                            *
- *                                                                                             *
- * HISTORY:                                                                                   *
- *   09/04/2026 OpenTS : Created.                                                             *
+ * HISTORY:                                                                                    *
+ *   09/05/2026 OpenTS : Created.                                                              *
  *=============================================================================================*/
-void Wide_Text_Add_Font_Face_obsolete(wchar_t const * face)
+void Wide_Text_Release_Face(void * handle)
 {
+	if (handle != NULL) {
+		FT_Done_Face((FT_Face)handle);
+	}
 }
+
 
 
 /***********************************************************************************************

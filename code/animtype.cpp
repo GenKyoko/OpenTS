@@ -171,9 +171,12 @@ AnimTypeClass::AnimTypeClass(char const *ininame) :
 /// </summary>
 AnimTypeClass::~AnimTypeClass(void)
 {
-	if (IsDemandLoad && ImageData) {
-		delete [] (char*) ImageData;
+	if (IsDemandLoad && ImageData != NULL) {
+		if (ImageDataIsOwned) {
+			delete [] (char*) ImageData;
+		}
 		ImageData = NULL;
+		ImageDataIsOwned = false;
 	}
 
 	AbstractTypePtrTracker.Delete(this);
@@ -209,6 +212,7 @@ void AnimTypeClass::Init(TheaterType theater)
 					char fullname[_MAX_FNAME+_MAX_EXT];	// Fully constructed iconset name.
 					_makepath(fullname, NULL, NULL, anim->Name(), Theaters[theater].Suffix);
 					anim->ImageData = MFCD::Retrieve(fullname);
+					anim->ImageDataIsOwned = false;
 					if (anim->ImageData == NULL) {
 						_makepath(fullname, NULL, NULL, anim->Name(), ".SHP");
 						anim->ImageData = MFCD::Retrieve(fullname);
@@ -219,8 +223,11 @@ void AnimTypeClass::Init(TheaterType theater)
 			} else {
 				if (anim->IsTheater || anim->IsNewTheater) {
 					if (anim->ImageData != NULL) {
-						delete [] (char*) anim->ImageData;
+						if (anim->ImageDataIsOwned) {
+							delete [] (char*) anim->ImageData;
+						}
 						anim->ImageData = NULL;
+						anim->ImageDataIsOwned = false;
 					}
 				}
 			}
@@ -253,6 +260,7 @@ void AnimTypeClass::Init_Theater(TheaterType theater)
 			char fullname[_MAX_FNAME+_MAX_EXT];	// Fully constructed iconset name.
 			_makepath(fullname, NULL, NULL, Name(), Theaters[theater].Suffix);
 			ImageData = MFCD::Retrieve(fullname);
+			ImageDataIsOwned = false;
 		}
 	}
 }
@@ -275,6 +283,7 @@ void AnimTypeClass::Load_Image(TheaterType theater)
 			_makepath(fullname, NULL, NULL, !GraphicName.empty() ? Graphic_Name() : Name(), ".SHP");
 			Theater_Naming_Convention(fullname, theater);
 			ImageData = MFCD::Retrieve(fullname);
+			ImageDataIsOwned = false;
 		}
 	}
 
@@ -472,13 +481,15 @@ void AnimTypeClass::Post_Load(void)
 	BASECLASS::Post_Load();
 
 	Fetch_Voxel_Image();
-	Fetch_Normal_Image();
 
 	if (!IsDemandLoad) {
+		Fetch_Normal_Image();
+
 		if (IsTheater) {
 			char fullname[_MAX_FNAME+_MAX_EXT];	// Fully constructed iconset name.
 			_makepath(fullname, NULL, NULL, Name(), Theaters[Scen->Theater].Suffix);
 			ImageData = MFCD::Retrieve(fullname);
+			ImageDataIsOwned = false;
 		} else if (IsNewTheater) {
 			Load_Image(Scen->Theater);
 		}
@@ -663,6 +674,7 @@ void const * AnimTypeClass::Get_Image_Data(void) const
 
 		CCFileClass file(fullname);
 		((void const *&)ImageData) = Load_Alloc_Data(file);
+		((AnimTypeClass*)this)->ImageDataIsOwned = true;
 		((AnimTypeClass*)this)->Load_Image(Scen->Theater);
 
 		data = ImageData;
@@ -679,9 +691,10 @@ void const * AnimTypeClass::Get_Image_Data(void) const
 /// </summary>
 void AnimTypeClass::Free_Image(void)
 {
-	if (IsDemandLoad && ImageData != NULL && IsFreeAfterPlaying) {
+	if (IsDemandLoad && ImageData != NULL && IsFreeAfterPlaying && ImageDataIsOwned) {
 		DebugString("Freeing loaded image for %s\n", Full_Name());
 		delete [] (char*) ImageData;
 		ImageData = NULL;
+		ImageDataIsOwned = false;
 	}
 }

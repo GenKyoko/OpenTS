@@ -1675,9 +1675,9 @@ char const * SidebarClass::StripClass::Help_Text(int id)
 			}
 
 			if (Map.IsCameoText) {
-				sprintf(_buffer, Fetch_String(TXT_MONEY_FORMAT_1), choice->Cost_Of(PlayerPtr));
+				sprintf(_buffer, Localize("TXT_MONEY_FORMAT_1"), choice->Cost_Of(PlayerPtr));
 			} else {
-				sprintf(_buffer, Fetch_String(TXT_MONEY_FORMAT_2), choice->Full_Name(), choice->Cost_Of(PlayerPtr));
+				sprintf(_buffer, Localize("TXT_MONEY_FORMAT_2"), choice->Full_Name(), choice->Cost_Of(PlayerPtr));
 			}
 
 			return(_buffer);
@@ -1786,7 +1786,7 @@ void SidebarClass::StripClass::Draw_It(bool complete)
 							production	= true;
 							completed	= factory->Has_Completed();
 							if (completed) {
-								state = Fetch_String(TXT_READY);
+								state = Localize("TXT_READY");
 							}
 							stage		= factory->Completion();
 							darken		= false;

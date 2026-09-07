@@ -483,7 +483,7 @@ void ViewHTML(const char * name, int no_ask)
 	_unlink(filename);
 
 	/// Ask the user for confirmation (unless no_ask forces an immediate launch), then spawn the browser.
-	if ((result > 32) && (no_ask || (ODMessageBox(Fetch_String(TXT_LAUNCHBROWSER), MB_YESNO, WOL_Wait_Callback) == IDYES))) {
+	if ((result > 32) && (no_ask || (ODMessageBox(Localize("TXT_LAUNCHBROWSER"), MB_YESNO, WOL_Wait_Callback) == IDYES))) {
 		
 		char commandLine[MAX_PATH + 10];
 		sprintf(commandLine, "[open] %s", name);
@@ -559,7 +559,7 @@ void ViewHTML(const char * name, int no_ask)
 		/*
 		 * No handler found for this file type -- tell the user there's no browser installed.
 		 */
-		ODMessageBox(Fetch_String(TXT_NOBROWSER), MB_OK, WOL_Wait_Callback);
+		ODMessageBox(Localize("TXT_NOBROWSER"), MB_OK, WOL_Wait_Callback);
 	}
 }
 
@@ -635,7 +635,7 @@ bool Switch_Server(int type)
 	g_LastIgnoredStatus = 0;
 	g_pChat->RequestLogout();
 	Show_Wait_Window(WOL_WAIT_LOGIN_DONE, false);
-	Set_Wait_Dialog_Text((char *)Fetch_String(TXT_CONNECTING_SERVER));
+	Set_Wait_Dialog_Text((char *)Localize("TXT_CONNECTING_SERVER"));
 
 	for (i = 0; i < ARRAY_SIZE(g_WaitEventHandles); i++) {
 		ResetEvent(g_WaitEventHandles[i]);
@@ -689,7 +689,7 @@ bool Switch_Server(int type)
 
 	g_ShowMOTD = true;
 	g_CurrentServerIndex = g_TargetServerIndex;
-	Set_Wait_Dialog_Text((char *)Fetch_String(TXT_REQ_CHANLIST));
+	Set_Wait_Dialog_Text((char *)Localize("TXT_REQ_CHANLIST"));
 
 	/// Request the normal user-channel list for the new server.
 	if (g_pChat->RequestChannelList(CHANNELTYPE_CHAT, 0) == S_OK) {
@@ -1375,12 +1375,12 @@ void Reset_WOL_Globals(void)
 	/*
 	 * Reload the localized lobby names and clear the WDT territory-to-lobby index map.
 	 */
-	g_Lobbies[0] = Fetch_String(TXT_LOB_1);
-	g_Lobbies[1] = Fetch_String(TXT_LOB_2);
-	g_Lobbies[2] = Fetch_String(TXT_LOB_3);
-	g_Lobbies[3] = Fetch_String(TXT_LOB_4);
-	g_Lobbies[4] = Fetch_String(TXT_LOB_5);
-	g_Lobbies[5] = Fetch_String(TXT_LOB_6);
+	g_Lobbies[0] = Localize("TXT_LOB_1");
+	g_Lobbies[1] = Localize("TXT_LOB_2");
+	g_Lobbies[2] = Localize("TXT_LOB_3");
+	g_Lobbies[3] = Localize("TXT_LOB_4");
+	g_Lobbies[4] = Localize("TXT_LOB_5");
+	g_Lobbies[5] = Localize("TXT_LOB_6");
 
 	memset(WDT_TERRITORY_LOBBY_INDEXES, 0xFFFFFFFF, sizeof(WDT_TERRITORY_LOBBY_INDEXES));
 
@@ -1494,13 +1494,13 @@ void Draw_Channel_List(void)
 		if (new_button) {
 			if (CurrentLevel == WOL_LEVEL_GAMES) {
 				EnableWindow(new_button, TRUE);
-				SendMessage(new_button, WM_SETTEXT, 0, (LPARAM) Fetch_String(TXT_NEW_GAME));
+				SendMessage(new_button, WM_SETTEXT, 0, (LPARAM) Localize("TXT_NEW_GAME"));
 			} else if (CurrentLevel == WOL_LEVEL_USERCHAT) {
 				EnableWindow(new_button, TRUE);
-				SendMessage(new_button, WM_SETTEXT, 0, (LPARAM) Fetch_String(TXT_NEW_CHAT));
+				SendMessage(new_button, WM_SETTEXT, 0, (LPARAM) Localize("TXT_NEW_CHAT"));
 			} else {
 				EnableWindow(new_button, FALSE);
-				SendMessage(new_button, WM_SETTEXT, 0, (LPARAM) Fetch_String(TXT_NEW));
+				SendMessage(new_button, WM_SETTEXT, 0, (LPARAM) Localize("TXT_NEW"));
 			}
 		}
 	}
@@ -1526,7 +1526,7 @@ void Draw_Channel_List(void)
 	if (CurrentLevel != WOL_LEVEL_SERVERS) {
 		thecell.type = OwnerDraw::CellData::TEXT;
 		char back_text[32];
-		sprintf(back_text, "..\\%s", Fetch_String(TXT_BACK));
+		sprintf(back_text, "..\\%s", Localize("TXT_BACK"));
 		thecell.string.set(back_text);
 		SendDlgItemMessage(win, IDC_CHANNELS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM) back_text);
 		SendDlgItemMessage(win, IDC_CHANNELS, OD_SETCELL, MAKEWPARAM(g_Col_ChanIcon, 0), (LPARAM)&thecell);
@@ -1564,13 +1564,13 @@ void Draw_Channel_List(void)
 		/// Top-level menu on a server: game channels, other games, official chat, user chat.
 		case WOL_LEVEL_ROOT: {
 			thecell.surf = SurfaceCache.GetSurface("gt-1.bmp");
-			SendDlgItemMessage(win, IDC_CHANNELS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM) Fetch_String(TXT_GAME_CHAN));
+			SendDlgItemMessage(win, IDC_CHANNELS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM) Localize("TXT_GAME_CHAN"));
 			SendDlgItemMessage(win, IDC_CHANNELS, OD_SETCELL, MAKEWPARAM(g_Col_ChanIcon, 1), (LPARAM)&thecell);
-			SendDlgItemMessage(win, IDC_CHANNELS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM) Fetch_String(TXT_OTHER_GAME));
+			SendDlgItemMessage(win, IDC_CHANNELS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM) Localize("TXT_OTHER_GAME"));
 			SendDlgItemMessage(win, IDC_CHANNELS, OD_SETCELL, MAKEWPARAM(g_Col_ChanIcon, 2), (LPARAM)&thecell);
-			SendDlgItemMessage(win, IDC_CHANNELS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM) Fetch_String(TXT_OFFICIAL_CHAT));
+			SendDlgItemMessage(win, IDC_CHANNELS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM) Localize("TXT_OFFICIAL_CHAT"));
 			SendDlgItemMessage(win, IDC_CHANNELS, OD_SETCELL, MAKEWPARAM(g_Col_ChanIcon, 3), (LPARAM)&thecell);
-			SendDlgItemMessage(win, IDC_CHANNELS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM) Fetch_String(TXT_USER_CHAT));
+			SendDlgItemMessage(win, IDC_CHANNELS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM) Localize("TXT_USER_CHAT"));
 			SendDlgItemMessage(win, IDC_CHANNELS, OD_SETCELL, MAKEWPARAM(g_Col_ChanIcon, 4), (LPARAM)&thecell);
 		} break;
 
@@ -1656,11 +1656,11 @@ void Draw_Channel_List(void)
 				thecell.hint.set("");
 				if (chan.tournament) {
 					thecell.surf = SurfaceCache.GetSurface("woltrny.pcx");
-					thecell.hint.set((char *)Fetch_String(TXT_TOURNAMENT_GAME));
+					thecell.hint.set((char *)Localize("TXT_TOURNAMENT_GAME"));
 				} else {
 					if (chan.reserved & 0x100) {
 						thecell.surf = SurfaceCache.GetSurface("wolclan.pcx");
-						thecell.hint.set((char *)Fetch_String(TXT_BATTLECLAN_GAME));
+						thecell.hint.set((char *)Localize("TXT_BATTLECLAN_GAME"));
 					} else {
 						thecell.surf = SurfaceCache.GetSurface("gt18.bmp");
 					}
@@ -1670,7 +1670,7 @@ void Draw_Channel_List(void)
 				thecell.hint.set("");
 				if (chan.flags & CHAN_MODE_KEY) {
 					thecell.surf = SurfaceCache.GetSurface("wolpriv.pcx");
-					thecell.hint.set((char *)Fetch_String(TXT_GAME_PASSWORD));
+					thecell.hint.set((char *)Localize("TXT_GAME_PASSWORD"));
 				} else {
 					thecell.type = OwnerDraw::CellData::INVALID;
 				}
@@ -1680,7 +1680,7 @@ void Draw_Channel_List(void)
 				thecell.type = OwnerDraw::CellData::PING;
 				sprintf(info, "Ping = %d ms", chan.latency);
 				if (chan.latency == -1) {
-					sprintf(info, Fetch_String(TXT_UNKNOWN_PING));
+					sprintf(info, Localize("TXT_UNKNOWN_PING"));
 				}
 				thecell.hint.set(info);
 				SendDlgItemMessage(win, IDC_CHANNELS, OD_SETCELL, MAKEWPARAM(g_Col_PingTime, visible_count + 1), (LPARAM)&thecell);
@@ -1826,10 +1826,10 @@ void Draw_Player_List(int keep_selection)
 
 	/// Set the Join/Leave button to match whether we're currently in a channel.
 	if ((g_CurrentChannel.name[0]) && (CurrentLevel != WOL_LEVEL_GAMES)) {
-		SendDlgItemMessage(win, IDC_JOINLEAVE, WM_SETTEXT, 0, (LPARAM) Fetch_String(TXT_LEAVE));
+		SendDlgItemMessage(win, IDC_JOINLEAVE, WM_SETTEXT, 0, (LPARAM) Localize("TXT_LEAVE"));
 		EnableWindow(GetDlgItem(win, IDC_JOINLEAVE), TRUE);
 	} else {
-		SendDlgItemMessage(win, IDC_JOINLEAVE, WM_SETTEXT, 0, (LPARAM) Fetch_String(TXT_JOIN));
+		SendDlgItemMessage(win, IDC_JOINLEAVE, WM_SETTEXT, 0, (LPARAM) Localize("TXT_JOIN"));
 	}
 
 	/*
@@ -1896,7 +1896,7 @@ void Draw_Player_List(int keep_selection)
 			SendDlgItemMessage(win, IDC_USERS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)info);
 
 			thecell.type = OwnerDraw::CellData::TEXT;
-			thecell.hint.set((char *)Fetch_String(TXT_UNRANKED));
+			thecell.hint.set((char *)Localize("TXT_UNRANKED"));
 			thecell.string.set((char *)user.name);
 
 			/// Color the name by WDT team, unless this user is the channel owner.
@@ -1936,7 +1936,7 @@ void Draw_Player_List(int keep_selection)
 				thecell.hint.insert(localestring, 0);
 			}
 			if (g_ActiveLadder->getValue(ladder_name, ladder)) {
-				sprintf(rank_string, "%s %d", Fetch_String(TXT_RANK), ladder.rung);
+				sprintf(rank_string, "%s %d", Localize("TXT_RANK"), ladder.rung);
 				thecell.hint.set(rank_string);
 				if (g_UserLocales.contains(ladder_name)) {
 					if (locale) {
@@ -1957,7 +1957,7 @@ void Draw_Player_List(int keep_selection)
 				sprintf(rank_string, "[%s]", user.squadabbrev);
 				thecell.hint.set((char *)user.squadname);
 			} else if (g_ActiveLadder->getValue(ladder_name, ladder)) {
-				sprintf(rank_string, "(%s %d)", Fetch_String(TXT_RANK), ladder.rung);
+				sprintf(rank_string, "(%s %d)", Localize("TXT_RANK"), ladder.rung);
 				thecell.hint.set("");
 			}
 			thecell.string.set(rank_string);
@@ -1968,11 +1968,11 @@ void Draw_Player_List(int keep_selection)
 			if (user.flags & CHAT_USER_CHANNELOWNER) {
 				thecell.type = OwnerDraw::CellData::SURFACE;
 				thecell.surf = SurfaceCache.GetSurface("woloper.pcx");
-				thecell.hint.set((char *)Fetch_String(TXT_OPER));
+				thecell.hint.set((char *)Localize("TXT_OPER"));
 			} else if (user.flags & CHAT_USER_VOICE) {
 				thecell.type = OwnerDraw::CellData::SURFACE;
 				thecell.surf = SurfaceCache.GetSurface("wolvoice.pcx");
-				thecell.hint.set((char *)Fetch_String(TXT_VOICE));
+				thecell.hint.set((char *)Localize("TXT_VOICE"));
 			} else {
 				thecell.string.set("");
 				thecell.hint.set("");
@@ -1987,7 +1987,7 @@ void Draw_Player_List(int keep_selection)
 			} else {
 				thecell.type = OwnerDraw::CellData::SURFACE;
 				thecell.surf = SurfaceCache.GetSurface("wolsqlch.pcx");
-				thecell.hint.set((char *)Fetch_String(TXT_IGNOREUSER));
+				thecell.hint.set((char *)Localize("TXT_IGNOREUSER"));
 			}
 			SendDlgItemMessage(win, IDC_USERS, OD_SETCELL, MAKEWPARAM(g_Col_Squelch, i), (LPARAM)&thecell);
 			thecell.type = OwnerDraw::CellData::TEXT;
@@ -2028,9 +2028,9 @@ void Draw_Player_List(int keep_selection)
 			/// Primary name cell: colored by player slot, with the ladder rank as a subtitle.
 			thecell.type = OwnerDraw::CellData::PRIMARY;
 			thecell.color = PlayerColorTable[g_UserInfo[slot_index].color];
-			thecell.hint.set((char *)Fetch_String(TXT_UNRANKED));
+			thecell.hint.set((char *)Localize("TXT_UNRANKED"));
 			if (g_ActiveLadder->getValue(ladder_name, ladder)) {
-				sprintf(rank_string, "%s %d", Fetch_String(TXT_RANK), ladder.rung);
+				sprintf(rank_string, "%s %d", Localize("TXT_RANK"), ladder.rung);
 				thecell.hint.set(rank_string);
 			}
 			SendDlgItemMessage(win, IDC_USERS, OD_SETCELL, MAKEWPARAM(g_Col_Gamename, i), (LPARAM)&thecell);
@@ -2042,7 +2042,7 @@ void Draw_Player_List(int keep_selection)
 				thecell.hint.set((char *)user.squadname);
 			} else {
 				if (g_ActiveLadder->getValue(ladder_name, ladder)) {
-					sprintf(info, "(%s %d)", Fetch_String(TXT_RANK), ladder.rung);
+					sprintf(info, "(%s %d)", Localize("TXT_RANK"), ladder.rung);
 				} else {
 					sprintf(info, "");
 				}
@@ -2055,10 +2055,10 @@ void Draw_Player_List(int keep_selection)
 			thecell.type = OwnerDraw::CellData::SURFACE;
 			if (house == HOUSE_GOOD) {
 				thecell.surf = SurfaceCache.GetSurface("gdii.pcx");
-				sprintf(info, "%s", Fetch_String(TXT_GDI));
+				sprintf(info, "%s", Localize("TXT_GDI"));
 			} else {
 				thecell.surf = SurfaceCache.GetSurface("nodi.pcx");
-				sprintf(info, "%s", Fetch_String(TXT_NOD));
+				sprintf(info, "%s", Localize("TXT_NOD"));
 			}
 			thecell.hint.set(info);
 			SendDlgItemMessage(win, IDC_USERS, OD_SETCELL, MAKEWPARAM(g_Col_House, i), (LPARAM)&thecell);
@@ -2071,7 +2071,7 @@ void Draw_Player_List(int keep_selection)
 				} else {
 					thecell.surf = SurfaceCache.GetSurface("wolacpt.pcx");
 				}
-				thecell.hint.set((char *)Fetch_String(TXT_ACCEPTED));
+				thecell.hint.set((char *)Localize("TXT_ACCEPTED"));
 			} else {
 				thecell.type = OwnerDraw::CellData::INVALID;
 				thecell.hint.set("");
@@ -2089,7 +2089,7 @@ void Draw_Player_List(int keep_selection)
 			char ping[64];
 			sprintf(ping, "Ping = %dms", average_ping);
 			if (average_ping == 0) {
-				sprintf(ping, Fetch_String(TXT_UNKNOWN_PING));
+				sprintf(ping, Localize("TXT_UNKNOWN_PING"));
 			}
 			thecell.hint.set(ping);
 			if (stricmp(g_NickName, (char *)user.name) == 0) {
@@ -2207,7 +2207,7 @@ class CNetUtilEventSink : public CComObjectRoot, public INetUtilEvent
 							if (!g_PlayingNetGame && newstate->CycleID == oldcycle && oldticks != newstate->NumTicks) {
 								if (newterritory != oldterritory) {
 									if (WS_Find_Dialog(IDD_WOL_MAIN)) {
-										PMessagePrintf(ColorSystem, Fetch_String(TXT_WDT_FRONT_LINE_CHANGED));
+										PMessagePrintf(ColorSystem, Localize("TXT_WDT_FRONT_LINE_CHANGED"));
 
 										unsigned char owner = newstate->OwnerHistory[newstate->NumTicks - 1][oldterritory];
 										if (owner == 2) {
@@ -2322,7 +2322,7 @@ class CNetUtilEventSink : public CComObjectRoot, public INetUtilEvent
 			if (rung_list) {
 				SendMessage(rung_list, LB_RESETCONTENT, NULL, NULL);
 				if (list == NULL) {
-					SendMessage(rung_list, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)((const char *)Fetch_String(TXT_NOT_IN_LADDER)));
+					SendMessage(rung_list, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)((const char *)Localize("TXT_NOT_IN_LADDER")));
 					InvalidateRect(rung_list, NULL, false);
 					return(S_OK);
 				}
@@ -2454,7 +2454,7 @@ class CNetUtilEventSink : public CComObjectRoot, public INetUtilEvent
 			if (message) {
 				ODMessageBox(message, MB_OK, WOL_Wait_Callback);
 			} else {
-				ODMessageBox(Fetch_String(TXT_UNKNOWN_STATUS), MB_OK, WOL_Wait_Callback);
+				ODMessageBox(Localize("TXT_UNKNOWN_STATUS"), MB_OK, WOL_Wait_Callback);
 			}
 
 			Close_Wait_Window(WOL_WAIT_NEW_NICK);
@@ -2558,9 +2558,9 @@ class CDownloadEventSink : public CComObjectRoot, public IDownloadEvent
 			stat[0] = 0;
 			SendDlgItemMessage(WS_Top_Window(), IDC_PROGRESS, PBM_SETPOS, (WPARAM)(bytesread * 100) / totalsize, 0);
 			if (timeleft > 0) {
-				sprintf(stat, (const char *)Fetch_String(TXT_BYTES_W_TIME), bytesread, totalsize, timeleft);
+				sprintf(stat, (const char *)Localize("TXT_BYTES_W_TIME"), bytesread, totalsize, timeleft);
 			} else {
-				sprintf(stat, (const char *)Fetch_String(TXT_BYTES_WO_TIME), bytesread, totalsize);
+				sprintf(stat, (const char *)Localize("TXT_BYTES_WO_TIME"), bytesread, totalsize);
 			}
 			/// Throttle the status text update to at most once per second.
 			if ((time(NULL) - prev_stat)) {
@@ -2583,11 +2583,11 @@ class CDownloadEventSink : public CComObjectRoot, public IDownloadEvent
 
 			switch (status) {
 				case DOWNLOADSTATUS_CONNECTING:
-					sprintf(stat, Fetch_String(TXT_CONNECTING));
+					sprintf(stat, Localize("TXT_CONNECTING"));
 					break;
 
 				case DOWNLOADSTATUS_FINDINGFILE:
-					sprintf(stat, Fetch_String(TXT_FINDING_PATCH));
+					sprintf(stat, Localize("TXT_FINDING_PATCH"));
 					break;
 
 				default:
@@ -2665,23 +2665,23 @@ static __forceinline HRESULT Handle_Public_Game_Options(struct User * user, cons
 		if (WS_Top_Window_ID() == IDD_WOL_GUEST) {
 			HWND statwin = GetDlgItem(WS_Top_Window(), IDC_WOLGUEST_STAT1);
 			if (statwin) {
-				SendMessage(statwin, WM_SETTEXT, 0, (LPARAM)Fetch_String(TXT_BAD_MAP_01));
+				SendMessage(statwin, WM_SETTEXT, 0, (LPARAM)Localize("TXT_BAD_MAP_01"));
 			}
 			statwin = GetDlgItem(WS_Top_Window(), IDC_WOLGUEST_STAT2);
 			if (statwin) {
-				SendMessage(statwin, WM_SETTEXT, 0, (LPARAM)Fetch_String(TXT_BAD_MAP_02));
+				SendMessage(statwin, WM_SETTEXT, 0, (LPARAM)Localize("TXT_BAD_MAP_02"));
 			}
 			statwin = GetDlgItem(WS_Top_Window(), IDC_WOLGUEST_STAT3);
 			if (statwin) {
-				SendMessage(statwin, WM_SETTEXT, 0, (LPARAM)Fetch_String(TXT_BAD_MAP_03));
+				SendMessage(statwin, WM_SETTEXT, 0, (LPARAM)Localize("TXT_BAD_MAP_03"));
 			}
 			statwin = GetDlgItem(WS_Top_Window(), IDC_WOLGUEST_STAT4);
 			if (statwin) {
-				SendMessage(statwin, WM_SETTEXT, 0, (LPARAM)Fetch_String(TXT_BAD_MAP_04));
+				SendMessage(statwin, WM_SETTEXT, 0, (LPARAM)Localize("TXT_BAD_MAP_04"));
 			}
 			statwin = GetDlgItem(WS_Top_Window(), IDC_WOLGUEST_STAT5);
 			if (statwin) {
-				SendMessage(statwin, WM_SETTEXT, 0, (LPARAM)Fetch_String(TXT_BAD_MAP_05));
+				SendMessage(statwin, WM_SETTEXT, 0, (LPARAM)Localize("TXT_BAD_MAP_05"));
 			}
 			InvalidateRect(WS_Top_Window(), NULL, FALSE);
 		}
@@ -2728,7 +2728,7 @@ class CChatEventSink : public CComObjectRoot, public IChatEvent
 			/// Failed to get a server list at all -- abort the login attempt.
 			if (FAILED(res)) {
 				SetEvent(g_WaitEventHandles[EV_ABORT]);
-				sprintf(g_LastErrorMessage, Fetch_String(TXT_NO_SERV_LIST));
+				sprintf(g_LastErrorMessage, Localize("TXT_NO_SERV_LIST"));
 				return(S_OK);
 			}
 
@@ -2887,7 +2887,7 @@ class CChatEventSink : public CComObjectRoot, public IChatEvent
 			/*
 			 * Confirm the upgrade with the user before downloading anything.
 			 */
-			if (ODMessageBox(Fetch_String(TXT_UPGRADEREQUIRED), MB_YESNO, WOL_Wait_Callback, true) == IDNO) {
+			if (ODMessageBox(Localize("TXT_UPGRADEREQUIRED"), MB_YESNO, WOL_Wait_Callback, true) == IDNO) {
 				/*
 				 * The download was required and the player declined it, so quit.
 				 */
@@ -2913,7 +2913,7 @@ class CChatEventSink : public CComObjectRoot, public IChatEvent
 				g_pDownload->DownloadFile((char *)updates->server, (char *)updates->login, (char *)updates->password, fullpath, localfile, "SOFTWARE\\Westwood\\Tiberian Sun");
 
 				i++;
-				sprintf(updatestring, Fetch_String(TXT_DOWNLOADING_X_OF_Y), i, patch_total);
+				sprintf(updatestring, Localize("TXT_DOWNLOADING_X_OF_Y"), i, patch_total);
 
 				HWND dlg = WS_Create_Dialog(ProgramInstance, IDD_WOL_DOWNLOAD, MainWindow, (DLGPROC)WOL_Download_Dialog_Proc, FALSE);
 				Center_Window_Within_Window(dlg);
@@ -2934,7 +2934,7 @@ class CChatEventSink : public CComObjectRoot, public IChatEvent
 			/*
 			 * All updates installed -- the game needs to restart to pick them up.
 			 */
-			ODMessageBox(Fetch_String(TXT_GAME_RESTART), 0, WOL_Wait_Callback);
+			ODMessageBox(Localize("TXT_GAME_RESTART"), 0, WOL_Wait_Callback);
 			SetEvent(g_WaitEventHandles[EV_QUITGAME]);
 			SetCurrentDirectory(working_dir);
 
@@ -3074,47 +3074,47 @@ class CChatEventSink : public CComObjectRoot, public IChatEvent
 
 				/// Various failure reasons -- store a localized error message and abort.
 				case CHAT_E_NICKINUSE:
-					strcpy(g_LastErrorMessage, Fetch_String(TXT_LOGIN_USED));
+					strcpy(g_LastErrorMessage, Localize("TXT_LOGIN_USED"));
 					SetEvent(g_WaitEventHandles[EV_ABORT]);
 					break;
 
 				case CHAT_E_BADPASS:
-					strcpy(g_LastErrorMessage, Fetch_String(TXT_BADPASS));
+					strcpy(g_LastErrorMessage, Localize("TXT_BADPASS"));
 					SetEvent(g_WaitEventHandles[EV_ABORT]);
 					break;
 
 				case CHAT_E_BANNED:
-					strcpy(g_LastErrorMessage, Fetch_String(TXT_BANNED));
+					strcpy(g_LastErrorMessage, Localize("TXT_BANNED"));
 					SetEvent(g_WaitEventHandles[EV_ABORT]);
 					break;
 
 				case CHAT_E_DISABLED:
-					strcpy(g_LastErrorMessage, Fetch_String(TXT_DISABLED));
+					strcpy(g_LastErrorMessage, Localize("TXT_DISABLED"));
 					SetEvent(g_WaitEventHandles[EV_ABORT]);
 					break;
 
 				case CHAT_E_SERIALBANNED:
-					strcpy(g_LastErrorMessage, Fetch_String(TXT_BANNED));
+					strcpy(g_LastErrorMessage, Localize("TXT_BANNED"));
 					SetEvent(g_WaitEventHandles[EV_ABORT]);
 					break;
 
 				case CHAT_E_SERIALDUP:
-					strcpy(g_LastErrorMessage, Fetch_String(TXT_SERIALDUP));
+					strcpy(g_LastErrorMessage, Localize("TXT_SERIALDUP"));
 					SetEvent(g_WaitEventHandles[EV_ABORT]);
 					break;
 
 				case CHAT_E_SERIALUNKNOWN:
-					strcpy(g_LastErrorMessage, Fetch_String(TXT_SERIALUNKNOWN));
+					strcpy(g_LastErrorMessage, Localize("TXT_SERIALUNKNOWN"));
 					SetEvent(g_WaitEventHandles[EV_ABORT]);
 					break;
 
 				case CHAT_E_SKUSERIALMISMATCH:
-					strcpy(g_LastErrorMessage, Fetch_String(TXT_SKUSERIALMISMATCH));
+					strcpy(g_LastErrorMessage, Localize("TXT_SKUSERIALMISMATCH"));
 					SetEvent(g_WaitEventHandles[EV_ABORT]);
 					break;
 
 				default:
-					strcpy(g_LastErrorMessage, Fetch_String(TXT_CANT_CONNECT));
+					strcpy(g_LastErrorMessage, Localize("TXT_CANT_CONNECT"));
 					SetEvent(g_WaitEventHandles[EV_ABORT]);
 					break;
 			}
@@ -3164,7 +3164,7 @@ class CChatEventSink : public CComObjectRoot, public IChatEvent
 		{
 			/// Creation failed -- report it and clear the pending-creation state.
 			if (FAILED(r)) {
-				PMessagePrintf(ColorSystem, Fetch_String(TXT_CHANCREATE_FAILED));
+				PMessagePrintf(ColorSystem, Localize("TXT_CHANCREATE_FAILED"));
 				g_IsChannelCreator = 0;
 				g_CurrentChannel.name[0] = '\0';
 				Close_Wait_Window(WOL_WAIT_CHANNEL_CREATE);
@@ -3176,7 +3176,7 @@ class CChatEventSink : public CComObjectRoot, public IChatEvent
 			 * player slot in the game options seeded.
 			 */
 			if (channel->type == CHANNELTYPE_CHAT) {
-				PMessagePrintf(ColorSystem, Fetch_String(TXT_CREATED_CHAN), channel->name);
+				PMessagePrintf(ColorSystem, Localize("TXT_CREATED_CHAN"), channel->name);
 				memcpy(&g_CurrentChannel, channel, sizeof(Channel));
 			} else {
 				memset(g_UserInfo, 0, sizeof(g_UserInfo));
@@ -3273,15 +3273,15 @@ class CChatEventSink : public CComObjectRoot, public IChatEvent
 						}
 					}
 
-					ODMessageBox(Fetch_String(TXT_GAME_CLOSED), 0, WOL_Wait_Callback, 0);
+					ODMessageBox(Localize("TXT_GAME_CLOSED"), 0, WOL_Wait_Callback, 0);
 				} else if (r == CHAT_E_BADCHANNELPASSWORD) {
-					ODMessageBox(Fetch_String(TXT_BADPASS), 0, WOL_Wait_Callback, 0);
+					ODMessageBox(Localize("TXT_BADPASS"), 0, WOL_Wait_Callback, 0);
 				} else if (r == CHAT_E_CHANNELFULL) {
-					ODMessageBox(Fetch_String(TXT_CHANNEL_FULL), 0, WOL_Wait_Callback, 0);
+					ODMessageBox(Localize("TXT_CHANNEL_FULL"), 0, WOL_Wait_Callback, 0);
 				} else if (r == CHAT_E_BANNED) {
-					ODMessageBox(Fetch_String(TXT_JOINBAN), 0, WOL_Wait_Callback, 0);
+					ODMessageBox(Localize("TXT_JOINBAN"), 0, WOL_Wait_Callback, 0);
 				} else {
-					PMessagePrintf(ColorSystem, Fetch_String(TXT_CANT_JOINCHAN), r);
+					PMessagePrintf(ColorSystem, Localize("TXT_CANT_JOINCHAN"), r);
 				}
 
 				g_IsChannelCreator = 0;
@@ -3323,7 +3323,7 @@ class CChatEventSink : public CComObjectRoot, public IChatEvent
 					SendMessage(dlg, OD_SETTOP, 0, 1);
 					ShowWindow(dlg, SW_NORMAL);
 				} else {
-					PMessagePrintf(ColorSystem, Fetch_String(TXT_JOINED_S), joinname);
+					PMessagePrintf(ColorSystem, Localize("TXT_JOINED_S"), joinname);
 				}
 			} else {
 
@@ -4050,13 +4050,13 @@ class CChatEventSink : public CComObjectRoot, public IChatEvent
 		STDMETHOD(OnPageSend)(HRESULT r)
 		{
 			if (r == S_OK) {
-				SMessagePrintf(ColorSystem, Fetch_String(TXT_PAGESENT));
+				SMessagePrintf(ColorSystem, Localize("TXT_PAGESENT"));
 			} else if (r == CHAT_S_PAGE_OFF) {
-				SMessagePrintf(ColorSystem, Fetch_String(TXT_PAGEDISABLED));
+				SMessagePrintf(ColorSystem, Localize("TXT_PAGEDISABLED"));
 			} else if (r == CHAT_S_PAGE_NOTHERE) {
-				SMessagePrintf(ColorSystem, Fetch_String(TXT_PAGEUSERGONE));
+				SMessagePrintf(ColorSystem, Localize("TXT_PAGEUSERGONE"));
 			} else {
-				SMessagePrintf(ColorSystem, Fetch_String(TXT_PAGEFAILED));
+				SMessagePrintf(ColorSystem, Localize("TXT_PAGEFAILED"));
 			}
 			return(S_OK);
 		}
@@ -4096,19 +4096,19 @@ class CChatEventSink : public CComObjectRoot, public IChatEvent
 						sprintf(name, "%s %d", g_Lobbies[m], d + 1);
 					}
 				}
-				SMessagePrintf(ColorSystem, Fetch_String(TXT_FINDOK), name);
+				SMessagePrintf(ColorSystem, Localize("TXT_FINDOK"), name);
 			}
 			else if (r == CHAT_S_FIND_NOCHAN) {
-				SMessagePrintf(ColorSystem, Fetch_String(TXT_FINDNONE));
+				SMessagePrintf(ColorSystem, Localize("TXT_FINDNONE"));
 			}
 			else if (r == CHAT_S_FIND_NOTHERE) {
-				SMessagePrintf(ColorSystem, Fetch_String(TXT_FINDGONE));
+				SMessagePrintf(ColorSystem, Localize("TXT_FINDGONE"));
 			}
 			else if (r == CHAT_S_FIND_OFF) {
-				SMessagePrintf(ColorSystem, Fetch_String(TXT_FINDDISABLED));
+				SMessagePrintf(ColorSystem, Localize("TXT_FINDDISABLED"));
 			}
 			else {
-				SMessagePrintf(ColorSystem, Fetch_String(TXT_FINDFAILED));
+				SMessagePrintf(ColorSystem, Localize("TXT_FINDFAILED"));
 			}
 
 			return(S_OK);
@@ -4157,7 +4157,7 @@ class CChatEventSink : public CComObjectRoot, public IChatEvent
 				} else if (g_PlayingNetGame) {
 					char txt[256];
 					txt[0] = '\0';
-					sprintf(txt, Fetch_String(TXT_WOL_CONNLOST));
+					sprintf(txt, Localize("TXT_WOL_CONNLOST"));
 					int scheme = GadgetClass::Get_Color_Scheme();
 					Session.Messages.Add_Message(NULL, 0, txt, scheme, TPF_TEXT, Rule->MessageDelay * TICKS_PER_MINUTE);
 					Map.Flag_To_Redraw();
@@ -4165,7 +4165,7 @@ class CChatEventSink : public CComObjectRoot, public IChatEvent
 					g_ChannelCount = 0;
 				} else {
 					if (WS_Find_Dialog(IDD_WOL_MAIN)) {
-						ODMessageBox(Fetch_String(TXT_YOURE_DISCON), 0, WOL_Wait_Callback);
+						ODMessageBox(Localize("TXT_YOURE_DISCON"), 0, WOL_Wait_Callback);
 					}
 					g_IgnoreNetStatus = true;
 					SetEvent(g_WaitEventHandles[EV_ABORT]);
@@ -4357,7 +4357,7 @@ class CChatEventSink : public CComObjectRoot, public IChatEvent
 
 			if (r == S_OK) {
 				char ban_text[200];
-				sprintf(ban_text, Fetch_String(TXT_BANNEDTILL), ctime(&bannedTill));
+				sprintf(ban_text, Localize("TXT_BANNEDTILL"), ctime(&bannedTill));
 				ODMessageBox(ban_text, MB_OK, WOL_Wait_Callback);
 			}
 			return(S_OK);
@@ -4374,9 +4374,9 @@ class CChatEventSink : public CComObjectRoot, public IChatEvent
 			if (g_PlayingNetGame) return(S_OK);
 
 			if (banned) {
-				PMessagePrintf(ColorSystem, Fetch_String(TXT_CHAN_BAN), name);
+				PMessagePrintf(ColorSystem, Localize("TXT_CHAN_BAN"), name);
 			} else {
-				PMessagePrintf(ColorSystem, Fetch_String(TXT_CHAN_UNBAN), name);
+				PMessagePrintf(ColorSystem, Localize("TXT_CHAN_UNBAN"), name);
 			}
 			return(S_OK);
 		}
@@ -4455,10 +4455,10 @@ class CChatEventSink : public CComObjectRoot, public IChatEvent
 			 * kicked.
 			 */
 			if (kicked->flags & CHAT_USER_MYSELF) {
-				PMessagePrintf(ColorSystem, Fetch_String(TXT_YOURE_KICKED), _kickmessage, kicker->name);
+				PMessagePrintf(ColorSystem, Localize("TXT_YOURE_KICKED"), _kickmessage, kicker->name);
 				GoBack();
 			} else {
-				PMessagePrintf(ColorSystem, Fetch_String(TXT_USER_KICKED), kicked->name, _kickmessage, kicker->name);
+				PMessagePrintf(ColorSystem, Localize("TXT_USER_KICKED"), kicked->name, _kickmessage, kicker->name);
 			}
 
 			Handle_User_Leave(*kicked);
@@ -4640,7 +4640,7 @@ int Startup_Chat(HINSTANCE hInstance)
 		hresult = AtlAdvise(g_pChat, g_pChatSink->GetUnknown(), IID_IChatEvent, &g_dwChatAdvise);
 	}
 	if ((g_pChat == NULL) || (hresult != S_OK)) {
-		ODMessageBox(Fetch_String(TXT_APIMISSING), MB_OK, NULL);
+		ODMessageBox(Localize("TXT_APIMISSING"), MB_OK, NULL);
 		return(-1);
 	}
 
@@ -4653,7 +4653,7 @@ int Startup_Chat(HINSTANCE hInstance)
 		hresult = AtlAdvise(g_pNetUtil, g_pNetUtilSink->GetUnknown(), IID_INetUtilEvent, &g_dwNetUtilAdvise);
 	}
 	if ((g_pNetUtil == NULL) || (hresult != S_OK)) {
-		ODMessageBox(Fetch_String(TXT_APIMISSING), MB_OK, NULL);
+		ODMessageBox(Localize("TXT_APIMISSING"), MB_OK, NULL);
 		return(-1);
 	}
 
@@ -4666,7 +4666,7 @@ int Startup_Chat(HINSTANCE hInstance)
 		hresult = AtlAdvise(g_pDownload, g_pDownloadSink->GetUnknown(), IID_IDownloadEvent, &g_dwDownloadAdvise);
 	}
 	if ((g_pDownload == NULL) || (hresult != S_OK)) {
-		ODMessageBox(Fetch_String(TXT_APIMISSING), MB_OK, NULL);
+		ODMessageBox(Localize("TXT_APIMISSING"), MB_OK, NULL);
 		return(-1);
 	}
 
@@ -4676,7 +4676,7 @@ int Startup_Chat(HINSTANCE hInstance)
 	unsigned long version;
 	g_pChat->GetVersion(&version);
 	if (version < 0x10009) {
-		ODMessageBox(Fetch_String(TXT_APIWRONGVERSION), MB_OK, NULL);
+		ODMessageBox(Localize("TXT_APIWRONGVERSION"), MB_OK, NULL);
 		return(-1);
 	}
 
@@ -4734,7 +4734,7 @@ void Handle_User_Leave(struct User & user)
 				sprintf(name, "%s %d", g_Lobbies[num1], num2 + 1);
 			}
 		}
-		PMessagePrintf(ColorSystem, Fetch_String(TXT_YOULEFT), name);
+		PMessagePrintf(ColorSystem, Localize("TXT_YOULEFT"), name);
 		g_ChannelCount--;
 		g_ChannelCount = 0;
 		g_UserList.clear();
@@ -4823,7 +4823,7 @@ void Logout_WOnline(void)
 		 */
 		if (g_pChat->RequestLogout() == S_OK) {
 			Show_Wait_Window(WOL_WAIT_LOGOUT_DONE,false);
-			Set_Wait_Dialog_Text((char *)Fetch_String(TXT_WOL_LOGGING_OUT));
+			Set_Wait_Dialog_Text((char *)Localize("TXT_WOL_LOGGING_OUT"));
 			for (i = 0; i < 5; i++) {
 				while ((wait_result = WaitForMultipleObjects(EV_COUNT, g_WaitEventHandles, FALSE, 100)) == WAIT_TIMEOUT) {
 					WOL_Wait_Callback();
@@ -4994,7 +4994,7 @@ WonlineResult Login_WOL(void)
 			WOL_Wait_Callback();
 			g_IgnoreNetStatus = false;
 			Show_Wait_Window(WOL_WAIT_LOGIN_DONE, false);
-			Set_Wait_Dialog_Text((char *)Fetch_String(TXT_CONNECTING_SERVER));
+			Set_Wait_Dialog_Text((char *)Localize("TXT_CONNECTING_SERVER"));
 
 			g_Servers.getPointer(&server, g_CurrentServerIndex);
 
@@ -5170,7 +5170,7 @@ int Join_WOL_Lobby(HWND win)
 		/*
 		 * Ask the server for the current channel list.
 		 */
-		Set_Wait_Dialog_Text((char *)Fetch_String(TXT_REQ_CHANLIST));
+		Set_Wait_Dialog_Text((char *)Localize("TXT_REQ_CHANLIST"));
 
 		if (!g_pChat->RequestChannelList(CHANNELTYPE_CHAT, 0)) {
 			unsigned type = CHANNELTYPE_CHAT;
@@ -5187,7 +5187,7 @@ int Join_WOL_Lobby(HWND win)
 			while ((idx = WaitForMultipleObjects(EV_COUNT, g_WaitEventHandles, FALSE, 100)) == WAIT_TIMEOUT) {
 				timeout += 100;
 				if (timeout > 30000) {
-					sprintf(g_LastErrorMessage, Fetch_String(TXT_CANT_CONNECT));
+					sprintf(g_LastErrorMessage, Localize("TXT_CANT_CONNECT"));
 					SetEvent(g_WaitEventHandles[EV_ABORT]);
 					idx = EV_ABORT;
 					break;
@@ -5216,7 +5216,7 @@ int Join_WOL_Lobby(HWND win)
 		/*
 		 * Join our assigned lobby channel and wait for confirmation.
 		 */
-		Set_Wait_Dialog_Text((char *)Fetch_String(TXT_JOINLOB));
+		Set_Wait_Dialog_Text((char *)Localize("TXT_JOINLOB"));
 
 		if (Join_Lobby() != -1) {
 			while ((idx = WaitForMultipleObjects(EV_COUNT, g_WaitEventHandles, FALSE, 100)) == WAIT_TIMEOUT) {
@@ -5570,7 +5570,7 @@ first_nick_retry:
 
 		/// All fields are required before continuing.
 		if ((month <= 0) || (day <= 0) || (year <= 0) || (strlen(email) < 6)) {
-			ODMessageBox(Fetch_String(TXT_REQUIRED_FIELD), MB_OK, WOL_Wait_Callback);
+			ODMessageBox(Localize("TXT_REQUIRED_FIELD"), MB_OK, WOL_Wait_Callback);
 			goto first_nick_retry;
 		}
 
@@ -5580,7 +5580,7 @@ first_nick_retry:
 		g_UserAge = -1;
 		g_UserConsent = 0;
 		if (g_pNetUtil->RequestAgeCheck(month, day, year, email) != S_OK) {
-			ODMessageBox(Fetch_String(TXT_CANT_CONNECT), MB_OK, WOL_Wait_Callback);
+			ODMessageBox(Localize("TXT_CANT_CONNECT"), MB_OK, WOL_Wait_Callback);
 			/*
 			 * Show the appropriate new-nick dialog for the checked age: full newsletter
 			 * signup for adults, parental-consent fields for minors old enough to
@@ -5618,21 +5618,21 @@ new_nick_retry:
 
 				/// Validate the password fields before submitting.
 				if (strcmp(pass, verify_pass) != 0) {
-					ODMessageBox(Fetch_String(TXT_PASSWORD_VERIFY), MB_OK, WOL_Wait_Callback);
+					ODMessageBox(Localize("TXT_PASSWORD_VERIFY"), MB_OK, WOL_Wait_Callback);
 					goto new_nick_retry;
 				}
 
 				if (strlen(pass) != 8) {
-					ODMessageBox(Fetch_String(TXT_PASSWORD_TOO_SHORT), MB_OK, WOL_Wait_Callback);
+					ODMessageBox(Localize("TXT_PASSWORD_TOO_SHORT"), MB_OK, WOL_Wait_Callback);
 					goto new_nick_retry;
 				}
 
 				/// Submit the new nickname request and wait for the result.
 				if (g_pNetUtil->RequestNewNick(nick, pass, email, parent_email, newsletter, shareinfo) != S_OK) {
-					ODMessageBox(Fetch_String(TXT_CANT_CONNECT), MB_OK, WOL_Wait_Callback);
+					ODMessageBox(Localize("TXT_CANT_CONNECT"), MB_OK, WOL_Wait_Callback);
 					return;
 				}
-				Show_Wait_Window(WOL_WAIT_NEW_NICK, true, Fetch_String(TXT_REQ_NICK));
+				Show_Wait_Window(WOL_WAIT_NEW_NICK, true, Localize("TXT_REQ_NICK"));
 				if (FAILED(g_OnNewNickResult)) {
 					goto new_nick_retry;
 				}
@@ -5648,16 +5648,16 @@ new_nick_retry:
 			Show_Wait_Window(WOL_WAIT_NEW_NICK);
 			if (g_UserAge < 0) {
 				if (g_AgeCheckResult == NETUTIL_E_INVALIDFIELD) {
-					ODMessageBox(Fetch_String(TXT_REQUIRED_FIELD), MB_OK, WOL_Wait_Callback);
+					ODMessageBox(Localize("TXT_REQUIRED_FIELD"), MB_OK, WOL_Wait_Callback);
 					goto first_nick_retry;
 				} else {
-					ODMessageBox(Fetch_String(TXT_CANT_CONNECT), MB_OK, WOL_Wait_Callback);
+					ODMessageBox(Localize("TXT_CANT_CONNECT"), MB_OK, WOL_Wait_Callback);
 					goto first_nick_retry;
 				}
 			} else {
 				/// Under 13 without consent -- point the user at the consent form.
 				if (g_UserAge < 13 && !g_UserConsent) {
-					if (ODMessageBox(Fetch_String(TXT_CONSENT_REQUIRED), MB_YESNO, WOL_Wait_Callback) == IDYES) {
+					if (ODMessageBox(Localize("TXT_CONSENT_REQUIRED"), MB_YESNO, WOL_Wait_Callback) == IDYES) {
 						char url[256];
 						sprintf(url, "http://apiregister.westwood.com/consent_form/index_%d.html", g_LanguageCode);
 						ViewHTML(url, 1);
@@ -5926,7 +5926,7 @@ BOOL CALLBACK WOL_Login_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM l
 				 */
 				case IDOK: {
 					if (Session.Locale == 0) {
-						if (ODMessageBox(Fetch_String(TXT_WARNING_LOCALE_UNKNOWN), MB_OKCANCEL, WOL_Wait_Callback) == IDCANCEL) {
+						if (ODMessageBox(Localize("TXT_WARNING_LOCALE_UNKNOWN"), MB_OKCANCEL, WOL_Wait_Callback) == IDCANCEL) {
 							return(FALSE);
 						}
 					}
@@ -5978,7 +5978,7 @@ BOOL CALLBACK WOL_Login_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM l
 					char delnick[256];
 					if (GetDlgItemText(win, IDC_NICKNAME, delnick, 256) > 0) {
 						char message[256];
-						sprintf(message, Fetch_String(TXT_DELETE_USER), delnick);
+						sprintf(message, Localize("TXT_DELETE_USER"), delnick);
 						if (ODMessageBox(message, MB_YESNO, WOL_Wait_Callback) == IDYES) {
 							int found = 0;
 							LPCSTR delcurnick;
@@ -6262,7 +6262,7 @@ BOOL CALLBACK WOL_Main_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM lP
 						HRESULT retval = g_pChat->RequestChannelCreate(&new_chan);
 						if (retval == CHAT_E_PARAMERROR) {
 							Close_Wait_Window(WOL_WAIT_IDLE);
-							ODMessageBox(Fetch_String(TXT_BAD_CHANNAME), MB_OK, WOL_Wait_Callback);
+							ODMessageBox(Localize("TXT_BAD_CHANNAME"), MB_OK, WOL_Wait_Callback);
 						} else if (retval == S_OK) {
 							Show_Wait_Window(WOL_WAIT_CHANNEL_CREATE, false);
 							Close_Wait_Window(WOL_WAIT_IDLE);
@@ -6271,7 +6271,7 @@ BOOL CALLBACK WOL_Main_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM lP
 							Draw_Channel_List();
 						} else {
 							Close_Wait_Window(WOL_WAIT_IDLE);
-							ODMessageBox(Fetch_String(TXT_CANTCREATE_CHAN), MB_OK, WOL_Wait_Callback);
+							ODMessageBox(Localize("TXT_CANTCREATE_CHAN"), MB_OK, WOL_Wait_Callback);
 						}
 					} else if (CurrentLevel == WOL_LEVEL_GAMES) {
 
@@ -6281,7 +6281,7 @@ BOOL CALLBACK WOL_Main_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM lP
 						 * then request creation and open the game options dialog.
 						 */
 						if (Session.IsWDT) {
-							strncpy(Session.Options.ScenarioDescription, Fetch_String(TXT_RANDOM_MAP_DESCRIPTION), sizeof(Session.Options.ScenarioDescription));
+							strncpy(Session.Options.ScenarioDescription, Localize("TXT_RANDOM_MAP_DESCRIPTION"), sizeof(Session.Options.ScenarioDescription));
 							strncpy(Session.ScenarioFileName, "RandMap.Sed", sizeof(Session.ScenarioFileName));
 							Session.Options.ScenarioIndex = -1;
 						}
@@ -6345,7 +6345,7 @@ BOOL CALLBACK WOL_Main_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM lP
 						HRESULT retval = g_pChat->RequestChannelCreate(&new_chan);
 
 						if (retval == CHAT_E_PARAMERROR) {
-							ODMessageBox(Fetch_String(TXT_BAD_CHANKEY), MB_OK, WOL_Wait_Callback);
+							ODMessageBox(Localize("TXT_BAD_CHANKEY"), MB_OK, WOL_Wait_Callback);
 						} else if (retval == S_OK) {
 							Show_Wait_Window(WOL_WAIT_CHANNEL_CREATE, false);
 							Close_Wait_Window(WOL_WAIT_IDLE);
@@ -6361,7 +6361,7 @@ BOOL CALLBACK WOL_Main_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM lP
 							Draw_Player_List(0);
 							return(FALSE);
 						} else {
-							ODMessageBox(Fetch_String(TXT_CANTCREATE_CHAN), MB_OK, WOL_Wait_Callback);
+							ODMessageBox(Localize("TXT_CANTCREATE_CHAN"), MB_OK, WOL_Wait_Callback);
 						}
 						Close_Wait_Window(WOL_WAIT_IDLE);
 					} else {
@@ -6388,7 +6388,7 @@ BOOL CALLBACK WOL_Main_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM lP
 						for (i = 0; i < g_UserList.length(); i++) {
 							g_UserList.get(user, i);
 							if (stricmp((char *)user.name, g_NickName) == 0 && (user.flags & CHAT_USER_CHANNELOWNER) == 0) {
-								PMessagePrintf(-1, Fetch_String(TXT_NOTCHANOP));
+								PMessagePrintf(-1, Localize("TXT_NOTCHANOP"));
 								not_operator = true;
 								break;
 							}
@@ -6428,7 +6428,7 @@ BOOL CALLBACK WOL_Main_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM lP
 						}
 					}
 					if (!found) {
-						PMessagePrintf(-1, Fetch_String(TXT_SEL_USER));
+						PMessagePrintf(-1, Localize("TXT_SEL_USER"));
 					}
 					Draw_Player_List(1);
 
@@ -6569,7 +6569,7 @@ BOOL CALLBACK WOL_Main_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM lP
 
 							g_GameChannelList.get(chan, extra);
 							if ((chan.reserved & 0x100) != 0 && g_OwnSquadID < 1) {
-								PMessagePrintf(-1, Fetch_String(TXT_NO_CLAN));
+								PMessagePrintf(-1, Localize("TXT_NO_CLAN"));
 								may_join = false;
 							}
 							if (chan.flags & CHAN_MODE_KEY) {
@@ -6599,7 +6599,7 @@ BOOL CALLBACK WOL_Main_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM lP
 									hostcrc = atol(cptr);
 								}
 								if (buildnum != hostbuild || crc != hostcrc) {
-									ODMessageBox(Fetch_String(TXT_MISMATCH), 0, WOL_Wait_Callback, 0);
+									ODMessageBox(Localize("TXT_MISMATCH"), 0, WOL_Wait_Callback, 0);
 									may_join = false;
 								}
 								bool start_game = false;
@@ -6628,7 +6628,7 @@ BOOL CALLBACK WOL_Main_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM lP
 												}
 											}
 											if (nofree || !may_join) {
-												ODMessageBox(Fetch_String(TXT_NO_FREE_SLOTS), 0, WOL_Wait_Callback, 0);
+												ODMessageBox(Localize("TXT_NO_FREE_SLOTS"), 0, WOL_Wait_Callback, 0);
 												Draw_Channel_List();
 												return(FALSE);
 											}
@@ -6641,7 +6641,7 @@ BOOL CALLBACK WOL_Main_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM lP
 								}
 								if (start_game) {
 									g_pChat->RequestChannelLeave();
-									PMessagePrintf(-1, Fetch_String(TXT_JOININGCHAN), chan.name);
+									PMessagePrintf(-1, Localize("TXT_JOININGCHAN"), chan.name);
 									CurrentLevel = WOL_LEVEL_BACK_LOBBIES;
 									if (g_ChannelCount) {
 										Show_Wait_Window(WOL_WAIT_CHANNEL_LEAVE);
@@ -6679,7 +6679,7 @@ BOOL CALLBACK WOL_Main_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM lP
 						SendDlgItemMessage(win, IDC_INPUT, WM_SETTEXT, 0, (LPARAM)"");
 						if (len > 2) {
 							if (strlen((char *)g_CurrentChannel.name) == 0) {
-								PMessagePrintf(-1, Fetch_String(TXT_NOT_IN_CHAN));
+								PMessagePrintf(-1, Localize("TXT_NOT_IN_CHAN"));
 							} else {
 								int color = ColorMe;
 								if (Send_Chat_Message(input) == 1) {
@@ -6702,14 +6702,14 @@ BOOL CALLBACK WOL_Main_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM lP
 					SetFocus(GetDlgItem(win, IDC_INPUT));
 					int color = ColorAction;
 					if (strlen((char *)g_CurrentChannel.name) == 0) {
-						PMessagePrintf(-1, Fetch_String(TXT_NOT_IN_CHAN));
+						PMessagePrintf(-1, Localize("TXT_NOT_IN_CHAN"));
 					} else if (strlen(input)) {
 						if (Send_Chat_Action(input)) {
 							color = ColorPrivAction;
 						}
 						PMessagePrintf(color, "%s %s", g_NickName, input);
 					} else {
-						PMessagePrintf(-1, Fetch_String(TXT_ENTER_MESSAGE));
+						PMessagePrintf(-1, Localize("TXT_ENTER_MESSAGE"));
 					}
 					break;
 				}
@@ -6729,7 +6729,7 @@ BOOL CALLBACK WOL_Main_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM lP
 						strcpy((char *)user.name, "0");
 						g_pChat->RequestPrivateMessage(&user, input);
 					} else {
-						PMessagePrintf(-1, Fetch_String(TXT_NOSQUAD));
+						PMessagePrintf(-1, Localize("TXT_NOSQUAD"));
 					}
 					break;
 				}
@@ -7056,7 +7056,7 @@ BOOL CALLBACK WOL_Find_Game_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPAR
 						}
 
 						if (buildnum != hostbuild || crc != hostcrc) {
-							ODMessageBox(Fetch_String(TXT_MISMATCH), 0, WOL_Wait_Callback, 0);
+							ODMessageBox(Localize("TXT_MISMATCH"), 0, WOL_Wait_Callback, 0);
 							break;
 						}
 
@@ -7076,7 +7076,7 @@ BOOL CALLBACK WOL_Find_Game_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPAR
 								if ((house != 0 && Session.House == HOUSE_GOOD && house == 2) ||
 									(Session.House == HOUSE_BAD && house == 1) ||
 									house == 0) {
-									ODMessageBox(Fetch_String(TXT_NO_FREE_SLOTS), 0, WOL_Wait_Callback, 0);
+									ODMessageBox(Localize("TXT_NO_FREE_SLOTS"), 0, WOL_Wait_Callback, 0);
 									break;
 								}
 							}
@@ -7101,7 +7101,7 @@ BOOL CALLBACK WOL_Find_Game_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPAR
 						 */
 						CurrentLevel = WOL_LEVEL_BACK_LOBBIES;
 						g_pChat->RequestChannelLeave();
-						PMessagePrintf(-1, Fetch_String(TXT_JOININGCHAN), chan.name);
+						PMessagePrintf(-1, Localize("TXT_JOININGCHAN"), chan.name);
 						if (g_ChannelCount) {
 							Show_Wait_Window(WOL_WAIT_CHANNEL_LEAVE);
 						}
@@ -7179,14 +7179,14 @@ BOOL CALLBACK WOL_Find_Game_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPAR
 					}
 					if (i != 1) {
 						if (i == 0) {
-							SendDlgItemMessage(win, IDC_FINDGAME_LOCATION, CB_INSERTSTRING, 0, (LPARAM)Fetch_String(TXT_ALL_LOCATIONS));
+							SendDlgItemMessage(win, IDC_FINDGAME_LOCATION, CB_INSERTSTRING, 0, (LPARAM)Localize("TXT_ALL_LOCATIONS"));
 						} else {
 							SendDlgItemMessage(win, IDC_FINDGAME_LOCATION, CB_ADDSTRING, 0, (LPARAM)locname);
 						}
 					}
 				}
 			}
-			int locsel = SendDlgItemMessage(win, IDC_FINDGAME_LOCATION, CB_SELECTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_ALL_LOCATIONS));
+			int locsel = SendDlgItemMessage(win, IDC_FINDGAME_LOCATION, CB_SELECTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_ALL_LOCATIONS"));
 			SendDlgItemMessage(win, IDC_FINDGAME_LOCATION, CB_SETCURSEL, locsel, 0);
 			SendDlgItemMessage(win, IDC_FINDGAME_LOCATION, CB_SETTOPINDEX, locsel, 0);
 
@@ -7392,10 +7392,10 @@ BOOL CALLBACK WOL_Find_Game_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPAR
 					thecell.hint.set("");
 					if (chan.tournament) {
 						thecell.surf = SurfaceCache.GetSurface("woltrny.pcx");
-						thecell.hint.set((char *)Fetch_String(TXT_TOURNAMENT_GAME));
+						thecell.hint.set((char *)Localize("TXT_TOURNAMENT_GAME"));
 					} else if (chan.reserved & 0x100) {
 						thecell.surf = SurfaceCache.GetSurface("wolclan.pcx");
-						thecell.hint.set((char *)Fetch_String(TXT_BATTLECLAN_GAME));
+						thecell.hint.set((char *)Localize("TXT_BATTLECLAN_GAME"));
 					} else {
 						thecell.surf = SurfaceCache.GetSurface("gt18.bmp");
 					}
@@ -7404,7 +7404,7 @@ BOOL CALLBACK WOL_Find_Game_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPAR
 					thecell.hint.set("");
 					if (chan.flags & CHAN_MODE_KEY) {
 						thecell.surf = SurfaceCache.GetSurface("wolpriv.pcx");
-						thecell.hint.set((char *)Fetch_String(TXT_GAME_PASSWORD));
+						thecell.hint.set((char *)Localize("TXT_GAME_PASSWORD"));
 					} else {
 						thecell.type = OwnerDraw::CellData::INVALID;
 					}
@@ -7445,7 +7445,7 @@ BOOL CALLBACK WOL_Find_Game_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPAR
 			g_GameChannelList.get(chan, extra);
 
 			SendDlgItemMessage(win, IDC_FINDGAME_DETAILS, LB_RESETCONTENT, 0, 0);
-			sprintf(details, "%s %s", Fetch_String(TXT_NAME_COLON), (char const *)chan.name);
+			sprintf(details, "%s %s", Localize("TXT_NAME_COLON"), (char const *)chan.name);
 			SendDlgItemMessage(win, IDC_FINDGAME_DETAILS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)details);
 
 			/// Parse the channel's extra info to reach the map/scenario filename field.
@@ -7479,17 +7479,17 @@ BOOL CALLBACK WOL_Find_Game_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPAR
 			}
 
 			if (!strcmp(scenarioname, RANDOM_MAP_FILE_NAME)) {
-				strcpy(scenarioname, Fetch_String(TXT_RANDOM_MAP_DESCRIPTION));
+				strcpy(scenarioname, Localize("TXT_RANDOM_MAP_DESCRIPTION"));
 			}
 
-			sprintf(details, "%s %s", Fetch_String(TXT_SCENARIO_COLON), scenarioname);
+			sprintf(details, "%s %s", Localize("TXT_SCENARIO_COLON"), scenarioname);
 			SendDlgItemMessage(win, IDC_FINDGAME_DETAILS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)details);
 
-			sprintf(details, "%s %s", Fetch_String(TXT_TOURNEY_COLON), Fetch_String(TXT_NO));
+			sprintf(details, "%s %s", Localize("TXT_TOURNEY_COLON"), Localize("TXT_NO"));
 			if (chan.tournament) {
-				sprintf(details, "%s %s", Fetch_String(TXT_TOURNEY_COLON), Fetch_String(TXT_YES));
+				sprintf(details, "%s %s", Localize("TXT_TOURNEY_COLON"), Localize("TXT_YES"));
 			} else if (chan.reserved & 0x100) {
-				sprintf(details, "%s %s", Fetch_String(TXT_TOURNEY_COLON), Fetch_String(TXT_BATTLE_CLAN));
+				sprintf(details, "%s %s", Localize("TXT_TOURNEY_COLON"), Localize("TXT_BATTLE_CLAN"));
 			}
 			SendDlgItemMessage(win, IDC_FINDGAME_DETAILS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)details);
 
@@ -7503,9 +7503,9 @@ BOOL CALLBACK WOL_Find_Game_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPAR
 
 			Ladder ladder;
 			if (g_ActiveLadder->getValue(name, ladder) && ladder.rung > 0) {
-				sprintf(details, "%s: %d", Fetch_String(TXT_RANK), ladder.rung);
+				sprintf(details, "%s: %d", Localize("TXT_RANK"), ladder.rung);
 			} else {
-				sprintf(details, "%s %s", Fetch_String(TXT_HOST_RANK), Fetch_String(TXT_UNRANKED));
+				sprintf(details, "%s %s", Localize("TXT_HOST_RANK"), Localize("TXT_UNRANKED"));
 			}
 			SendDlgItemMessage(win, IDC_FINDGAME_DETAILS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)details);
 		} break;
@@ -7571,7 +7571,7 @@ BOOL CALLBACK WOL_Find_Page_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPAR
 						if (strlen((char *)user.name)) {
 							g_pChat->RequestFind(&user);
 						} else {
-							SMessagePrintf(-1, Fetch_String(TXT_NAME_ERROR));
+							SMessagePrintf(-1, Localize("TXT_NAME_ERROR"));
 						}
 					}
 				} break;
@@ -7595,9 +7595,9 @@ BOOL CALLBACK WOL_Find_Page_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPAR
 							g_pChat->RequestPage(&user, message);
 							SMessagePrintf(ColorMe, "[%s] %s", g_NickName, message);
 						} else if (strlen((char *)user.name)) {
-							SMessagePrintf(-1, Fetch_String(TXT_ENTER_MESSAGE));
+							SMessagePrintf(-1, Localize("TXT_ENTER_MESSAGE"));
 						} else {
-							SMessagePrintf(-1, Fetch_String(TXT_NAME_ERROR));
+							SMessagePrintf(-1, Localize("TXT_NAME_ERROR"));
 						}
 					}
 				} break;
@@ -7606,7 +7606,7 @@ BOOL CALLBACK WOL_Find_Page_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPAR
 				case IDC_SQUADPAGE: {
 					if (g_pChat) {
 						if (g_OwnSquadID == 0) {
-							SMessagePrintf(-1, Fetch_String(TXT_NOSQUAD));
+							SMessagePrintf(-1, Localize("TXT_NOSQUAD"));
 						} else {
 							char message[200];
 							memset(message, 0, 200);
@@ -7618,7 +7618,7 @@ BOOL CALLBACK WOL_Find_Page_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPAR
 							if (strlen(message)) {
 								g_pChat->RequestPage(&user, message);
 							} else {
-								SMessagePrintf(-1, Fetch_String(TXT_ENTER_MESSAGE));
+								SMessagePrintf(-1, Localize("TXT_ENTER_MESSAGE"));
 							}
 						}
 					}
@@ -7695,7 +7695,7 @@ BOOL CALLBACK WOL_Ladder_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM 
 						g_pNetUtil->RequestLadderSearch(g_LadderServerHost, g_LadderServerPort, ladder_search_key, LADDER_CODE(g_SelectedLadderSKU), -1, 0, 0, 25, 0);
 					}
 					SendDlgItemMessage(win, IDC_LADRUNGS, LB_RESETCONTENT, NULL, NULL);
-					SendDlgItemMessage(win, IDC_LADRUNGS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)((const char *)Fetch_String(TXT_SEARCHING)));
+					SendDlgItemMessage(win, IDC_LADRUNGS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)((const char *)Localize("TXT_SEARCHING")));
 				} break;
 
 				case IDBACK: {
@@ -7714,7 +7714,7 @@ BOOL CALLBACK WOL_Ladder_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM 
 						g_pNetUtil->RequestLadderSearch(g_LadderServerHost, g_LadderServerPort, ladder_search_key, LADDER_CODE(g_SelectedLadderSKU), -1, 0, 0, 25, 0);
 					}
 					SendDlgItemMessage(win, IDC_LADRUNGS, LB_RESETCONTENT, NULL, NULL);
-					SendDlgItemMessage(win, IDC_LADRUNGS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)((const char *)Fetch_String(TXT_SEARCHING)));
+					SendDlgItemMessage(win, IDC_LADRUNGS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)((const char *)Localize("TXT_SEARCHING")));
 				} break;
 
 				/// Search for a rung by name once the user finishes typing.
@@ -7743,7 +7743,7 @@ BOOL CALLBACK WOL_Ladder_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM 
 							}
 							SendDlgItemMessage(win, IDC_LADRUNGS, LB_RESETCONTENT, NULL, NULL);
 
-							sprintf(buffer, Fetch_String(TXT_SEARCHING_FOR), input);
+							sprintf(buffer, Localize("TXT_SEARCHING_FOR"), input);
 							SendDlgItemMessage(win, IDC_LADRUNGS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)buffer);
 						}
 					}
@@ -7782,7 +7782,7 @@ BOOL CALLBACK WOL_Ladder_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM 
 						g_LadderPos = 1;
 						if (sku == (BATTLECLANS | TIBERIAN_SUN_SKU) || sku == (BATTLECLANS | FIRESTORM_SKU))
 						{
-							int ladder_sel = SendDlgItemMessage(win, IDC_LADDER_LOCATION, CB_SELECTSTRING, 0xFFFFFFFF, (LPARAM)Fetch_String(TXT_ALL_LOCATIONS));
+							int ladder_sel = SendDlgItemMessage(win, IDC_LADDER_LOCATION, CB_SELECTSTRING, 0xFFFFFFFF, (LPARAM)Localize("TXT_ALL_LOCATIONS"));
 							SendDlgItemMessage(win, IDC_LADDER_LOCATION, CB_SETCURSEL, ladder_sel, 0);
 							SendDlgItemMessage(win, IDC_LADDER_LOCATION, CB_SETTOPINDEX, ladder_sel, 0);
 							EnableWindow(GetDlgItem(win, IDC_LADDER_LOCATION), 0);
@@ -7884,7 +7884,7 @@ BOOL CALLBACK WOL_Ladder_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM 
 			SendDlgItemMessage(win, IDC_LADRUNGS, OD_ADDCOLUMN, 0, (LPARAM)g_Col_Losses);
 			SendDlgItemMessage(win, IDC_LADRUNGS, OD_ADDCOLUMN, 0, (LPARAM)g_Col_Disconnects);
 
-			SendDlgItemMessage(win, IDC_LADRUNGS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)((const char *)Fetch_String(TXT_SEARCHING)));
+			SendDlgItemMessage(win, IDC_LADRUNGS, LB_INSERTSTRING, (WPARAM)-1, (LPARAM)((const char *)Localize("TXT_SEARCHING")));
 		} break;
 
 		case WM_INITDIALOG: {
@@ -7902,15 +7902,15 @@ BOOL CALLBACK WOL_Ladder_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM 
 			 * and enabled, otherwise Tiberian Sun players).
 			 */
 			SendDlgItemMessage(win, IDC_LADDER_TYPE, CB_RESETCONTENT, 0, 0);
-			SendDlgItemMessage(win, IDC_LADDER_TYPE, CB_INSERTSTRING, 0, (LPARAM)Fetch_String(TXT_FS_BATTLECLANS));
-			SendDlgItemMessage(win, IDC_LADDER_TYPE, CB_INSERTSTRING, 0, (LPARAM)Fetch_String(TXT_FS_PLAYERS));
-			SendDlgItemMessage(win, IDC_LADDER_TYPE, CB_INSERTSTRING, 0, (LPARAM)Fetch_String(TXT_TS_BATTLECLANS));
-			SendDlgItemMessage(win, IDC_LADDER_TYPE, CB_INSERTSTRING, 0, (LPARAM)Fetch_String(TXT_TS_PLAYERS));
+			SendDlgItemMessage(win, IDC_LADDER_TYPE, CB_INSERTSTRING, 0, (LPARAM)Localize("TXT_FS_BATTLECLANS"));
+			SendDlgItemMessage(win, IDC_LADDER_TYPE, CB_INSERTSTRING, 0, (LPARAM)Localize("TXT_FS_PLAYERS"));
+			SendDlgItemMessage(win, IDC_LADDER_TYPE, CB_INSERTSTRING, 0, (LPARAM)Localize("TXT_TS_BATTLECLANS"));
+			SendDlgItemMessage(win, IDC_LADDER_TYPE, CB_INSERTSTRING, 0, (LPARAM)Localize("TXT_TS_PLAYERS"));
 			if (Addon_Installed(ADDON_FIRESTORM) && Addon_Enabled(ADDON_FIRESTORM)) {
 				g_SelectedLadderSKU = FIRESTORM_SKU;
-				sel = SendDlgItemMessage(win, IDC_LADDER_TYPE, CB_SELECTSTRING, -1, (LPARAM)Fetch_String(TXT_FS_PLAYERS));
+				sel = SendDlgItemMessage(win, IDC_LADDER_TYPE, CB_SELECTSTRING, -1, (LPARAM)Localize("TXT_FS_PLAYERS"));
 			} else {
-				sel = SendDlgItemMessage(win, IDC_LADDER_TYPE, CB_SELECTSTRING, -1, (LPARAM)Fetch_String(TXT_TS_PLAYERS));
+				sel = SendDlgItemMessage(win, IDC_LADDER_TYPE, CB_SELECTSTRING, -1, (LPARAM)Localize("TXT_TS_PLAYERS"));
 				g_SelectedLadderSKU = TIBERIAN_SUN_SKU;
 			}
 			SendDlgItemMessage(win, IDC_LADDER_TYPE, CB_SETCURSEL, sel, 0);
@@ -7935,7 +7935,7 @@ BOOL CALLBACK WOL_Ladder_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM 
 					}
 					if (index != LOC_OTHER) {
 						if (index == LOC_UNKNOWN) {
-							SendDlgItemMessage(win, IDC_LADDER_LOCATION, CB_INSERTSTRING, 0, (LPARAM)Fetch_String(TXT_ALL_LOCATIONS));
+							SendDlgItemMessage(win, IDC_LADDER_LOCATION, CB_INSERTSTRING, 0, (LPARAM)Localize("TXT_ALL_LOCATIONS"));
 						} else {
 							SendDlgItemMessage(win, IDC_LADDER_LOCATION, CB_ADDSTRING, 0, (LPARAM)name);
 						}
@@ -7945,7 +7945,7 @@ BOOL CALLBACK WOL_Ladder_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM 
 
 			}
 
-			sel = SendDlgItemMessage(win, IDC_LADDER_LOCATION, CB_SELECTSTRING, -1, (LPARAM)Fetch_String(TXT_ALL_LOCATIONS));
+			sel = SendDlgItemMessage(win, IDC_LADDER_LOCATION, CB_SELECTSTRING, -1, (LPARAM)Localize("TXT_ALL_LOCATIONS"));
 			SendDlgItemMessage(win, IDC_LADDER_LOCATION, CB_SETCURSEL, sel, 0);
 			SendDlgItemMessage(win, IDC_LADDER_LOCATION, CB_SETTOPINDEX, sel, 0);
 
@@ -8007,7 +8007,7 @@ BOOL CALLBACK WOL_Download_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARA
 
 		/// Download failed -- notify the user, abort, and close the dialog.
 		case WOL_DOWNLOAD_FAILED:
-			ODMessageBox(Fetch_String(TXT_DOWNLOAD_FAILED), 0, WOL_Wait_Callback);
+			ODMessageBox(Localize("TXT_DOWNLOAD_FAILED"), 0, WOL_Wait_Callback);
 			g_pDownload->Abort();
 			WS_Destroy_Dialog(win, IDCANCEL);
 			break;
@@ -8271,18 +8271,18 @@ BOOL CALLBACK WOL_Begin_Nick_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPA
 			 * Populate the birth-month combo.
 			 */
 			SendDlgItemMessage(win, IDC_BMONTH, CB_RESETCONTENT, 0, 0);
-			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_JANUARY));
-			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_FEBRUARY));
-			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_MARCH));
-			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_APRIL));
-			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_MAY));
-			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_JUNE));
-			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_JULY));
-			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_AUGUST));
-			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_SEPTEMBER));
-			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_OCTOBER));
-			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_NOVEMBER));
-			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_DECEMBER));
+			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_JANUARY"));
+			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_FEBRUARY"));
+			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_MARCH"));
+			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_APRIL"));
+			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_MAY"));
+			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_JUNE"));
+			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_JULY"));
+			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_AUGUST"));
+			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_SEPTEMBER"));
+			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_OCTOBER"));
+			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_NOVEMBER"));
+			SendDlgItemMessage(win, IDC_BMONTH, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_DECEMBER"));
 			SendDlgItemMessage(win, IDC_BMONTH, CB_SETCURSEL, (WPARAM)0, NULL);
 		}
 			return(false);
@@ -8698,14 +8698,14 @@ BOOL CALLBACK WOL_Game_Options_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM l
 
 					int color = ColorAction;
 					if (strlen((char *)g_CurrentChannel.name) == 0) {
-						PMessagePrintf(-1, Fetch_String(TXT_NOT_IN_CHAN));
+						PMessagePrintf(-1, Localize("TXT_NOT_IN_CHAN"));
 					} else if (strlen(input)) {
 						if (Send_Chat_Action(input)) {
 							color = ColorPrivAction;
 						}
 						PMessagePrintf(color, "%s %s", g_NickName, input);
 					} else {
-						PMessagePrintf(-1, Fetch_String(TXT_ENTER_MESSAGE));
+						PMessagePrintf(-1, Localize("TXT_ENTER_MESSAGE"));
 					}
 					return(false);
 				}
@@ -8775,7 +8775,7 @@ BOOL CALLBACK WOL_Game_Options_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM l
 					}
 
 					if (reqcolor != Session.ColorIdx) {
-						PMessagePrintf(ColorSystem, Fetch_String(TXT_COLOR_IN_USE));
+						PMessagePrintf(ColorSystem, Localize("TXT_COLOR_IN_USE"));
 					}
 
 					Session.ColorIdx = reqcolor;
@@ -8881,14 +8881,14 @@ BOOL CALLBACK WOL_Game_Options_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM l
 
 					/// Need at least two players to start.
 					//if (g_UserList.length() < 2) {
-					//	PMessagePrintf(-1, Fetch_String(TXT_ONLY_ONE));
+					//	PMessagePrintf(-1, Localize("TXT_ONLY_ONE"));
 					//	return(false);
 					//}
 
 					/// Every player must have accepted the current game options.
 					for (i = 0; i < g_UserList.length(); i++) {
 						if (g_UserInfo[i].accepted == 0) {
-							PMessagePrintf(-1, Fetch_String(TXT_ACCEPTFIRST));
+							PMessagePrintf(-1, Localize("TXT_ACCEPTFIRST"));
 							return(false);
 						}
 					}
@@ -8896,7 +8896,7 @@ BOOL CALLBACK WOL_Game_Options_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM l
 					/// WDT (ladder) games require a full channel with an even split of houses.
 					if (Session.IsWDT) {
 						if (g_UserList.length() < (int)g_CurrentChannel.maxUsers) {
-							PMessagePrintf(-1, Fetch_String(TXT_NEED_PLAYERS_TO_START), g_CurrentChannel.maxUsers);
+							PMessagePrintf(-1, Localize("TXT_NEED_PLAYERS_TO_START"), g_CurrentChannel.maxUsers);
 							return(false);
 						}
 
@@ -8910,7 +8910,7 @@ BOOL CALLBACK WOL_Game_Options_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM l
 							}
 						}
 						if (nonzero_houses != zero_houses) {
-							PMessagePrintf(-1, Fetch_String(TXT_NEED_EQUAL_TEAMS));
+							PMessagePrintf(-1, Localize("TXT_NEED_EQUAL_TEAMS"));
 							return(false);
 						}
 					}
@@ -8918,7 +8918,7 @@ BOOL CALLBACK WOL_Game_Options_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM l
 					/// The map must have enough waypoints for the human players plus AI players.
 					int waypoints = RandomMapWaypointCount(Session.Options.ScenarioIndex);
 					if (waypoints < g_UserList.length() + SendDlgItemMessage(win, IDC_AIPLAYERS, TBM_GETPOS, 0, 0)) {
-						PMessagePrintf(-1, Fetch_String(TXT_SCENARIO_TOO_SMALL), waypoints);
+						PMessagePrintf(-1, Localize("TXT_SCENARIO_TOO_SMALL"), waypoints);
 						return(false);
 					}
 
@@ -8937,7 +8937,7 @@ BOOL CALLBACK WOL_Game_Options_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM l
 							g_UserList.getPointer(&user, i);
 
 							if (user->squadID < 1) {
-								PMessagePrintf(-1, Fetch_String(TXT_CLAN_NOSTART));
+								PMessagePrintf(-1, Localize("TXT_CLAN_NOSTART"));
 								return(false);
 							}
 
@@ -8946,7 +8946,7 @@ BOOL CALLBACK WOL_Game_Options_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM l
 								squad1_count++;
 							} else {
 								if (squad2 && squad2 != user->squadID) {
-									PMessagePrintf(-1, Fetch_String(TXT_CLAN_NOSTART));
+									PMessagePrintf(-1, Localize("TXT_CLAN_NOSTART"));
 									return(false);
 								}
 								squad2 = user->squadID;
@@ -8955,7 +8955,7 @@ BOOL CALLBACK WOL_Game_Options_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM l
 						}
 
 						if (squad1_count != squad2_count) {
-							PMessagePrintf(-1, Fetch_String(TXT_CLAN_NOSTART));
+							PMessagePrintf(-1, Localize("TXT_CLAN_NOSTART"));
 							return(false);
 						}
 					}
@@ -9012,7 +9012,7 @@ BOOL CALLBACK WOL_Game_Options_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM l
 						for (i = 0; i < g_UserList.length(); i++) {
 							g_UserList.get(user, i);
 							if ((strcasecmp((char *)user.name, g_NickName) == 0) && ((user.flags & CHAT_USER_CHANNELOWNER) == 0)) {
-								PMessagePrintf(-1, Fetch_String(TXT_NOTCHANOP));
+								PMessagePrintf(-1, Localize("TXT_NOTCHANOP"));
 								not_operator = true;
 								break;
 							}
@@ -9052,7 +9052,7 @@ BOOL CALLBACK WOL_Game_Options_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM l
 						}
 					}
 					if (!found) {
-						PMessagePrintf(-1, Fetch_String(TXT_SEL_USER));
+						PMessagePrintf(-1, Localize("TXT_SEL_USER"));
 					}
 					Draw_Player_List(1);
 					return(TRUE);
@@ -9081,14 +9081,14 @@ BOOL CALLBACK WOL_Game_Options_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM l
 			SendDlgItemMessage(win, IDC_YOURSIDE, CB_SETCURSEL, Session.House, 0);
 
 			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_RESETCONTENT, 0, 0);
-			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_GOLD));
-			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_RED));
-			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_BLUE));
-			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_GREEN));
-			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_ORANGE));
-			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_SKY_BLUE));
-			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_PURPLE));
-			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_PINK));
+			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_GOLD"));
+			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_RED"));
+			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_BLUE"));
+			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_GREEN"));
+			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_ORANGE"));
+			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_SKY_BLUE"));
+			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_PURPLE"));
+			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_PINK"));
 			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_SETCURSEL, Session.ColorIdx, 0);
 
 			int scenario = Session.IsWDT ? -1 : 0;
@@ -9323,12 +9323,12 @@ BOOL CALLBACK WOL_Guest_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM l
 					SetFocus(GetDlgItem(win, IDC_INPUT));
 					int color = ColorAction;
 					if (strlen((char *)g_CurrentChannel.name) == 0) {
-						PMessagePrintf(-1, Fetch_String(TXT_NOT_IN_CHAN));
+						PMessagePrintf(-1, Localize("TXT_NOT_IN_CHAN"));
 					} else if (strlen(input)) {
 						if (Send_Chat_Action(input)) color = ColorPrivAction;
 						PMessagePrintf(color, "%s %s", g_NickName, input);
 					} else {
-						PMessagePrintf(-1, Fetch_String(TXT_ENTER_MESSAGE));
+						PMessagePrintf(-1, Localize("TXT_ENTER_MESSAGE"));
 					}
 				} break;
 
@@ -9347,14 +9347,14 @@ BOOL CALLBACK WOL_Guest_Dialog_Proc(HWND win, UINT uMsg, WPARAM wParam, LPARAM l
 			SendDlgItemMessage(win, IDC_YOURSIDE, CB_SETCURSEL, (WPARAM)Session.House, NULL);
 
 			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_RESETCONTENT, 0, 0);
-			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_GOLD));
-			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_RED));
-			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_BLUE));
-			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_GREEN));
-			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_ORANGE));
-			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_SKY_BLUE));
-			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_PURPLE));
-			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_PINK));
+			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_GOLD"));
+			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_RED"));
+			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_BLUE"));
+			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_GREEN"));
+			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_ORANGE"));
+			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_SKY_BLUE"));
+			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_PURPLE"));
+			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_PINK"));
 			SendDlgItemMessage(win, IDC_YOURCOLOR, CB_SETCURSEL, (WPARAM)Session.ColorIdx, NULL);
 
 			Session.Options.ScenarioDescription[0] = 0;
@@ -10236,7 +10236,7 @@ int Request_WDT_Server_List(void)
 	int retval;
 
 	Show_Wait_Window(WOL_WAIT_LOGIN_DONE, false);
-	Set_Wait_Dialog_Text((char *)Fetch_String(TXT_FETCHING_SERVLIST));
+	Set_Wait_Dialog_Text((char *)Localize("TXT_FETCHING_SERVLIST"));
 
 	g_Servers.setEmpty();
 	g_CurrentServerIndex = 0;
@@ -10264,7 +10264,7 @@ int Request_WDT_Server_List(void)
 		while (wait_result == WAIT_TIMEOUT) {
 			timeout += 50;
 			if (timeout > 30000) {
-				ODMessageBox(Fetch_String(TXT_CANT_CONNECT), MB_OK, WOL_Wait_Callback, 0);
+				ODMessageBox(Localize("TXT_CANT_CONNECT"), MB_OK, WOL_Wait_Callback, 0);
 				SetEvent(g_WaitEventHandles[EV_ABORT]);
 				wait_result = EV_ABORT;
 				break;
@@ -10303,7 +10303,7 @@ int Request_WDT_Server_List(void)
 bool Request_WDT_Cycle(void)
 {
 	if (g_WDTServer.conndata == NULL) {
-		ODMessageBox(Fetch_String(TXT_WDT_NET_ERR), 0, WOL_Wait_Callback);
+		ODMessageBox(Localize("TXT_WDT_NET_ERR"), 0, WOL_Wait_Callback);
 	} else {
 		int wait_result;
 		for (wait_result = 0; wait_result < EV_COUNT; wait_result++) {
@@ -10319,7 +10319,7 @@ bool Request_WDT_Cycle(void)
 
 		if (res == S_OK) {
 			Show_Wait_Window(WOL_WAIT_LOGIN_DONE, false);
-			Set_Wait_Dialog_Text((char *)Fetch_String(TXT_FETCHING_WDT));
+			Set_Wait_Dialog_Text((char *)Localize("TXT_FETCHING_WDT"));
 			while (true) {
 				wait_result = WaitForMultipleObjects(EV_COUNT, g_WaitEventHandles, FALSE, 100);
 				while (wait_result == WAIT_TIMEOUT) {
@@ -10334,7 +10334,7 @@ bool Request_WDT_Cycle(void)
 					return(0);
 				}
 				if (wait_result == EV_ERROR) {
-					ODMessageBox(Fetch_String(TXT_WDT_NET_ERR), 0, WOL_Wait_Callback);
+					ODMessageBox(Localize("TXT_WDT_NET_ERR"), 0, WOL_Wait_Callback);
 					Close_Wait_Window(WOL_WAIT_ALL);
 					return(0);
 				}
@@ -10360,7 +10360,7 @@ bool Request_WDT_Cycle(void)
 								return(0);
 							}
 							if (wait_result == EV_ERROR) {
-								ODMessageBox(Fetch_String(TXT_WDT_NET_ERR), 0, WOL_Wait_Callback);
+								ODMessageBox(Localize("TXT_WDT_NET_ERR"), 0, WOL_Wait_Callback);
 								Close_Wait_Window(WOL_WAIT_ALL);
 								return(0);
 							}
@@ -10376,7 +10376,7 @@ bool Request_WDT_Cycle(void)
 				}
 			}
 		} else {
-			ODMessageBox(Fetch_String(TXT_WDT_NET_ERR), 0, WOL_Wait_Callback);
+			ODMessageBox(Localize("TXT_WDT_NET_ERR"), 0, WOL_Wait_Callback);
 		}
 	}
 	return(0);

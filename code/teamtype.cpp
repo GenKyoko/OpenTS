@@ -376,10 +376,20 @@ SUGGESTED_TEAM_LIST TeamTypeClass::Suggested_New_Team(HouseClass * house, bool)
 
 		if (team_count < Rule->TotalAITeamCap[house->Difficulty]) {
 			DiscreteDistributionClass<AITriggerTypeClass> trigdist;
+			int process_pass = 0;
+			int skirmish_ok = 0;
+			int enabled_count = 0;
 			for (i = 0; i < AITriggerTypes.Count(); i++) {
 				if (AITriggerTypes[i] != NULL) {
 					AITriggerTypeClass *trig = AITriggerTypes[i];
+					if (trig->Is_Available_In_Skirmish()) {
+						skirmish_ok++;
+					}
+					if (trig->Is_Enabled()) {
+						enabled_count++;
+					}
 					if (trig->Process(house, enemy, skip_base_defense) == true) {
+						process_pass++;
 						trigdist.Add(trig, trig->Get_Current_Weight());
 					}
 				}
@@ -394,6 +404,18 @@ SUGGESTED_TEAM_LIST TeamTypeClass::Suggested_New_Team(HouseClass * house, bool)
 				if (trig->Get_Second_TeamType() != NULL) {
 					best.Add(trig->Get_Second_TeamType());
 				}
+			}
+
+			/*
+			**	Debug: low rate report of the trigger sampling state, so a computer
+			**	house that never sends anything can be diagnosed from the log.
+			*/
+			if ((Frame % 600) == (house->HeapID * 41) % 600) {
+				DebugString("AITriggers (h%d): enemy=%s, pass=%d/%d, skirmish_ok=%d, enabled=%d, base_defense_skip=%d\n",
+					house->HeapID,
+					(enemy != NULL) ? 1 : 0,
+					process_pass, AITriggerTypes.Count(), skirmish_ok, enabled_count,
+					skip_base_defense ? 1 : 0);
 			}
 		}
 	}

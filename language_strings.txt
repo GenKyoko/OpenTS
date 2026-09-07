@@ -1,0 +1,671 @@
+TXT_NONE:  
+TXT_COPYRIGHT: Â© 2000 Electronic Arts, All Rights Reserved
+TXT_TIME_FORMAT_HOURS: Time:%02d:%02d:%02d
+TXT_TIME_FORMAT_NO_HOURS: Time:%02d:%02d
+TXT_MONEY_FORMAT_1: $%d
+TXT_MONEY_FORMAT_2: %s ($%d)
+TXT_READY: Ready
+TXT_HOLD: On Hold
+TXT_PRIMARY: Primary
+TXT_PRI: Pri.
+TXT_OK: OK
+TXT_YES: Yes
+TXT_NO: No
+TXT_SCENARIO_WON: Mission Accomplished
+TXT_SCENARIO_LOST: Mission Failed
+TXT_CANCEL: Cancel
+TXT_IGNORE: Ignore
+TXT_CLICK_CONTINUE: Click to Continue
+TXT_MISSION_EFFICIENCY: MISSION EFFICIENCY
+TXT_MISSION_TIME_LAPSE: MISSION TIME LAPSE
+TXT_CURRENCY: CURRENCY
+TXT_CASUALTIES: CASUALTIES
+TXT_BEST_SCORES: Best Scores
+TXT_STRUCTURES: Structures
+TXT_RESUME_MISSION: Resume Mission
+TXT_VIDEO: Video
+TXT_MORE: -- More --
+TXT_INTERFACE: Interface
+TXT_TEAM: Team
+TXT_SELECTION: Selection
+TXT_CONTROL: Control
+TXT_CREATE_TEAM: Create Team %2d
+TXT_CREATE_TEAM_DESC: Creates Team %d from currently selected units.
+TXT_SELECT_TEAM: Select Team %2d
+TXT_SELECT_TEAM_DESC: Select members of team %d.
+TXT_ADD_SELECT_TEAM: Add Select Team %2d
+TXT_ADD_SELECT_TEAM_DESC: Select members of team %d without unselecting other units.
+TXT_CENTER_TEAM: Center Team %2d
+TXT_CENTER_TEAM_DESC: Select and center view about team %d.
+TXT_NEXT_OBJECT: Next Object
+TXT_NEXT_OBJECT_DESC: Select the next object.
+TXT_PREV_OBJECT: Previous Object
+TXT_PREV_OBJECT_DESC: Select the previous object.
+TXT_STOP_OBJECT: Stop Object
+TXT_STOP_OBJECT_DESC: Stop the selected object(s).
+TXT_GUARD: Guard
+TXT_GUARD_DESC: Set the selected object(s) into 'guard area' mode.
+TXT_VICTORIOUS: You Are Victorious!
+TXT_CD_ERROR1: Tiberian Sun is unable to detect your CD ROM drive.
+TXT_DLL_INVALID: Tiberian Sun requires %s version %d.%d or newer.\n\nPlease consult the read me for instructions on how to\nobtain a newer version of %s.
+TXT_ENEMY_SOLDIER: Enemy Soldier
+TXT_ENEMY_VEHICLE: Enemy Unit
+TXT_ENEMY_STRUCTURE: Enemy Structure
+TXT_INITGAME_FAILED: Failed to initialize. Please reinstall.
+TXT_PREPARECOM_FAILED: One or more DLL files were missing\nor damaged. Please reinstall.
+TXT_NO_SOUND_CARD: No Sound Card Detected
+TXT_INVALIDMODE: This product requires a 16bit pixel depth!
+TXT_LOST: Game Over
+TXT_MOUSE_REQUIRED: A mouse is required for playing Tiberian Sun.
+TXT_DSOUND_ACCESS: Unable to play Direct Sound primary buffer.
+TXT_DDRAW_UNKNOWN: Unrecognized Direct Draw result code.
+TXT_VIDEO_ERROR: Error - Unable to set the video mode.
+TXT_SHORT_TITLE: Tiberian Sun
+TXT_CRITICALLY_LOW: Warning - you are critically low on free disk space for saving games. Do you want to play Tiberian Sun anyway?
+TXT_DISK_NAME: Tiberian Sun Disk %d
+TXT_CONFIRM_SAVE: Overwrite existing save game?
+TXT_DISKFULL: Warning - you are critically low on free disk space for saving games.
+TXT_SIGNING_OFF: Signing off - Please Wait...
+TXT_CD_DIALOG_1: Please insert a Tiberian Sun CD into the CD-ROM drive.
+TXT_CD_DIALOG_2: Please insert CD %d (%s) into the CD-ROM drive.
+TXT_NAMES: Players
+TXT_LOSSES: Losses
+TXT_ECONOMY: Economy
+TXT_SCORE: Score
+TXT_KILLS: Kills
+TXT_RESET_HOTKEYS: Are you sure you want to reset the hotkey assignments?
+TXT_DSOUND_CANT_CREATE: Warning - Unable to create Direct Sound Object.
+TXT_DSOUND_NO_COOP: Warning - Unable to set Direct Sound cooperative level.
+TXT_DSOUND_NO_PRIMARY: Warning - Unable to create Direct Sound primary buffer.
+TXT_DSOUND_INCOMPAT: Warning - Your sound card does not meet the product's audio requirements.
+TXT_MISMATCH: Game versions incompatible. To make sure you have the latest version, visit www.westwood.com
+TXT_NO_EXPANSION_SCENARIO: Error - other player does not have this expansion scenario.
+TXT_SCENARIO_ERROR: Incompatable scenario file detected. The scenario may be corrupt.
+TXT_INVALID: Invalid option switch.
+TXT_OPTION_HELP_01: Tiberian Sun Â© 1999, Westwood Studios\n
+TXT_OPTION_HELP_02: Parameters:\n
+TXT_OPTION_HELP_03:   -DESTNET = Specify Network Number of destination system\n
+TXT_OPTION_HELP_04:   -SOCKET = Network Socket ID (0 - 16383)\n
+TXT_OPTION_HELP_05:   -STEALTH = Hide multiplayer names (\"Boss mode\")\n
+TXT_OPTION_HELP_06:   -MESSAGES = Allow messages from outside this game.\n
+TXT_MAP_ERROR: Map Error!
+TXT_SCATTER: Scatter
+TXT_SCATTER_DESC: Scatter selected object(s).
+TXT_CENTER_VIEW: Center View
+TXT_CENTER_VIEW_DESC: Center the view about selected object(s).
+TXT_CENTER_BASE: Center Base
+TXT_CENTER_BASE_DESC: Center the view about the player's base.
+TXT_ALLIANCE: Alliance
+TXT_ALLIANCE_DESC: Toggle alliance with owner of selected object.
+TXT_SELECT_VIEW: Select View
+TXT_SELECT_VIEW_DESC: Select all owned objects in the current view.
+TXT_REPAIR_MODE: Repair Mode
+TXT_REPAIR_MODE_DESC: Toggle repair mode on / off.
+TXT_SELL_MODE: Sell Mode
+TXT_SELL_MODE_DESC: Toggle sell mode on / off.
+TXT_POWER_MODE: Power Mode
+TXT_POWER_MODE_DESC: Toggle power mode on / off.
+TXT_RADAR_EVENT: Goto Radar Event
+TXT_RADAR_EVENT_DESC: Center the tactical view on the last radar event.
+TXT_RADAR_TOGGLE: Radar Toggle
+TXT_RADAR_TOGGLE_DESC: Toggle radar display mode on / off.
+TXT_SIDEBAR_UP: Sidebar Up
+TXT_SIDEBAR_UP_DESC: Scrolls sidebar selection list upward.
+TXT_LSIDEBAR_UP: Structure List up
+TXT_LSIDEBAR_UP_DESC: Scroll sidebar structure selection list upward.
+TXT_RSIDEBAR_UP: Unit List Up
+TXT_RSIDEBAR_UP_DESC: Scroll sidebar unit selection list upward.
+TXT_SIDEBAR_PGUP: Sidebar PageUp
+TXT_SIDEBAR_PGUP_DESC: Page sidebar selection list upward.
+TXT_LSIDEBAR_PGUP: Structure List PageUp
+TXT_LSIDEBAR_PGUP_DESC: Page sidebar structure selection list upward.
+TXT_RSIDEBAR_PGUP: Unit List PageUp
+TXT_RSIDEBAR_PGUP_DESC: Page sidebar unit selection list upward.
+TXT_SIDEBAR_DOWN: Sidebar Down
+TXT_SIDEBAR_DOWN_DESC: Scroll sidebar selection list downward.
+TXT_LSIDEBAR_DOWN: Structure List Down
+TXT_LSIDEBAR_DOWN_DESC: Scroll sidebar structure selection list downward.
+TXT_TAB_SIDEBAR: Sidebar
+TXT_TAB_BUTTON_CONTROLS: Options
+TXT_SHADOW: Unrevealed Terrain
+TXT_OPTIONS_MENU: Options Menu
+TXT_STOP: Stop
+TXT_DEPLOY_OBJECT: Deploy Object
+TXT_DEPLOY_OBJECT_DESC: Deploy selected object(s).
+TXT_WAYPOINTMODE: Waypoint Mode
+TXT_WAYPOINTMODE_DESC: Toggle waypoint placement mode on / off.
+TXT_ON: On
+TXT_OFF: Off
+TXT_MULTIPLAYER_GAME: Multiplayer Game
+TXT_SCRNCAP: Screen Capture
+TXT_SCRNCAP_DESC: Take a snapshot of the game screen. (Saved as 'SCRNxxxx.PCX' file in Tiberian Sun run directory.)
+TXT_SENDING_GO: Sending GO request - Please Wait...
+TXT_WAITING_GO: Waiting for GO response - Please Wait...
+TXT_SENDING_GO_ACK: Sending GO acknowlegement - Please Wait...
+TXT_CWAIT_STAR70: *70
+TXT_CWAIT_70NUM: 70#
+TXT_CWAIT_1170: 1170
+TXT_EASY: Easy
+TXT_NORMAL: Normal
+TXT_HARD: Hard
+TXT_HIGH: High
+TXT_LOW: Low
+TXT_FASTEST: Fastest
+TXT_FASTER: Faster
+TXT_SLOWER: Slower
+TXT_SLOWEST: Slowest
+TXT_SLOW: Slow
+TXT_MEDIUM: Medium
+TXT_FAST: Fast
+TXT_UNABLE_READ_SCENARIO: Unable to read scenario!
+TXT_ERROR_LOADING_GAME: Error loading game!
+TXT_OBSOLETE_SAVEGAME: [OBSOLETE]
+TXT_MUSTENTER_DESCRIPTION: You must enter a description!
+TXT_ERROR_SAVING_GAME: Error saving mission!
+TXT_DELETE_FILE_QUERY: Delete this file?
+TXT_EMPTY_SLOT: [EMPTY SLOT]
+TXT_MAP: Map: %s
+TXT_EXPANSION_TITLE: Firestorm
+TXT_REQUEST_DENIED: Request denied.
+TXT_UNABLE_PLAY_WAAUGH: Unable to play; scenario not found.
+TXT_NOTHING_TO_JOIN: Nothing to join!
+TXT_NAME_ERROR: You must enter a name!
+TXT_YOURGAME_OUTDATED: Your game version is outdated.
+TXT_DESTGAME_OUTDATED: Destination game version is outdated.
+TXT_THATGUYS_GAME: %s's Game
+TXT_THATGUYS_GAME_BRACKET: [%s's Game]
+TXT_REJECT: Reject
+TXT_CANT_REJECT_SELF: You can't reject yourself!
+TXT_SELECT_PLAYER_REJECT: You must select a player to reject.
+TXT_CREDITS_COLON: Credits:
+TXT_ONLY_ONE: Only one player?
+TXT_OOPS: Oops!
+TXT_TO: To %s:
+TXT_TO_ALL: To All:
+TXT_MESSAGE: Message:
+TXT_CONNECTION_LOST: Connection to %s lost!
+TXT_LEFT_GAME: %s has left the game.
+TXT_PLAYER_DEFEATED: %s has been defeated!
+TXT_COMPUTER: Computer
+TXT_NONAME: [NONAME]
+TXT_DEFAULT: Default
+TXT_SETTINGS: Settings
+TXT_NAME_COLON: Name:
+TXT_OUT_OF_SYNC: Reconnection Error!
+TXT_PACKET_TOO_LATE: Packet received too late!
+TXT_USER_SIGNED_OFF: User signed off!
+TXT_POWER_DRAIN: Power = %d\rDrain = %d
+TXT_STAND_BY: Please Stand By...
+TXT_LOW_POWER: Low Power
+TXT_KILLS_COLON: Kills:
+TXT_SPY_INFO: Spy Info
+TXT_INFANTRY: Infantry
+TXT_BUILDNGS: Buildings
+TXT_CIVILIAN_BUILDING: Civilian Building
+TXT_TECHNICIAN: Technician
+TXT_UNITS: Units
+TXT_TO_REPLAY: Would you like to replay this mission?
+TXT_SURRENDER: Surrender
+TXT_GAMENAME_MUSTBE_UNIQUE: Your game name must be unique.
+TXT_GAME_IS_CLOSED: Game is closed.
+TXT_NAME_MUSTBE_UNIQUE: Your name must be unique.
+TXT_RECONNECTING_TO: Connection to %s has been interrupted. Attempting to reconnect.
+TXT_WAITING_FOR_CONNECTIONS: Waiting for all players to enter the game....
+TXT_TIME_ALLOWED: Time allowed: %02d seconds
+TXT_JUST_YOU_AND_ME: From Computer: It's just you and me now!
+TXT_HAS_ALLIED: %s has allied with %s
+TXT_AT_WAR: %s declares war on %s
+TXT_SCENARIOS_DO_NOT_MATCH: Scenarios don't match.
+TXT_CONTINUE: Continue
+TXT_QUEUE_FULL: Data Queue Overflow
+TXT_SPECIAL_WARNING: %s changed game options!
+TXT_WAITING_FOR_OPPONENT: Waiting for Opponent
+TXT_GAME_WAS_SAVED: Mission Saved
+TXT_SPACE_CANT_SAVE: Insufficient disk space to save a game.  Please delete a previous saved games to free up some disk space and try again.
+TXT_LOADING: Mission is loading. Please wait...
+TXT_LOBBY: Lobby
+TXT_SAVING_GAME: Mission saving - Please Wait...
+TXT_GAME_FULL: Game is full.
+TXT_MUST_SELECT_GAME: You must select a game!
+TXT_S_PLAYING_S: %s playing %s
+TXT_ONLY_HOST_CAN_MODIFY: Only the host can modify this option.
+TXT_GAME_CANCELLED: Game was cancelled.
+TXT_S_FORMED_NEW_GAME: %s has formed a new game.
+TXT_GAME_NOW_IN_PROGRESS: %s's game is now in progress.
+TXT_RSIDEBAR_DOWN: Unit List Down
+TXT_RSIDEBAR_DOWN_DESC: Scroll sidebar unit selection list downward.
+TXT_SIDEBAR_PGDN: Sidebar PageDown
+TXT_SIDEBAR_PGDN_DESC: Page sidebar selection list downward.
+TXT_LSIDEBAR_PGDN: Structure List PageDown
+TXT_LSIDEBAR_PGDN_DESC: Page sidebar structure selection list downward.
+TXT_RSIDEBAR_PGDN: Unit List PageDown
+TXT_RSIDEBAR_PGDN_DESC: Page sidebar unit selection list downward.
+TXT_OPTIONS: Options Menu
+TXT_OPTIONS_DESC: Display game options dialog.
+TXT_SCROLL_N: Scroll North
+TXT_SCROLL_N_DESC: Scroll tactical map to the north.
+TXT_SCROLL_S: Scroll South
+TXT_SCROLL_S_DESC: Scroll tactical map to the south.
+TXT_SCROLL_E: Scroll East
+TXT_SCROLL_E_DESC: Scroll tactical map to the east.
+TXT_SCROLL_W: Scroll West
+TXT_SCROLL_W_DESC: Scroll tactical map to the west.
+TXT_VIEW_BOOKMARK1: View Bookmark 1
+TXT_VIEW_BOOKMARK1_DESC: View bookmarked map position 1.
+TXT_VIEW_BOOKMARK2: View Bookmark 2
+TXT_VIEW_BOOKMARK2_DESC: View bookmarked map position 2.
+TXT_VIEW_BOOKMARK3: View Bookmark 3
+TXT_VIEW_BOOKMARK3_DESC: View bookmarked map position 3.
+TXT_VIEW_BOOKMARK4: View Bookmark 4
+TXT_VIEW_BOOKMARK4_DESC: View bookmarked map position 4.
+TXT_SET_BOOKMARK1: Set Bookmark 1
+TXT_SET_BOOKMARK1_DESC: Set view bookmark map position 1.
+TXT_SET_BOOKMARK2: Set Bookmark 2
+TXT_SET_BOOKMARK2_DESC: Set view bookmark map position 2.
+TXT_SET_BOOKMARK3: Set Bookmark 3
+TXT_SET_BOOKMARK3_DESC: Set view bookmark map position 3.
+TXT_SET_BOOKMARK4: Set Bookmark 4
+TXT_SET_BOOKMARK4_DESC: Set view bookmark map position 4.
+TXT_FOLLOW: Follow
+TXT_FOLLOW_DESC: Toggle follow state of selected object(s).
+TXT_DEL_WAYPOINT: Delete Waypoint
+TXT_DEL_WAYPOINT_DESC: Delete selected waypoint.
+TXT_PAGEUSER: Page User
+TXT_PAGEUSER_DESC: Page a Westwood Online user. (Internet play only)
+TXT_NO_DIAL_TONE: No dial tone. Ensure your modem is connected to the phone line and try again.
+TXT_CONNECTING: Connecting...
+TXT_SELECT_SETTINGS: Please select 'Settings' to setup default configuration
+TXT_ANSWERING: Answering...
+TXT_INITIALIZING_MODEM: Initializing Modem...Standby
+TXT_ERROR_NO_INIT: Error - Modem did not respond to initialisation string.
+TXT_ERROR_NO_DISABLE: Error - Unable to disable modem auto answer.
+TXT_ERROR_TOO_MANY: Error - Too many errors initialising modem - Aborting.
+TXT_ERROR_ERROR: Error - Modem returned error status.
+TXT_ERROR_TIMEOUT: Error - TIme out waiting for connect.
+TXT_RECEIVING_SCENARIO: Receiving scenario from host.
+TXT_SENDING_SCENARIO: Sending scenario to remote players.
+TXT_NO_FLOW_CONTROL_RESPONSE: Error - Modem failed to respond to flow control command. Your Windows configuration may be incorrect.
+TXT_NO_COMP_DISABLE_RESPONSE: Error - Modem failed to respond to compression disable command. Your Windows configuration may be incorrect.
+TXT_NO_EC_DISABLE_RESPONSE: Error - Modem failed to respond to error correction disable command. Your Windows configuration may be incorrect.
+TXT_UNABLE_TO_OPEN_PORT: Invalid Port or Port is in use
+TXT_INVALID_PORT_ADDRESS: Invalid Port/Address. COM 1-4 OR ADDRESS
+TXT_IRQ_ALREADY_IN_USE: IRQ already in use
+TXT_ERROR_IN_INITSTRING: Error in the InitString
+TXT_MODEM_OR_LOOPBACK: Not a Null Modem Cable Attached! It is a modem or loopback cable.
+TXT_UNABLE_FIND_MODEM: Unable to find modem. Check power and cables.
+TXT_NULL_CONNERR_CHECK_CABLES: Connection error! Check your cables. Attempting to Reconnect...
+TXT_MODEM_CONNERR_REDIALING: Connection error! Redialing...
+TXT_MODEM_CONNERR_WAITING: Connection error! Waiting for Call...
+TXT_WAITING_CONNECT: Waiting to Connect...
+TXT_CUSTOM: CUSTOM -
+TXT_COM1: COM1 - 3F8
+TXT_COM2: COM2 - 2F8
+TXT_COM3: COM3 - 3E8
+TXT_COM4: COM4 - 2E8
+TXT_NO_CARRIER: No carrier.
+TXT_LINE_BUSY: Line busy.
+TXT_NUMBER_INVALID: Number invalid.
+TXT_DIALING: Dialing...
+TXT_DIALING_CANCELED: Dialing Canceled
+TXT_WAITING_FOR_CALL: Waiting for Call...
+TXT_ANSWERING_CANCELED: Answering Canceled
+TXT_SYSTEM_NOT_RESPONDING: Other system not responding!
+TXT_NO_COMP_ENABLE_RESPONSE: Error - Modem failed to respond to compression enable command. Your Windows configuration may be incorect.
+TXT_NO_EC_ENABLE_RESPONSE: Error - Modem failed to respond to error correction enable command. Your Windows configuration may be incorrect.
+TXT_NUCLEAR_BOMB: Atom Bomb
+TXT_ION_CANNON: Ion Cannon
+TXT_FIRESTORM: Firestorm Defense Toggle
+TXT_ION_STORM_APPROACHING: Warning: Ion Storm approaching.
+TXT_ION_STORM: Warning: Ion Storm here!
+TXT_EM_PULSE: EM Pulse
+TXT_FIRESTORM_ON: Activated
+TXT_CHARGING: Charging...
+TXT_YELLOW: Yellow
+TXT_GRAY: Gray
+TXT_RED: Red
+TXT_PURPLE: Purple
+TXT_BLUE: Blue
+TXT_CYAN: Cyan
+TXT_TAN: Tan
+TXT_GREEN: Green
+TXT_MODE: Mode
+TXT_RANK: Rank
+TXT_BACK: Back
+TXT_NOT_IN_LADDER: Sorry, that player or rank is not in the ladder.
+TXT_BYTES_W_TIME: Bytes read: %d / %d.    Time left: %d seconds
+TXT_BYTES_WO_TIME: Bytes read: %d / %d.
+TXT_FINDING_PATCH: Finding Patch...
+TXT_NO_SERV_LIST: Couldn't get the server list
+TXT_UPGRADEREQUIRED: An upgrade is required for this game\nDo you want to download it now?\n \n \nWarning: use of \"trainers\", third-party cheat programs, or any other modification of Tiberian Sun may cause the automatic update procedure to fail. Please remove any such programs or reinstall Tiberian Sun before continuing.
+TXT_DOWNLOADING_X_OF_Y: Downloading file %d of %d...
+TXT_SERVER_ERROR: Chat Server Error
+TXT_LOGIN_USED: That login is already being used.
+TXT_BADPASS: That login or password was incorrect.
+TXT_BANNED: You've been temporarily banned. Would you like to open your web browser to get more information?
+TXT_CANT_CONNECT: Could not connect to Westwood Online, check your Internet connection.
+TXT_CHANCREATE_FAILED: Could not create the channel
+TXT_CREATED_CHAN: Created channel: %s
+TXT_CANT_JOINCHAN: Error joining channel %X
+TXT_PAGESENT: Page was successful.
+TXT_PAGEDISABLED: User has pages disabled
+TXT_PAGEUSERGONE: User isn't logged in
+TXT_PAGEFAILED: Couldn't page user
+TXT_FINDOK: User is in channel %s
+TXT_FINDNONE: User isn't in any channels
+TXT_FINDGONE: User isn't logged in
+TXT_FINDDISABLED: User has find disabled
+TXT_FINDFAILED: Find failed
+TXT_YOURE_DISCON: You've been disconnected from the server
+TXT_BANNEDTILL: You've been banned from Westwood Online until %s
+TXT_CHAN_BAN: %s has been banned from the channel
+TXT_CHAN_UNBAN: The channel ban on %s has been removed
+TXT_YOURE_KICKED: You were kicked out of channel %s by %s
+TXT_USER_KICKED: User %s was kicked out of channel %s by %s
+TXT_YOULEFT: You left channel %s
+TXT_FETCHING_SERVLIST: Fetching server list
+TXT_CONNECTING_SERVER: Connecting to Westwood Online
+TXT_REQ_CHANLIST: Requesting channel list
+TXT_JOINLOB: Joining Lobby
+TXT_JOININGCHAN: Joining channel: %s
+TXT_SEARCHING: SEARCHING...
+TXT_SEARCHING_FOR: Searching for %s....
+TXT_ACCEPTFIRST: All users must accept before the game can start.
+TXT_NO_BOUND_NET_CARD: IPX not available
+TXT_INVALID_SOCKET: Socket number must be between 0 and 16383
+TXT_DESTNET_ADDR_ERROR: Destination network address must be in the format xx.xx.xx.xx
+TXT_ABOUT_TO_TRY_MODE: The display mode will be changed. If there is a problem with the new display mode then wait and the old mode will be restored.
+TXT_APIMISSING: The Westwood online support library is either missing or invalid. Please reinstall the shared internet components from your CD.
+TXT_APIWRONGVERSION: The installed version of the Westwood Online support library is too old. Please reinstall the shared internet components from your CD.
+TXT_NOTCHANOP: You must be a channel operator to do this.
+TXT_NOSQUAD: You are not in a Tiberian Sun squad.
+TXT_LAUNCHBROWSER: Would you like to launch your web browser to visit this page?
+TXT_NOBROWSER: You don't have a web browser associated with HTML files.
+TXT_BAD_CHANNAME: You can't make a channel with this name.  Try removing spaces and other punctuation.
+TXT_BAD_CHANKEY: You can't make a channel with this password. Try removing spaces and other punctuation.
+TXT_CANTCREATE_CHAN: You cannot create this channel.
+TXT_NAME_BLANK: Your player name is blank, please enter a name.
+TXT_GAME_CLOSED: That game channel has closed
+TXT_CHANNEL_FULL: That channel is full
+TXT_JOINBAN: You've been banned from this channel
+TXT_ENTER_MESSAGE: Please enter a message to send
+TXT_NOT_IN_CHAN: You can't send a message when you're not in a channel
+TXT_WOL_CONNLOST: Lost connection to Westwood Online, outside users will not be able to page you.
+TXT_DSOUND_PROCEED: Proceeding with audio disabled.
+TXT_REQ_NICK: Requesting new login...
+TXT_GDI01A: Destroy all enemy units
+TXT_GDI02A: The Nod forces that attacked our Phoenix base are in this sector.  Their base must be destroyed in order to secure the region.  However, there is a significant civilian population requiring evacuation.  GDI transports will evacuate the civilians once all Nod SAM sites are destroyed.  The Nod base can then be safely terminated.
+TXT_GDI03A: It is highly probable that the Brotherhood will attempt to remove technology from the crash site and store it at the technology center.  Locate and secure the crash site, then capture the technology center.
+TXT_GDI03B: Destroying the base in this sector will prevent further removal of artifacts from the crash site.  In addition, Nod will not be able to reinforce the site from this location.
+TXT_GDI04A: Be advised, the Brotherhood will attempt to destroy the impact site.  GDI reinforcements are en route.  Protect the site until they arrive.
+TXT_GDI05A: A sensor net protects the valley where Tratos is being held.  To facilitate his rescue, we must disable the array that controls this highly sensitive net.  Once down, it will be much easier to get Tratos out of the valley.
+TXT_GDI05C: Tratos is being held in a hospital prison facility within this sector.  Avoid detection and rescue Tratos from the facility.  Once he is out, a transport will be sent in to evacuate him.  Once Tratos is clear, destroy all Nod forces in the area to prevent further experimentation.
+TXT_GDI06A: The large dams that power Vega's base lie in this sector.  Destroying them will temporarily drain power from his base.  To aid you in your objective, attack his island facility before he can bring new generators online.  The dam can be destroyed by disabling the two regulator stations in this sector.  GDI air support will be available if you can find a way to contact them and confirm your target. 
+TXT_GDI06B: Vega's base is secreted on an island in this sector.  Reaching it will be difficult, as there is only one overland access.  Your best chance of success lies in the use of amphibious APCs to land on the island and penetrate Vega's defenses.  Once on the island, destroy Vega's facility and command center.
+TXT_GDI07A: Nod has taken over much of our Hammerfest base in their search for the disrupter. Nod has reactivated the perimeter to prevent GDI from attacking.  Water assault remains your only option.  Find the Firestorm Defense structure generating the perimeter and deactivate it.  Only then can reinforcements arrive.  Proceed to destroy Nod's primary base, and prevent them from attacking again.
+TXT_GDI08A: It is imperative that you prevent the train from reaching the Nod base.  Remember, destroying the locomotive will immediately stop the train.  Recent ice melts in the region have disabled the only train bridge.  You must move quickly as Nod engineers are on their way to repair it.  The crystals can be recovered easily if you get to the train before Nod can repair the bridge.  Otherwise, we will need to attack the base in order to reclaim the crystals.
+TXT_GDI09A: The mutants are being held on an island in this sector.  We can spare a small force to attempt a rescue.  The area leading to the island is heavily guarded.  If you are detected, more Nod forces will arrive.  Avoiding Nod patrols is advised.  You must rescue all ten mutants and lead them to the dust-off zone.  Periodic airstrikes will be available.
+TXT_GDI09B: Destroying the supply base here will prevent the missile complex from receiving reinforcements.
+TXT_GDI09C: The train transporting the mutants is headed to this power grid.  The grid powers the missile complex.  Merely destroying the grid is inadequate: Nod will compensate by building more power plants at the base.  Use all the mutants to plant C4 charges on all the power plants.  We'll detonate the C4 when we attack the missile complex.
+TXT_GDI09D: Complete destruction of the missile complex is essential.  Be advised, Nod will use their Tiberium missiles and their new fighter prototypes against you.
+TXT_GDI10A: One of two possible locations for the fighter production facility.  Use the mutants to locate its whereabouts while remaining undetected.  If detected, Nod will cloak the factory and deploy more troops.  Hide the mutants, and Nod will once again uncloak their base.  After the base location is recorded, GDI dropships will immediately arrive with reinforcements.
+TXT_GDI10B: Another possible location of the fighter production facility.  Use the mutants to locate the position of the fighter production facility.  They must remain undetected. If Nod suspects enemy forces, they will cloak their production facility and deploy troops.  If the mutants can hide from the Nod troops for a short period, Nod will assume the area is clear, and uncloak the base.  Once we have recorded the location of the base, the mission will be complete.
+TXT_GDI11A: Be advised: Kane is determined to destroy you.  The ion storm has grounded the Kodiak.  We must protect it until the storm abates.  Production will be limited.  There is a high probability of equipment malfunction.  Caution is advised.
+TXT_GDI12A: Impulse signatures emanating from Cairo suggest Kane will launch his world-altering missile within hours.  You must destroy the pyramid temple before he has the chance to launch.  There are no alternatives.
+TXT_NOD01A: Destroy all enemy units.
+TXT_NOD02A: Hassan communicates to the Brotherhood through a nearby TV station.  With the Brotherhood in chaos, the opportunity to divide Hassan from his followers presents itself.  Capture the TV station and those once loyal to Kane's technology of peace will return to the fold.  And as for Hassan's pathetic guards -- crush them.
+TXT_NOD03A: The infidel Hassan has been tracked to this region of Cairo.  Build a base and remove the usurper.
+TXT_NOD03B: We have become aware of an imprisoned commander in this region who WAS loyal to Hassan.  Free him and his forces and they should be sympathetic to our cause -- and help in the capture of Hassan.  The commander may have information vital to my.......your movement.
+TXT_NOD04A: Taking out this weak GDI position will allow us to reclaim our Sarajevo temple without interruption.  Move to an open area and build your base.  GDI patrols are known to be in the area.  Do not mar the brotherhood's name any further.
+TXT_NOD05A: The alien craft is located in this region - find it!  You must utilize your stealth advantage, as the area is infested with GDI.  Once the craft is located, get an engineer inside to retrieve the Tacitus.  Should you encounter Vega's forces, consider them expendable.
+TXT_NOD06A: Control of the mutants is in our grasp.  Their headquarters is located to the north of your drop-off position.  The GDI units you will need to implicate in this deception occupy a small base to the southwest.  Do not mar the Brotherhood's name any further.  Allow the blame to fall squarely on Solomon's shoulders.
+TXT_NOD06B: You must reach the medical colony in the region without being prematurely detected by GDI and forcing a base evacuation.  To prevent this, consider first destroying the 3 sensor towers protecting the base.  Our new artillery unit should be sufficient for the job, even in your hands.  Once inside the base, the capture of the mutant female should be simple.
+TXT_NOD06C: The mutant female may be trying to reach the underground railway system located in New Detroit.  Move in and control the station before she arrives.  If she boards the train, you must stop it immediately.  This may be our last chance of capturing the abomination.
+TXT_NOD07A: The informant must make contact with the mutants south of the GDI base.  Use the mutants to protect the informant and to eliminate GDI patrols.  Reinforcements will arrive after you have secured the railway tunnel here.  Use them to locate and destroy the research facility.  The mutants, of course, are expendable.
+TXT_NOD07B: Use the cyborg commando and his team to locate the bio-toxin tanker trucks.  Both trucks must reach the convoy point here if they are to arrive in time to aid you in your assault against the research facility.  GDI patrols are known to be in the area.
+TXT_NOD08A: A cyborg commando has been sent to retrieve you.  Once free, rendezvous with your rescue team to the south.  Use them to locate and free Oxanna before she is transported to the main GDI facility.  After she has been freed, capture a GDI transport to make your escape.  
+TXT_NOD09A: In this sector lies a Nod base overrun with tiberium-based lifeforms.  Find the base, reactivate it, and use the tiberium life to fill our missiles.  When you have enough of the tiberium substance, launch the missile against the GDI base and destroy it.
+TXT_NOD09B: Enter the sector and deploy your base.  Once you have established a tiberium waste facility, convoys of tiberium waste will begin arriving.  Protect the convoys at all cost.  Once we have enough tiberium waste, the missile will be ready for use against GDI.  Destroying their base, once it is infected, will be a simple matter.
+TXT_NOD10A: We must destroy GDI's new weapon.  They will, of course, build more in the future but it will buy us valuable time.  We know GDI is testing the Mammoth somewhere in this sector.  Use a chameleon spy to infiltrate a GDI comm center and locate the test site.  Your fighter prototype should be all you need to obliterate the nuisance.
+TXT_NOD11A: The GDI defense perimeter is located here.  Do not destroy any GDI factories during your assault - you will need them to build GDI units under our control.  Once Jake McNeil's inspection detail is in our converted base, attack!  Kill all but McNeil.  Use the special toxin soldiers provided to control McNeil.  Once he has been \"persuaded\" to help us in our cause, EVAC him as directed.  If he detects the trap, capture him before he can flee the sector.   
+TXT_NOD12A: Kane's vision is at hand.  Unfortunately GDI's orbital station, the Philadelphia, can stop the missile that will take us into the future.   We must destroy the Philadelphia at all costs!  The Philadelphia will require three orbits over this sector before it can locate our missile.  You must get three ICBM launchers into position before the Philadelphia's final orbit is complete.  With the ICBMs in place, we can bring GDI's command station down.  All this remains contingent, of course, on McNeil's helpfulness.  You must pretend to pursue him back towards the GDI base.  They will open the perimeter to let him in.  Once he is in, he will deactivate the perimeter shortly thereafter.
+TXT_NOD12B: We suggest that the brotherhood should not suffer the indignations of the past.  In order to prevent history from repeating itself, you must steal the firing codes for GDI's ion cannon.    Paranoid security measures prevent GDI from storing the entire code in one place.  Therefore, use a chameleon spy to infiltrate three different comm centers.  Once we have the codes and the spy is safely evacuated, we will be able to use GDI's ion cannon against them in the final assault.  Unfortunately GDI will have to use the ion cannon once before we can use the codes.
+TXT_JANUARY: January
+TXT_FEBRUARY: February
+TXT_MARCH: March
+TXT_APRIL: April
+TXT_MAY: May
+TXT_JUNE: June
+TXT_JULY: July
+TXT_AUGUST: August
+TXT_SEPTEMBER: September
+TXT_OCTOBER: October
+TXT_NOVEMBER: November
+TXT_DECEMBER: December
+TXT_RELEASE_THE_HOUNDS: Release
+TXT_LOADING_GAME1A: Analyzing combat zone topography...
+TXT_LOADING_GAME1C: Compiling wartime conventions...
+TXT_LOADING_GAME1D: Gathering intel on involved factions...
+TXT_LOADING_GAME1E: Creating theories on likely enemy plan...
+TXT_LOADING_GAME1F: Secondary check of combat zone...
+TXT_LOADING_GAME1G: Deploying forces to combat zone...
+TXT_LOADING_GAME1H: Final analysis of outcome...
+TXT_RECONNECT_HELP1: Click on a name to propose removing that player from the game.
+TXT_RECONNECT_HELP2: If all other players have connection times in the red then you have probably been
+TXT_RECONNECT_HELP3: Check your connection to the internet.  If you were disconnected from the internet
+TXT_RECONNECT_HELP4: disconnected from the network.
+TXT_RECONNECT_HELP5: Click cancel to abort this game and return to the lobby.
+TXT_RECONNECT_HELP2B: disconnected from your internet service provider.
+TXT_RECONNECT_HELP3B: you can re-dial your provider and continue the game as normal provided the other
+TXT_RECONNECT_HELP3C: players don't elect to remove you from the game..
+TXT_RECONNECT_KICK_SELF: You can't propose removing yourself. Click cancel to leave the game.
+TXT_RECONNECT_KICK_RECEIVED: %s proposes kicking %s from the game.
+TXT_BIOME_TUNDRA: Tundra
+TXT_BIOME_TAIGA: Taiga
+TXT_BIOME_TEMPERATE: Temperate
+TXT_BIOME_DESERT: Desert
+TXT_TIME_MORNING: Morning
+TXT_TIME_AFTERNOON: Afternoon
+TXT_TIME_DUSK: Dusk
+TXT_TIME_NIGHT: Night
+TXT_MAPSIZE_SMALL: Small
+TXT_MAPSIZE_MEDIUM: Medium
+TXT_MAPSIZE_LARGE: Large
+TXT_MAPSIZE_VERY_LARGE: V.Large
+TXT_RANDOM_MAP_DESCRIPTION: Random Map
+TXT_LOADING_GAME1B: Compensating for ambient light values...
+TXT_CONSENT_REQUIRED: Since you are under the age of 13 our privacy policy requires that you send us a parental consent form to continue.  Press 'yes' to open your web browser to this page.
+TXT_CLAN_NOSTART: To start a BattleClan tournament game there needs to be an even number of people from two clans.  Everyone in the game must be in a clan.
+TXT_DISABLED: Your account has been temporarily disabled.  Make sure the Email address you registered with is correct.  Would you like to open your web browser to get more information?
+TXT_SERIALBANNED: (NOT USED ANYMORE)
+TXT_SERIALDUP: Your Serial number is currently in use.  Would you like to open your web browser to get more information?
+TXT_NOD04B: Taking out this weak GDI position will allow us to reclaim our Sarajevo temple without interruption.  Move in under the cover of an ion storm when GDI's communications will be down.  Take out the comm center before the storm subsides.
+TXT_SEL_USER: You must select a user to kick/ignore/ban them.
+TXT_GOLD: Gold
+TXT_ORANGE: Orange
+TXT_SKY_BLUE: Sky Blue
+TXT_PINK: Pink
+TXT_COLOR_IN_USE: The requested color is already taken.
+TXT_NO_CLAN: You must be in a BattleClan to join this game.
+TXT_LANGCODE: 0
+TXT_SERIAL_DUP: There are already 2 players with your serial# in that game.
+TXT_SCENARIO_TOO_SMALL: This map has a %d player max.  The max includes human and AI players.
+TXT_DOWNLOAD_FAILED: The download failed, please check your connection and try again later.
+TXT_GAME_RESTART: Tiberian Sun will now restart to update itself.
+TXT_PASSWORD_TOO_SHORT: Your password must be exactly 8 letters long.
+TXT_PASSWORD_VERIFY: You need to enter the same password twice.
+TXT_LOB_1: GDI Barracks
+TXT_LOB_2: NOD Barracks
+TXT_LOB_3: GDI Comm. Center
+TXT_LOB_4: Temple of NOD
+TXT_LOB_5: GDI Tech Center
+TXT_LOB_6: Hand of NOD
+TXT_NEW_GAME: New Game
+TXT_NEW_CHAT: New Chat
+TXT_NEW: New
+TXT_GAME_CHAN: Tiberian Sun game channels
+TXT_OTHER_GAME: Other game channels
+TXT_OFFICIAL_CHAT: Official chat channels
+TXT_USER_CHAT: User chat channels
+TXT_GAME_PASSWORD: Game has a password
+TXT_LEAVE: Leave
+TXT_JOIN: Join
+TXT_OPER: Channel Operator
+TXT_VOICE: Voice
+TXT_IGNOREUSER: Ignore User
+TXT_ACCEPTED: Accepted
+TXT_JOINED_S: You joined channel %s
+TXT_REQUIRED_FIELD: A required field is missing, or invalid.
+TXT_SCENARIO_COLON: Scenario:
+TXT_TOURNEY_COLON: Tournament:
+TXT_BATTLE_CLAN: BattleClan
+TXT_HOST_RANK: Host Rank:
+TXT_UNRANKED: Unranked
+TXT_CANT_KICK: You cannot kick a player from a tournament game.
+TXT_HOST_CHANGED_OPTIONS: The host has changed game options, press accept if you're ready.
+TXT_GDI: GDI
+TXT_NOD: Nod
+TXT_GAME_ID: Game# %d
+TXT_TOURNAMENT_GAME: Tournament Game
+TXT_BATTLECLAN_GAME: BattleClan Game
+TXT_GAME: Game: %d
+TXT_WDT_FORMAT_TWO_LINES: %s\n%s
+TXT_WDT_TERRITORY_CONTROL: \nGDI: %2d%%\nNod: %2d%%
+TXT_WDT_REVIEWING_HISTORY: Reviewing History\n
+TXT_WDT_DAY: Day : %d
+TXT_BIOME_MUTATED: Mutated
+TXT_WDT_INVALID_MISSING: Invalid/Missing
+TXT_WDT_INFO_CORRUPT: The World Domination Tour information was either not downloaded or is corrupt.
+TXT_WDT_NAME_DESC_RANK: %s\n%s\nRank : %d
+TXT_WDT_CANCEL: Cancel
+TXT_WDT_WEB_PAGE: Web Page
+TXT_WDT_NAME_RANK: %s\nRank : %d
+TXT_BAD_MAP_01: The host has selected
+TXT_BAD_MAP_02: a modified map.
+TXT_BAD_MAP_03: This may give the host
+TXT_BAD_MAP_04: an unfair advantage.
+TXT_BAD_MAP_05: No preview available.
+TXT_AMOUNT_VERY_FEW: Very Few
+TXT_AMOUNT_FEW: Few
+TXT_AMOUNT_MANY: Many
+TXT_AMOUNT_VERY_MANY: Very Many
+TXT_AMOUNT_VERY_LOW: Very Low
+TXT_AMOUNT_LOW: Low
+TXT_AMOUNT_HIGH: High
+TXT_AMOUNT_VERY_HIGH: Very High
+TXT_AMOUNT_VERY_SCARCE: Very Scarce
+TXT_AMOUNT_SCARCE: Scarce
+TXT_AMOUNT_ABUNDANT: Abundant
+TXT_AMOUNT_VERY_ABUNDANT: Very Abundant
+TXT_AMOUNT_VERY_SPARSE: Very Sparse
+TXT_AMOUNT_SPARSE: Sparse
+TXT_AMOUNT_HEAVY: Heavy
+TXT_AMOUNT_VERY_HEAVY: Very Heavy
+TXT_WDT_HARV_TRUCE: Harvester Truce
+TXT_WDT_BASES_ON: Starting Bases
+TXT_WDT_BASES_OFF: No Starting Bases
+TXT_WDT_MCV_REDEPLOY_ON: Redeployable MCV
+TXT_WDT_FOG_OF_WAR: Fog of War
+TXT_WDT_BRIDGE_DESTROY_ON: Bridges Destroyable
+TXT_WDT_BRIDGE_DESTROY_OFF: Indestructable Bridges
+TXT_WDT_GOODIES_ON: Goodie Crates
+TXT_WDT_GOODIES_OFF: No Goodie Crates
+TXT_WDT_TIME_OF_DAY_TRANSITIONS: Time of Day Transitions
+TXT_WDT_FMT_CLIFFS: %s Cliffs
+TXT_WDT_FMT_ACCESSIBILITY: %s Accessibility
+TXT_WDT_FMT_HILLS: %s Hills
+TXT_WDT_FMT_TIBERIUM: %s Tiberium
+TXT_WDT_FMT_TIBERIUM_FIELDS: %s Tiberium Fields
+TXT_WDT_FMT_WATER: %s Water
+TXT_WDT_FMT_VEGETATION: %s Vegetation
+TXT_WDT_FMT_CITIES: %s Cities
+TXT_WDT_LIFEFORMS: Tiberium Lifeforms
+TXT_WDT_VEINHOLES: Veinholes
+TXT_WDT_TECHLEVEL: Tech Level %d
+TXT_WDT_STARTING_UNITS: %d Starting Units
+TXT_WDT_CREDITS: %d Credits
+TXT_WDT_MCV_REDEPLOY_OFF: MCV Not Redeployable
+TXT_WDT_SHORT_GAME_ON: Short Game
+TXT_WDT_SHORT_GAME_OFF: Unlimited Game Length
+TXT_WDT_TWO_PLAYER_ONLY: Two Player Only
+TXT_WDT_FOUR_PLAYER_ONLY: Four Player Only
+TXT_WDT_MAP_TINY: Tiny Map
+TXT_WDT_MAP_SMALL: Small Map
+TXT_WDT_MAP_NARROW: Narrow Map
+TXT_WDT_MAP_TALL_NARROW: Tall & Narrow Map
+TXT_WDT_MAP_SHORT: Short Map
+TXT_WDT_MAP_LARGE: Large Map
+TXT_WDT_MAP_SHORT_WIDE: Short & Wide Map
+TXT_WDT_MAP_HUGE: Huge Map
+TXT_FETCHING_SQUAD: Fetching squad information
+TXT_FETCHING_LADDER: Fetching ladder information
+TXT_WDT_NET_ERR: Could not connect to the World Domination Tour server, or there is no server available
+TXT_NO_FREE_SLOTS: There are no more free slots in that game for your side
+TXT_WDT_FRONT_LINE_CHANGED: The active World Domination Tour territories have changed.  Relocating to new front line...
+TXT_FETCHING_WDT: Fetching World Domination Tour information
+TXT_CHOOSE_MAP: Please Choose Map
+TXT_WOL_LOGGING_OUT: Logging off Westwood Online
+TXT_PLAYER_CHANGED_LATENCY: Player %s has changed the connection speed setting.
+TXT_PLAYER_CHANGED_SPEED: Player %s has changed the game speed setting.
+TXT_WORST_CONNECTION: Bad
+TXT_POOR_CONNECTION: Poor
+TXT_GOOD_CONNECTION: Normal
+TXT_BEST_CONNECTION: Fast
+TXT_WARNING_LOCALE_UNKNOWN: You have not set your location. Click OK to continue anyway or cancel to go back and set your location.
+TXT_DELETE_USER: Are you sure you want to remove user '%s' from the login list?
+TXT_ALL_LOCATIONS: All Locations
+TXT_TS_PLAYERS: Tiberian Sun Players
+TXT_TS_BATTLECLANS: Tiberian Sun BattleClans
+TXT_FS_PLAYERS: Firestorm Players
+TXT_FS_BATTLECLANS: Firestorm BattleClans
+TXT_WDT_NOD_PLAYERS: WDT Nod Players
+TXT_WDT_GDI_PLAYERS: WDT GDI Players
+TXT_SELECT_TYPE: Select Same Type
+TXT_SELECT_TYPE_DESC: Selects all on-screen units of the same types as currently selected. Press twice quickly to select across the whole map.
+TXT_FIRESTORM_REQUIRED: Firestorm required to join this game.
+TXT_FIRESTORM_MUST_ENABLE: Firestorm must be enabled to join this game.
+TXT_FIRESTORM_NO_JOIN_TS: Unable to join original Tiberian Sun game with Firestorm enabled.
+TXT_SERIALUNKNOWN: Your serial number was not found.  This is most likely due to a mistyped serial number during installation.  You must reinstall the game, specifying a valid serial number, to play online.
+TXT_SKUSERIALMISMATCH: Your serial number is associated with a product other than Tiberian Sun.  You must reinstall the game, specifying a valid Tiberian Sun serial number, to play online.
+TXT_WDT_TIBERIUM_RANGE: Very Scarce Tiberium
+TXT_WDT_TIBERIUM_SCARCE: Scarce Tiberium
+TXT_WDT_TIBERIUM_ABUNDANT: Abundant Tiberium
+TXT_WDT_TIBERIUM_VERY_ABUNDANT: Very Abundant Tiberium
+TXT_WDT_TIBERIUM_FIELDS_RANGE: Very Few Tiberium Fields
+TXT_WDT_TIBERIUM_FIELDS_FEW: Few Tiberium Fields
+TXT_WDT_TIBERIUM_FIELDS_MANY: Many Tiberium Fields
+TXT_WDT_TIBERIUM_FIELDS_NUMEROUS: Numerous Tiberium Fields
+TXT_WDT_ACCESSIBILITY_RANGE: Very Low Accessibility
+TXT_WDT_ACCESSIBILITY_LOW: Low Accessibility
+TXT_WDT_ACCESSIBILITY_HIGH: High Accessibility
+TXT_WDT_ACCESSIBILITY_VERY_HIGH: Very High Accessibility
+TXT_WDT_CLIFFS_RANGE: Very Few Cliffs
+TXT_WDT_CLIFFS_FEW: Few Cliffs
+TXT_WDT_CLIFFS_MANY: Many Cliffs
+TXT_WDT_CLIFFS_NUMEROUS: Numerous Cliffs
+TXT_WDT_HILLS_RANGE: Very Few Hills
+TXT_WDT_HILLS_FEW: Few Hills
+TXT_WDT_HILLS_MANY: Many Hills
+TXT_WDT_HILLS_NUMEROUS: Numerous Hills
+TXT_WDT_WATER_RANGE: Very Scarce Water
+TXT_WDT_WATER_SCARCE: Scarce Water
+TXT_WDT_WATER_ABUNDANT: Abundant Water
+TXT_WDT_WATER_VERY_ABUNDANT: Very Abundant Water
+TXT_WDT_VEGETATION_RANGE: Very Sparse Vegetation
+TXT_WDT_VEGETATION_SPARSE: Sparse Vegetation
+TXT_WDT_VEGETATION_HEAVY: Heavy Vegetation
+TXT_WDT_VEGETATION_VERY_HEAVY: Very Heavy Vegetation
+TXT_WDT_CITIES_RANGE: Very Few Cities
+TXT_WDT_CITIES_FEW: Few Cities
+TXT_WDT_CITIES_MANY: Many Cities
+TXT_WDT_CITIES_NUMEROUS: Numerous Cities
+TXT_MULTI_ENGINEERS: Multi-Engineers
+TXT_NORMAL_ENGINEERS: Normal Engineers
+TXT_NEED_PLAYERS_TO_START: You need %d players to start the game.
+TXT_NEED_EQUAL_TEAMS: You must have an equal number of GDI and Nod players to start the game.
+TXT_WDT_NO_ALLIANCE_CHANGE: You cannot change alliances in a World Domination Tour game.
+TXT_UNKNOWN_STATUS: Unknown Status
+TXT_UNKNOWN_PING: Unknown Ping
+TXT_MANUAL_PLACE: Place Building
+TXT_MANUAL_PLACE_DESC: Enters placement mode for the completed building waiting on the sidebar.
+TXT_CREDITS_STORAGE: Credits = %d\rStorage = %d
+TXT_CREDITS: Credits = %d

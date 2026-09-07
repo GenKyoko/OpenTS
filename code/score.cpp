@@ -71,10 +71,13 @@
 #include "shapeset.h"
 #include "surface.h"
 #include "theme.h"
+#include "ttffont.h"
+#include "uifonts.h"
 #include "windlg.h"
 #include "winstub.h"
 
 #include <algorithm>
+#include <cstring>
 
 
 #define SIZEGBAR			140
@@ -245,7 +248,7 @@ void ScoreClass::Presentation(void)
 	SurfacePtr->Blit_From(rect, *HiddenSurface, rect);
 	AlternateSurface->Blit_From(rect, *HiddenSurface, rect);
 
-	str = Fetch_String(TXT_MISSION_EFFICIENCY);
+	str = Localize("TXT_MISSION_EFFICIENCY");
 	FullFont->String_Width(str);
 	x = XPos - FullFont->String_Width(str) / 2 + 552;
 	Alloc_Object(obj = new ScorePrintClass(str, x, YPos + 13, FullFont, false));
@@ -274,7 +277,7 @@ void ScoreClass::Presentation(void)
 	SurfacePtr->Blit_From(rect, *HiddenSurface, rect);
 	AlternateSurface->Blit_From(rect, *HiddenSurface, rect);
 
-	str = Fetch_String(TXT_CURRENCY);
+	str = Localize("TXT_CURRENCY");
 	FullFont->String_Width(str);
 	x = XPos - FullFont->String_Width(str) / 2 + 560;
 	Alloc_Object(obj = new ScorePrintClass(str, x, YPos + 193, FullFont, false));
@@ -298,7 +301,7 @@ void ScoreClass::Presentation(void)
 	SurfacePtr->Blit_From(rect, *HiddenSurface, rect);
 	AlternateSurface->Blit_From(rect, *HiddenSurface, rect);
 
-	str = Fetch_String(TXT_MISSION_TIME_LAPSE);
+	str = Localize("TXT_MISSION_TIME_LAPSE");
 	FullFont->String_Width(str);
 	x = XPos - FullFont->String_Width(str) / 2 + 542;
 	Alloc_Object(obj = new ScorePrintClass(str, x, YPos + 366, FullFont, false));
@@ -324,7 +327,7 @@ void ScoreClass::Presentation(void)
 	/*
 	** Show stats on # of units killed
 	*/
-	str = Fetch_String(TXT_CASUALTIES);
+	str = Localize("TXT_CASUALTIES");
 	FullFont->String_Width(str);
 	x = XPos - FullFont->String_Width(str) / 2 + 316;
 	Alloc_Object(obj = new ScorePrintClass(str, x, YPos + 300, FullFont, false));
@@ -334,7 +337,7 @@ void ScoreClass::Presentation(void)
 	/*
 	** Print out stats on buildings destroyed
 	*/
-	str = Fetch_String(TXT_STRUCTURES);
+	str = Localize("TXT_STRUCTURES");
 	x = XPos + 194;
 	Alloc_Object(obj = new ScorePrintClass(str, x, YPos + 247, FullFont, false));
 	x = XPos + 328;
@@ -342,7 +345,7 @@ void ScoreClass::Presentation(void)
 
 	Wait_For_Print(obj);
 
-	str = Fetch_String(TXT_UNITS);
+	str = Localize("TXT_UNITS");
 	x = XPos - FullFont->String_Width(str) / 2 + 290;
 	Alloc_Object(obj = new ScorePrintClass(str, x, YPos + 247, FullFont, false));
 	x = XPos - FullFont->String_Width(str) / 2 + 422;
@@ -377,7 +380,7 @@ void ScoreClass::Presentation(void)
 	SurfacePtr->Blit_From(rect, *HiddenSurface, rect);
 	AlternateSurface->Blit_From(rect, *HiddenSurface, rect);
 
-	str = Fetch_String(TXT_BEST_SCORES);
+	str = Localize("TXT_BEST_SCORES");
 	FullFont->String_Width(str);
 	x = XPos - FullFont->String_Width(str) / 2 + 84;
 	Alloc_Object(obj = new ScorePrintClass(str, x, YPos + 217, FullFont, false));
@@ -439,7 +442,7 @@ void ScoreClass::Presentation(void)
 	if (index < NUMFAMENAMES) {
 		Input_Name(hallfame[index].name, XPos + HALLFAME_X - 4, YPos + HALLFAME_Y + (index * 16));
 	} else {
-		str = Fetch_String(TXT_CLICK_CONTINUE);
+		str = Localize("TXT_CLICK_CONTINUE");
 		x = XPos + (640 - FullFont->String_Width(str)) / 2;
 		y = YPos - FullFont->Get_Height() / 2 + 357;
 		Alloc_Object(obj = new ScorePrintClass(str, x, y, FullFont, false));
@@ -1268,6 +1271,10 @@ void ScoreFontClass::Load_Sounds(void)
 /// <returns>Returns with the width in pixels that the string would occupy.</returns>
 int ScoreFontClass::String_Width(const char * string)
 {
+	if (Ttf != NULL) {
+		return(Ttf->String_Pixel_Width(string));
+	}
+
 	const char * str = string;
 	int w = 0;
 	while (*str) {
@@ -1284,6 +1291,10 @@ int ScoreFontClass::String_Width(const char * string)
 /// <returns>Returns with the width in pixels that the character occupies.</returns>
 int ScoreFontClass::Char_Width(char ch)
 {
+	if (Ttf != NULL) {
+		return(Ttf->Char_Pixel_Width(ch));
+	}
+
 	char out[1];
 
 	if (ch == 32) {
@@ -1309,6 +1320,26 @@ int ScoreFontClass::Char_Width(char ch)
 /// <param name="play_sound">Should a typing sound be played along with the character?</param>
 void ScoreFontClass::Print_Char(Surface *surf, char ch, int x, int y, int v, bool play_sound)
 {
+	if (play_sound == true && v == 0) {
+		void *snd = text_sounds[rand() % 3].mSound;
+		if (snd != NULL) {
+			Audio.Play_Sample(snd, 255, Options.SoundVolume * 128);
+		}
+	}
+
+	if (Ttf != NULL) {
+		/*
+		** The vector path has no brightness frames; the character is drawn as it
+		** stands, and the typewriter flicker comes from the font's animation.
+		*/
+		char buffer[2];
+		buffer[0] = ch;
+		buffer[1] = '\0';
+		Rect clip = surf->Get_Rect();
+		Ttf->Print(buffer, *surf, clip, Point2D(x, y), *Drawer, TextRemap);
+		return;
+	}
+
 	CharToOemBuff(&ch, &ch, sizeof(ch));
 
 	if (ch != 32) {
@@ -1335,6 +1366,12 @@ void ScoreFontClass::Print_Char(Surface *surf, char ch, int x, int y, int v, boo
 /// <param name="brightness_frame">The brightness frame to draw the glyphs with.</param>
 void ScoreFontClass::Print_String(Surface *surf, const char * string, int x, int y, int brightness_frame)
 {
+	if (Ttf != NULL) {
+		Rect clip = surf->Get_Rect();
+		Ttf->Print(string, *surf, clip, Point2D(x, y), *Drawer, TextRemap);
+		return;
+	}
+
 	unsigned char buf[2];
 	while (*string != '\0') {
 		if (*string != 32) {
@@ -1358,6 +1395,13 @@ void ScoreFontClass::Print_String(Surface *surf, const char * string, int x, int
 ScoreFullFontClass::ScoreFullFontClass(ConvertClass * drawer) :
 	ScoreFontClass()
 {
+	Ttf = static_cast<TtfFontClass *>(Fetch_TTF_Font_Replacement("SCOREFULL", 21));
+	if (Ttf != NULL) {
+		Ttf->Begin_Text_Animation(120, 150);
+	}
+	memset(TextRemap, 0, sizeof(TextRemap));
+	TextRemap[1] = 68;	// The score palette's text color.
+
 	IsShapeAllocated = false;
 	ShapePtr = (const ShapeSet *)MFCD::Retrieve("FULLFNT3.SHP");
 	if (ShapePtr == NULL) {
@@ -1382,6 +1426,13 @@ ScoreFullFontClass::ScoreFullFontClass(ConvertClass * drawer) :
 ScoreBigFontClass::ScoreBigFontClass(ConvertClass * drawer) :
 	ScoreFontClass()
 {
+	Ttf = static_cast<TtfFontClass *>(Fetch_TTF_Font_Replacement("SCOREBIG", 35));
+	if (Ttf != NULL) {
+		Ttf->Begin_Text_Animation(120, 150);
+	}
+	memset(TextRemap, 0, sizeof(TextRemap));
+	TextRemap[1] = 68;	// The score palette's text color.
+
 	IsShapeAllocated = false;
 	ShapePtr = (const ShapeSet *)MFCD::Retrieve("BIGFONT.SHP");
 	if (ShapePtr == NULL) {
@@ -1442,12 +1493,20 @@ bool ScoreTimeClass::Update(Surface * surf)
 /// <param name="font">The score screen font to print the text with.</param>
 /// <param name="is_fully_lit">Should the text appear fully lit instead of typing itself in?</param>
 ScorePrintClass::ScorePrintClass(int string, int xpos, int ypos, ScoreFontClass * font, bool is_fully_lit) :
-	ScoreAnimClass(xpos, ypos, Fetch_String(string)),
+	ScoreAnimClass(xpos, ypos, Localize(string)),
 	Pos(0),
+	LastSeen(0),
 	Stage(0),
 	State(is_fully_lit),
 	Font(font)
 {
+	if (Font->Has_TTF() && State) {
+		/*
+		** Fully lit text must not type itself in, so its typewriter run is wound
+		** to the end before the first frame.
+		*/
+		Font->Get_TTF()->Finish_Text_Animation(Get_String());
+	}
 }
 
 
@@ -1462,10 +1521,14 @@ ScorePrintClass::ScorePrintClass(int string, int xpos, int ypos, ScoreFontClass 
 ScorePrintClass::ScorePrintClass(void const * string, int xpos, int ypos, ScoreFontClass * font, bool is_fully_lit) :
 	ScoreAnimClass(xpos, ypos, string),
 	Pos(0),
+	LastSeen(0),
 	Stage(0),
 	State(is_fully_lit),
 	Font(font)
 {
+	if (Font->Has_TTF() && State) {
+		Font->Get_TTF()->Finish_Text_Animation(Get_String());
+	}
 }
 
 
@@ -1481,6 +1544,40 @@ bool ScorePrintClass::Update(Surface * surf)
 {
 
 	StillUpdating = true;
+
+	/*
+	** The TrueType path: the font's wall clock typewriter animation decides how
+	** much of the text shows, so every pass restores the strip the text types
+	** into and prints the text whole. Each newly revealed character paces one
+	** typing sound, and once the line is complete it is laid into the alternate
+	** surface so background restores keep it, then the object retires.
+	*/
+	if (Font->Has_TTF()) {
+		TtfFontClass * ttf = Font->Get_TTF();
+		char const * text = (char const *)DataPtr;
+
+		Rect rect;
+		int w = Font->String_Width(text);
+		rect.Set(XPos - 8 <= 0 ? 0 : XPos - 8, YPos, w + 10, Font->Get_Height());
+		HiddenSurface->Blit_From(rect, *AlternateSurface, rect);
+
+		ttf->Print(text, *HiddenSurface, rect, Point2D(XPos, YPos), *Font->Drawer, Font->Get_Text_Remap());
+
+		unsigned visible = ttf->Text_Animation_Visible(text);
+		if ((int)visible > LastSeen) {
+			LastSeen = visible;
+			void *snd = text_sounds[rand() % 3].mSound;
+			if (snd != NULL) {
+				Audio.Play_Sample(snd, 255, Options.SoundVolume * 128);
+			}
+		}
+
+		if (!ttf->Is_Text_Animation_Running(text) && visible > 0) {
+			AlternateSurface->Blit_From(rect, *HiddenSurface, rect);
+			return(true);
+		}
+		return(false);
+	}
 
 	if (!Timer) {
 		Timer = 2;

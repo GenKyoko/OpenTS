@@ -238,7 +238,7 @@ int ListClass::Add_Item(char const * text)
 int ListClass::Add_Item(int text)
 {
 	if (text != TXT_NONE) {
-		Add_Item(Fetch_String(text));
+		Add_Item(Localize(text));
 	}
 	return(List.Count() - 1);
 }

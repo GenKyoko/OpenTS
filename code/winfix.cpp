@@ -39,6 +39,7 @@
 #include "misc.h"
 #include "ownrdraw.h"
 #include "trim.h"
+#include "video.h"
 
 #include <algorithm>
 #include <commctrl.h>
@@ -852,25 +853,35 @@ void Center_Window_Within_Window(HWND window)
 /// <summary>
 /// Centers a window over another window.
 /// This routine is used by the dialog handlers to place a dialog over the window that
-/// spawned it. The main game window is measured by the current video mode rather than by
+/// spawned it. The main game window is measured by the frame it presents rather than by
 /// its client area, so a dialog lands centered on what the player can actually see.
 /// </summary>
 /// <param name="window">The window to be moved.</param>
 /// <param name="parent">The window to center over.</param>
 void Center_Window_Within_Window(HWND window, HWND parent)
 {
+	VideoScaleInfo const & scale = Video_Get_Scale_Info();
+	bool over_frame = (parent == MainWindow && scale.DestWidth > 0 && scale.DestHeight > 0);
+
 	RECT rcl;
 	GetClientRect(parent, &rcl);
 
 	if (parent == MainWindow) {
-		rcl.right = VideoModeWidth;
-		rcl.bottom = VideoModeHeight;
+		if (over_frame) {
+			rcl.right = scale.DestWidth;
+			rcl.bottom = scale.DestHeight;
+		} else {
+			rcl.right = VideoModeWidth;
+			rcl.bottom = VideoModeHeight;
+		}
 	}
 
 	ClientToScreen(parent, (LPPOINT)&rcl);
 	ClientToScreen(parent, (LPPOINT)&rcl.right);
-	rcl.right -= rcl.left;
-	rcl.bottom -= rcl.top;
+	int origin_x = rcl.left;
+	int origin_y = rcl.top;
+	rcl.right -= origin_x;
+	rcl.bottom -= origin_y;
 
 	RECT rect;
 	GetClientRect(window, &rect);
@@ -886,6 +897,25 @@ void Center_Window_Within_Window(HWND window, HWND parent)
 	}
 	if (y < 0) {
 		y = 0;
+	}
+
+	/*
+	 * The frame is letterboxed inside the client, so the centered position is carried
+	 * to where the frame actually sits.
+	 */
+	if (parent == MainWindow) {
+		x += scale.DestX;
+		y += scale.DestY;
+	}
+
+	/*
+	 * A popup window is positioned in screen coordinates, so the position computed
+	 * against the client area's origin carries that origin back in. A child window
+	 * needed the raw value.
+	 */
+	if (GetWindowLong(window, GWL_STYLE) & WS_POPUP) {
+		x += origin_x;
+		y += origin_y;
 	}
 
 	SetWindowPos(window, 0, x, y, -1, -1, SWP_NOSIZE|SWP_NOZORDER);

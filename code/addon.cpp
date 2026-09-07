@@ -244,5 +244,5 @@ const char * Get_Addon_Title(AddonType addon)
 		TXT_SHORT_TITLE,
 		TXT_EXPANSION_TITLE,
 	};
-	return(Fetch_String(_id[addon]));
+	return(Localize(_id[addon]));
 }

@@ -391,7 +391,7 @@ int WWFontClass::Set_YSpacing(int y)
  *   01/24/2000 SKB : put in call for Get_Remap_Palette                                        *
  *   01/24/2000 SKB : Put in call for get converer.                                            *
  *=============================================================================================*/
-Point2D WWFontClass::Print(char const * string, Surface & surface, Rect const & cliprect, Point2D const & drawpoint, ConvertClass const & convertref, unsigned char const * remap) const
+Point2D WWFontClass::Print(char const * string, Surface & surface, Rect const & cliprect, Point2D const & drawpoint, ConvertClass const & convertref, unsigned char const * remap, ColorScheme const * scheme) const
 {
 	if (string == NULL) return(drawpoint);
 

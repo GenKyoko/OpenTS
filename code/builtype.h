@@ -55,6 +55,14 @@ class BuildingTypeClass : public TechnoTypeClass
 		*/
 		void const * BuildupData;
 
+		/*
+		**	True when BuildupData points at memory this object allocated itself (and
+		**	therefore may delete). Data fetched through MFCD::Retrieve can be a
+		**	borrowed pointer into a mix file's cached data block and must never be
+		**	passed to delete.
+		*/
+		bool BuildupDataIsOwned;
+
 		/// Unused
 		Point3D HalfDamageSmokeLocation1;
 		Point3D HalfDamageSmokeLocation2;

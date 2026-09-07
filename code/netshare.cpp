@@ -923,7 +923,7 @@ bool DecodePubGameopt(char * options, char * name)
 			strcpy(Session.Options.ScenarioDescription, scenario_description);
 		}
 		if (stricmp(Session.ScenarioFileName, RANDOM_MAP_FILE_NAME) == 0) {
-			strcpy(Session.Options.ScenarioDescription, Fetch_String(TXT_RANDOM_MAP_DESCRIPTION));
+			strcpy(Session.Options.ScenarioDescription, Localize("TXT_RANDOM_MAP_DESCRIPTION"));
 		}
 	}
 
@@ -960,7 +960,7 @@ bool DecodePubGameopt(char * options, char * name)
 		int color = atol(token);
 
 		if (stricmp(handle, Session.Handle) == 0 && color != Session.PrefColor && !IsColorChangePending) {
-			PMessagePrintf(-1, Fetch_String(TXT_COLOR_IN_USE));
+			PMessagePrintf(-1, Localize("TXT_COLOR_IN_USE"));
 			Session.PrefColor = color;
 		}
 
@@ -1011,7 +1011,7 @@ bool DecodePubGameopt(char * options, char * name)
 				Net2SetAccept(NULL, 0);
 			}
 
-			PMessagePrintf(-1, Fetch_String(TXT_HOST_CHANGED_OPTIONS));
+			PMessagePrintf(-1, Localize("TXT_HOST_CHANGED_OPTIONS"));
 
 			char buffer[64];
 			sprintf(buffer, "A0");

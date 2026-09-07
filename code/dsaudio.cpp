@@ -297,7 +297,7 @@ bool DSAudio::Init( HWND window , int bits_per_sample, bool stereo , int rate )
 		res = DirectSoundCreate (NULL,&SoundObject,NULL);
 		if ( res != DS_OK ) {
 			DebugString("Failed to create direct sound object. Error code %d\n", res);
-			Print_Sound_Error(Fetch_String(TXT_DSOUND_CANT_CREATE), window);
+			Print_Sound_Error(Localize("TXT_DSOUND_CANT_CREATE"), window);
 			UNLOCK_GLOBAL_MUTEX();
 			return(FALSE);
 		}
@@ -308,7 +308,7 @@ bool DSAudio::Init( HWND window , int bits_per_sample, bool stereo , int rate )
 		res = SoundObject->SetCooperativeLevel( window, DSSCL_PRIORITY );
 		if ( res != DS_OK ) {
 			DebugString("Failed to set cooperative level. Error code %d\n", res);
-			Print_Sound_Error(Fetch_String(TXT_DSOUND_NO_COOP), window);
+			Print_Sound_Error(Localize("TXT_DSOUND_NO_COOP"), window);
 			SoundObject->Release();
 			SoundObject = NULL;
 			UNLOCK_GLOBAL_MUTEX();
@@ -349,7 +349,7 @@ bool DSAudio::Init( HWND window , int bits_per_sample, bool stereo , int rate )
 														NULL );
 		if ( res!=DS_OK ){
 			DebugString("Failed to create the primary sound buffer. Error code %d\n", res);
-			Print_Sound_Error(Fetch_String(TXT_DSOUND_NO_PRIMARY), window);
+			Print_Sound_Error(Localize("TXT_DSOUND_NO_PRIMARY"), window);
 			SoundObject->Release();
 			SoundObject = NULL;
 			UNLOCK_GLOBAL_MUTEX();
@@ -417,7 +417,7 @@ bool DSAudio::Init( HWND window , int bits_per_sample, bool stereo , int rate )
 						PrimaryBufferPtr = NULL;
 						SoundObject->Release();
 						SoundObject = NULL;
-						Print_Sound_Error(Fetch_String(TXT_DSOUND_INCOMPAT), window);
+						Print_Sound_Error(Localize("TXT_DSOUND_INCOMPAT"), window);
 						UNLOCK_GLOBAL_MUTEX();
 						return(false);
 					}
@@ -437,7 +437,7 @@ bool DSAudio::Init( HWND window , int bits_per_sample, bool stereo , int rate )
 		res = PrimaryBufferPtr->Play(0,0,DSBPLAY_LOOPING);
 		if ( res != DS_OK ) {
 			DebugString("Failed to start primary sound buffer. Error code %d\n", res);
-			Print_Sound_Error(Fetch_String(TXT_DSOUND_ACCESS), window);
+			Print_Sound_Error(Localize("TXT_DSOUND_ACCESS"), window);
 			PrimaryBufferPtr->Release();
 			PrimaryBufferPtr = NULL;
 			SoundObject->Release();
@@ -2193,8 +2193,8 @@ bool DSAudio::File_Callback(short id, short *odd, void **buffer, int *size)
 void DSAudio::Print_Sound_Error(char const *sound_error, HWND window)
 {
 	char buf[512];
-	sprintf(buf, "%s\n\n%s", sound_error, Fetch_String(TXT_DSOUND_PROCEED));
-	MessageBox(window, buf, Fetch_String(TXT_SHORT_TITLE), MB_ICONEXCLAMATION|MB_OK);
+	sprintf(buf, "%s\n\n%s", sound_error, Localize("TXT_DSOUND_PROCEED"));
+	MessageBox(window, buf, Localize("TXT_SHORT_TITLE"), MB_ICONEXCLAMATION|MB_OK);
 }
 
 

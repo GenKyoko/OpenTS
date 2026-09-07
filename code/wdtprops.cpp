@@ -139,7 +139,7 @@ const char * CampaignProperties::Get_Short_Desc(void) const
 	if (TourState != NULL) {
 		return(TourState->ShortDesc);
 	}
-	return(Fetch_String(TXT_WDT_INVALID_MISSING));
+	return(Localize("TXT_WDT_INVALID_MISSING"));
 }
 
 
@@ -153,7 +153,7 @@ const char * CampaignProperties::Get_Long_Desc(void) const
 	if (TourState != NULL) {
 		return(TourState->LongDesc);
 	}
-	return(Fetch_String(TXT_WDT_INFO_CORRUPT));
+	return(Localize("TXT_WDT_INFO_CORRUPT"));
 }
 
 

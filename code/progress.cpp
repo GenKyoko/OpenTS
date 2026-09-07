@@ -255,7 +255,7 @@ void ProgressScreenClass::Display_Progress(Point2D xpt)
 							if (progress > percent) {
 								for (int j = 0; j < ARRAY_SIZE(_progress_messages); j++) {
 									if (_progress_messages[j].Progress <= progress && _progress_messages[j].Progress > percent) {
-										Fancy_Text_Print(Fetch_String(_progress_messages[j].Text), *HiddenSurface, HiddenSurface->Get_Rect(), Pos + Point2D(0, 10 * j), Fetch_Scheme_By_Name("Green"), 0, TextPrintType(TPF_NOSHADOW|TPF_EFNT));
+										Fancy_Text_Print(Localize(_progress_messages[j].Text), *HiddenSurface, HiddenSurface->Get_Rect(), Pos + Point2D(0, 10 * j), Fetch_Scheme_By_Name("Green"), 0, TextPrintType(TPF_NOSHADOW|TPF_EFNT));
 										Sound_Effect(VocClass::From_Name("Notify"), 0.4f);
 										Percentage = _progress_messages[j].Progress;
 										if (surface == HiddenSurface) {

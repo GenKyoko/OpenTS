@@ -6976,8 +6976,11 @@ bool TechnoClass::Is_Allowed_To_Retaliate(TechnoClass const * source, WarheadTyp
 
 	/*
 	**	Don't allow retaliation if it isn't equipped with a weapon that can deal with the threat.
+	**	Mirror the air/ground legality that Can_Fire applies, so a pure anti-aircraft
+	**	defense never locks onto the ground unit shooting it (and vice versa).
 	*/
-	if (source->RTTI == RTTI_AIRCRAFT && !wdata->Weapon->Bullet->IsAntiAircraft) return(false);
+	if (source->In_Air() && !wdata->Weapon->Bullet->IsAntiAircraft) return(false);
+	if (source->On_Ground() && !wdata->Weapon->Bullet->IsAntiGround) return(false);
 
 	/*
 	**	Tanya is not allowed to retaliate against buildings in the normal sense while in guard mode. That

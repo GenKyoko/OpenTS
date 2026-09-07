@@ -705,7 +705,7 @@ void EventClass::Execute(void)
 				Special = Data.Options.Data;
 				Scen->Special = Data.Options.Data;
 
-				sprintf(txt, Fetch_String(TXT_SPECIAL_WARNING), (char const *)house->IniName);
+				sprintf(txt, Localize("TXT_SPECIAL_WARNING"), (char const *)house->IniName);
 				Session.Messages.Add_Message(NULL, 0, txt,
 					house->Scheme,
 					TextPrintType(TPF_6PT_GRAD|TPF_USE_GRAD_PAL|TPF_FULLSHADOW), 1200);
@@ -1083,7 +1083,7 @@ void EventClass::Execute(void)
 
 			house = Houses[ID];
 			if (house != PlayerPtr && house != NULL) {
-				str = Fetch_String(TXT_PLAYER_CHANGED_SPEED);
+				str = Localize("TXT_PLAYER_CHANGED_SPEED");
 				if (str != NULL && strlen(str) != 0) {
 					sprintf(msg, str, house->IniName.c_str());
 					Session.Messages.Add_Message(NULL, 0, msg, house->Scheme, TextPrintType(TPF_6PT_GRAD|TPF_USE_GRAD_PAL|TPF_FULLSHADOW), Rule->MessageDelay * TICKS_PER_MINUTE);
@@ -1102,7 +1102,7 @@ void EventClass::Execute(void)
 		**	Save a multiplayer game (this event is only generated in multiplayer mode)
 		*/
 		case SAVEGAME:
-			Request_Save_Game(NET_SAVE_FILE_NAME, Fetch_String(TXT_MULTIPLAYER_GAME));
+			Request_Save_Game(NET_SAVE_FILE_NAME, Localize("TXT_MULTIPLAYER_GAME"));
 			break;
 
 		/*
@@ -1145,7 +1145,7 @@ void EventClass::Execute(void)
 
 			house = Houses[ID];
 			if (house != PlayerPtr && house != NULL) {
-				str = Fetch_String(TXT_PLAYER_CHANGED_LATENCY);
+				str = Localize("TXT_PLAYER_CHANGED_LATENCY");
 				if (str != NULL && strlen(str) != 0) {
 					sprintf(msg, str, house->IniName.c_str());
 					Session.Messages.Add_Message(NULL, 0, msg, house->Scheme, TextPrintType(TPF_6PT_GRAD|TPF_USE_GRAD_PAL|TPF_FULLSHADOW), Rule->MessageDelay * TICKS_PER_MINUTE);

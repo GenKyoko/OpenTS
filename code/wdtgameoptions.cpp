@@ -65,7 +65,7 @@ void RangedGameOption::Get_String(const WDTTerritory * territory, char * str, in
 {
 	int stringid = Get_In_Range_Of(territory);
 	WDT_Game_Option_Append_Comma(str, len);
-	strncat(str, Fetch_String(StringID + stringid), len);
+	strncat(str, Localize(StringID + stringid), len);
 }
 
 
@@ -138,7 +138,7 @@ void FlagGameOption::Get_String(const WDTTerritory * territory, char * str, int 
 	int stringid = (territory->Booleans & Bitmask) ? OnString : OffString;
 	if (stringid != TXT_NONE) {
 		WDT_Game_Option_Append_Comma(str, len);
-		strncat(str, Fetch_String(stringid), len);
+		strncat(str, Localize(stringid), len);
 	}
 }
 
@@ -169,7 +169,7 @@ void NumberOfPlayersGameOption::Get_String(const WDTTerritory * territory, char 
 		int stringid = territory->NumPlayers == 4 ? TXT_WDT_FOUR_PLAYER_ONLY : TXT_WDT_TWO_PLAYER_ONLY;
 		if (stringid != TXT_NONE) {
 			WDT_Game_Option_Append_Comma(str, len);
-			strncat(str, Fetch_String(stringid), len);
+			strncat(str, Localize(stringid), len);
 		}
 	}
 }
@@ -220,6 +220,6 @@ void MapSizeGameOption::Get_String(const WDTTerritory * territory, char * str, i
 	int stringid = _table[territory->Width][territory->Height];
 	if (stringid != TXT_NONE) {
 		WDT_Game_Option_Append_Comma(str, len);
-		strncat(str, Fetch_String(stringid), len);
+		strncat(str, Localize(stringid), len);
 	}
 }

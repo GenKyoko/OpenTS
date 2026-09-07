@@ -493,7 +493,7 @@ bool Spawner::Start_Scenario(char* scenario_name)
 	 */
 	if (scenario_name[0] == 0 && !Config->LoadSaveGame) {
 		DebugFmt("[Spawner] Failed to read scenario [{}]\n", scenario_name);
-		MessageBox(MainWindow, Fetch_String(TXT_UNABLE_READ_SCENARIO), "Tiberian Sun", MB_OK);
+		MessageBox(MainWindow, Localize("TXT_UNABLE_READ_SCENARIO"), "Tiberian Sun", MB_OK);
 
 		return false;
 	}
@@ -611,7 +611,7 @@ bool Spawner::Load_Game(const char* file_name)
 	 */
 	if (!LoadOptionsClass().Load_File(file_name)) {
 		DebugFmt("[Spawner] Failed to load savegame [{}]\n", file_name);
-		MessageBox(MainWindow, Fetch_String(TXT_ERROR_LOADING_GAME), Fetch_String(TXT_SHORT_TITLE), MB_OK);
+		MessageBox(MainWindow, Localize("TXT_ERROR_LOADING_GAME"), Localize("TXT_SHORT_TITLE"), MB_OK);
 		return false;
 	}
 

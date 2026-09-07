@@ -59,7 +59,7 @@ void Skirmish_On_WM_COMMAND(HWND window, int message, WPARAM wparam, LPARAM lpar
 				if (handle) waypoint = Slider_GetPos(handle) + 1;
 
 				if (waypoint_count < waypoint) {
-					sprintf(buffer, Fetch_String(TXT_SCENARIO_TOO_SMALL), waypoint_count);
+					sprintf(buffer, Localize("TXT_SCENARIO_TOO_SMALL"), waypoint_count);
 					WWMessageBox().Process(buffer, TXT_OK);
 					EnableWindow(GetDlgItem(window, 1), TRUE);
 					return;
@@ -399,14 +399,14 @@ BOOL Skirmish_On_WM_INITDIALOG(HWND window, WPARAM wparam, LPARAM lparam)
 	}
 
 	SendDlgItemMessage(window, IDC_SKIRMISH_COLOR, CB_RESETCONTENT, 0, 0);
-	SendDlgItemMessage(window, IDC_SKIRMISH_COLOR, CB_INSERTSTRING, -1, (LPARAM)Fetch_String(TXT_GOLD));
-	SendDlgItemMessage(window, IDC_SKIRMISH_COLOR, CB_INSERTSTRING, -1, (LPARAM)Fetch_String(TXT_RED));
-	SendDlgItemMessage(window, IDC_SKIRMISH_COLOR, CB_INSERTSTRING, -1, (LPARAM)Fetch_String(TXT_BLUE));
-	SendDlgItemMessage(window, IDC_SKIRMISH_COLOR, CB_INSERTSTRING, -1, (LPARAM)Fetch_String(TXT_GREEN));
-	SendDlgItemMessage(window, IDC_SKIRMISH_COLOR, CB_INSERTSTRING, -1, (LPARAM)Fetch_String(TXT_ORANGE));
-	SendDlgItemMessage(window, IDC_SKIRMISH_COLOR, CB_INSERTSTRING, -1, (LPARAM)Fetch_String(TXT_SKY_BLUE));
-	SendDlgItemMessage(window, IDC_SKIRMISH_COLOR, CB_INSERTSTRING, -1, (LPARAM)Fetch_String(TXT_PURPLE));
-	SendDlgItemMessage(window, IDC_SKIRMISH_COLOR, CB_INSERTSTRING, -1, (LPARAM)Fetch_String(TXT_PINK));
+	SendDlgItemMessage(window, IDC_SKIRMISH_COLOR, CB_INSERTSTRING, -1, (LPARAM)Localize("TXT_GOLD"));
+	SendDlgItemMessage(window, IDC_SKIRMISH_COLOR, CB_INSERTSTRING, -1, (LPARAM)Localize("TXT_RED"));
+	SendDlgItemMessage(window, IDC_SKIRMISH_COLOR, CB_INSERTSTRING, -1, (LPARAM)Localize("TXT_BLUE"));
+	SendDlgItemMessage(window, IDC_SKIRMISH_COLOR, CB_INSERTSTRING, -1, (LPARAM)Localize("TXT_GREEN"));
+	SendDlgItemMessage(window, IDC_SKIRMISH_COLOR, CB_INSERTSTRING, -1, (LPARAM)Localize("TXT_ORANGE"));
+	SendDlgItemMessage(window, IDC_SKIRMISH_COLOR, CB_INSERTSTRING, -1, (LPARAM)Localize("TXT_SKY_BLUE"));
+	SendDlgItemMessage(window, IDC_SKIRMISH_COLOR, CB_INSERTSTRING, -1, (LPARAM)Localize("TXT_PURPLE"));
+	SendDlgItemMessage(window, IDC_SKIRMISH_COLOR, CB_INSERTSTRING, -1, (LPARAM)Localize("TXT_PINK"));
 	SendDlgItemMessage(window, IDC_SKIRMISH_COLOR, CB_SETCURSEL, Session.PrefColor, 0);
 
 	for (int player = 0; player < MAX_PLAYERS; player++) {

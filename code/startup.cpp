@@ -344,7 +344,7 @@ static bool RegisterClasses(void)
 	REGISTER_CLASS(AlphaShapeClass, CLSID_AlphaShapeClass);
 
 	if (failed) {
-		MessageBox(NULL, Fetch_String(TXT_PREPARECOM_FAILED), Fetch_String(TXT_SHORT_TITLE), MB_ICONEXCLAMATION);
+		MessageBox(NULL, Localize("TXT_PREPARECOM_FAILED"), Localize("TXT_SHORT_TITLE"), MB_ICONEXCLAMATION);
 	}
 
 	return(failed);
@@ -467,8 +467,8 @@ int CALLBACK WinMain ( HINSTANCE instance , HINSTANCE , char * command_line , in
 	}
 
 	if (GetDllVersion("comctl32.dll") < PACKVERSION(4, 70)) {
-		sprintf(buffer, Fetch_String(TXT_DLL_INVALID), "comctl32.dll", 4, 70, "comctl32.dll");
-		MessageBox(NULL, buffer, Fetch_String(TXT_SHORT_TITLE), MB_ICONERROR);
+		sprintf(buffer, Localize("TXT_DLL_INVALID"), "comctl32.dll", 4, 70, "comctl32.dll");
+		MessageBox(NULL, buffer, Localize("TXT_SHORT_TITLE"), MB_ICONERROR);
 		exit(EXIT_FAILURE);
 	}
 
@@ -520,6 +520,7 @@ int CALLBACK WinMain ( HINSTANCE instance , HINSTANCE , char * command_line , in
 		RawFileClass *cfile = new RawFileClass(CONFIG_FILE_NAME);
 
 		ConfigINI.Load(*cfile, false);
+
 		Options.ScreenWidth = ConfigINI.Get_Int("Video", "ScreenWidth", Options.ScreenWidth);
 		Options.ScreenHeight = ConfigINI.Get_Int("Video", "ScreenHeight", Options.ScreenHeight);
 
@@ -590,8 +591,8 @@ int CALLBACK WinMain ( HINSTANCE instance , HINSTANCE , char * command_line , in
 		**	If there is not enough disk space free, don't allow the product to run.
 		*/
 		if (Disk_Space_Available() < INIT_FREE_DISK_SPACE) {
-			wsprintf (buffer, Fetch_String(TXT_CRITICALLY_LOW), (INIT_FREE_DISK_SPACE) / (1024 * 1024));
-			int reply = MessageBox(NULL, buffer, Fetch_String(TXT_SHORT_TITLE), MB_ICONQUESTION|MB_YESNO);
+			wsprintf (buffer, Localize("TXT_CRITICALLY_LOW"), (INIT_FREE_DISK_SPACE) / (1024 * 1024));
+			int reply = MessageBox(NULL, buffer, Localize("TXT_SHORT_TITLE"), MB_ICONQUESTION|MB_YESNO);
 			if (reply == IDNO) {
 				OleUninitialize();
 				return(EXIT_FAILURE);
@@ -619,13 +620,13 @@ int CALLBACK WinMain ( HINSTANCE instance , HINSTANCE , char * command_line , in
 		Audio.Init(MainWindow, 16, 0, 22050);
 
 		if (!Video_Init(MainWindow)) {
-			MessageBox(MainWindow, Fetch_String(TXT_VIDEO_ERROR), Fetch_String(TXT_SHORT_TITLE), MB_ICONWARNING);
+			MessageBox(MainWindow, Localize("TXT_VIDEO_ERROR"), Localize("TXT_SHORT_TITLE"), MB_ICONWARNING);
 			exit(EXIT_FAILURE);
 		}
 
 		VisibleSurface = DSurface::Create_Primary();
 		if (VisibleSurface == NULL) {
-			MessageBox(MainWindow, Fetch_String(TXT_VIDEO_ERROR), Fetch_String(TXT_SHORT_TITLE), MB_ICONWARNING);
+			MessageBox(MainWindow, Localize("TXT_VIDEO_ERROR"), Localize("TXT_SHORT_TITLE"), MB_ICONWARNING);
 			exit(EXIT_FAILURE);
 		}
 

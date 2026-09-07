@@ -105,6 +105,7 @@
 #include "egos.h"
 #include "empulse.h"
 #include "uifonts.h"
+#include "localization.h"
 #include "enviro.h"
 #include "except.h"
 #include "expand.h"
@@ -796,7 +797,7 @@ static BOOL CALLBACK Campaign_Choice_Dialog_Proc(HWND window, UINT message, WPAR
 			if ((HWND)lparam == GetDlgItem(window, IDC_DIFFICULTY_SLIDER)) {
 				stringID = GameDifficultyNames[diff];
 				item = GetDlgItem(window, IDC_DIFFICULTY_LABEL);
-				Static_SetText(item, Fetch_String(stringID));
+				Static_SetText(item, Localize(stringID));
 			}
 			break;
 		}
@@ -1475,7 +1476,13 @@ restart:
 
 						int timeout = (TickCount + 50 * TIMER_SECOND);
 
-						while (Theme.Still_Playing() && Is_Speaking() && (timeout > TickCount)) {
+						/*
+						**	Let the EVA voice and the fading score play out before the
+						**	audio system is torn down. The original condition used &&
+						**	which never waited at all, so any speech still playing was
+						**	cut off mid-stream when the sound driver was shut down.
+						*/
+						while ((Theme.Still_Playing() || Is_Speaking()) && (timeout > TickCount)) {
 							Call_Back();
 						}
 
@@ -1755,12 +1762,12 @@ bool Parse_Command_Line(int argc, char * argv[])
 			**	Unrecognized command line parameter... Display usage
 			**	and then exit.
 			*/
-			puts(Fetch_String(TXT_OPTION_HELP_01));
-			puts(Fetch_String(TXT_OPTION_HELP_02));
-			puts(Fetch_String(TXT_OPTION_HELP_03));
-			puts(Fetch_String(TXT_OPTION_HELP_04));
-			puts(Fetch_String(TXT_OPTION_HELP_05));
-			puts(Fetch_String(TXT_OPTION_HELP_06));
+			puts(Localize("TXT_OPTION_HELP_01"));
+			puts(Localize("TXT_OPTION_HELP_02"));
+			puts(Localize("TXT_OPTION_HELP_03"));
+			puts(Localize("TXT_OPTION_HELP_04"));
+			puts(Localize("TXT_OPTION_HELP_05"));
+			puts(Localize("TXT_OPTION_HELP_06"));
 			return(false);
 		}
 
@@ -1964,7 +1971,7 @@ bool Parse_Command_Line(int argc, char * argv[])
 						break;
 
 					default:
-						puts(Fetch_String(TXT_INVALID));
+						puts(Localize("TXT_INVALID"));
 						return(false);
 				}
 
@@ -2450,7 +2457,7 @@ static void Init_Patch_Mixfiles(void)
 {
 	MFCD * expand;
 
-	if (RawFileClass("PATCH.MIX").Is_Available()) {
+	if (CCFileClass("PATCH.MIX").Is_Available()) {
 		expand = new MFCD("PATCH.MIX", &FastKey);
 		assert(expand != NULL);
 
@@ -2496,6 +2503,20 @@ static bool Init_Bootstrap_Mixfiles(void)
 	//int index;
 	//char name[64];
 	//MFCD * expand;
+
+	/*
+	**	OpenTS's own override archive. It is registered before every other
+	**	mixfile, so the files it carries take precedence over anything the game
+	**	or a patch ships with.
+	*/
+	if (CCFileClass("OPENTS.MIX").Is_Available()) {
+		MFCD * opents = new MFCD("OPENTS.MIX", &FastKey);
+
+		if (opents != NULL) {
+			ExpandMix.Add(opents);
+			DebugStringNoPrefix(" %s", "OPENTS.MIX");
+		}
+	}
 
 	Init_Patch_Mixfiles();
 	Init_Expand_Mixfiles();
@@ -2750,6 +2771,11 @@ static bool Bootstrap(void)
 	**	path's default face from it.
 	*/
 	Init_UI_Fonts();
+
+	/*
+	**	Load the fixed localization chain from UI.INI's [Localization] section.
+	*/
+	Init_Localization();
 
 	/*
 	**	Setup the keyboard processor in preparation for the game.
@@ -3194,12 +3220,12 @@ BOOL CALLBACK Version_Dialog_Proc(HWND window, UINT message, WPARAM wparam, LPAR
 			handle = GetDlgItem(window, IDC_VERSION_INFO);
 
 			if (Addon_Installed(ADDON_FIRESTORM) == true) {
-				strcpy(buffer, Fetch_String(TXT_SHORT_TITLE));
+				strcpy(buffer, Localize("TXT_SHORT_TITLE"));
 				strcat(buffer, ": ");
 				strcat(buffer, Get_Addon_Title(ADDON_FIRESTORM));
 				ListBox_AddString(handle, buffer);
 			} else {
-				ListBox_AddString(handle, Fetch_String(TXT_SHORT_TITLE));
+				ListBox_AddString(handle, Localize("TXT_SHORT_TITLE"));
 			}
 
 			sprintf(buffer, "Version %s", Version_Name());
@@ -3476,7 +3502,7 @@ void Draw_Version_Text(Surface * surface)
 	);
 
 	Fancy_Text_Print(
-		Fetch_String(TXT_COPYRIGHT),
+		Localize("TXT_COPYRIGHT"),
 		*surface,
 		rect,
 		Point2D(rect.X + rect.Width - 2, rect.Y + rect.Height - 10),
@@ -3499,14 +3525,14 @@ class CreateTeamCommandClass : public CommandClass
 			return(_cmd_buffer);
 		}
 		virtual char const * Get_Display_Name(void) const {
-			sprintf(_cmd_buffer, Fetch_String(TXT_CREATE_TEAM), Team);
+			sprintf(_cmd_buffer, Localize("TXT_CREATE_TEAM"), Team);
 			return(_cmd_buffer);
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_TEAM)));
+			return(Localize("TXT_TEAM"));
 		}
 		virtual char const * Get_Description(void) const {
-			sprintf(_cmd_buffer, Fetch_String(TXT_CREATE_TEAM_DESC), Team);
+			sprintf(_cmd_buffer, Localize("TXT_CREATE_TEAM_DESC"), Team);
 			return(_cmd_buffer);
 		}
 
@@ -3539,14 +3565,14 @@ class SelectTeamCommandClass : public CommandClass
 			return(_cmd_buffer);
 		}
 		virtual char const * Get_Display_Name(void) const {
-			sprintf(_cmd_buffer, Fetch_String(TXT_SELECT_TEAM), Team);
+			sprintf(_cmd_buffer, Localize("TXT_SELECT_TEAM"), Team);
 			return(_cmd_buffer);
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_TEAM)));
+			return(Localize("TXT_TEAM"));
 		}
 		virtual char const * Get_Description(void) const {
-			sprintf(_cmd_buffer, Fetch_String(TXT_SELECT_TEAM_DESC), Team);
+			sprintf(_cmd_buffer, Localize("TXT_SELECT_TEAM_DESC"), Team);
 			return(_cmd_buffer);
 		}
 
@@ -3589,14 +3615,14 @@ class AddTeamCommandClass : public CommandClass
 			return(_cmd_buffer);
 		}
 		virtual char const * Get_Display_Name(void) const {
-			sprintf(_cmd_buffer, Fetch_String(TXT_ADD_SELECT_TEAM), Team);
+			sprintf(_cmd_buffer, Localize("TXT_ADD_SELECT_TEAM"), Team);
 			return(_cmd_buffer);
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_TEAM)));
+			return(Localize("TXT_TEAM"));
 		}
 		virtual char const * Get_Description(void) const {
-			sprintf(_cmd_buffer, Fetch_String(TXT_ADD_SELECT_TEAM_DESC), Team);
+			sprintf(_cmd_buffer, Localize("TXT_ADD_SELECT_TEAM_DESC"), Team);
 			return(_cmd_buffer);
 		}
 
@@ -3634,14 +3660,14 @@ class CenterTeamCommandClass : public CommandClass
 			return(_cmd_buffer);
 		}
 		virtual char const * Get_Display_Name(void) const {
-			sprintf(_cmd_buffer, Fetch_String(TXT_CENTER_TEAM), Team);
+			sprintf(_cmd_buffer, Localize("TXT_CENTER_TEAM"), Team);
 			return(_cmd_buffer);
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_TEAM)));
+			return(Localize("TXT_TEAM"));
 		}
 		virtual char const * Get_Description(void) const {
-			sprintf(_cmd_buffer, Fetch_String(TXT_CENTER_TEAM_DESC), Team);
+			sprintf(_cmd_buffer, Localize("TXT_CENTER_TEAM_DESC"), Team);
 			return(_cmd_buffer);
 		}
 
@@ -3682,13 +3708,13 @@ class PrevObjectCommandClass : public CommandClass
 			return("PreviousObject");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_PREV_OBJECT));
+			return(Localize("TXT_PREV_OBJECT"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_SELECTION)));
+			return(Localize("TXT_SELECTION"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_PREV_OBJECT_DESC));
+			return(Localize("TXT_PREV_OBJECT_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -3716,13 +3742,13 @@ class StopCommandClass : public CommandClass
 			return("StopObject");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_STOP_OBJECT));
+			return(Localize("TXT_STOP_OBJECT"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_CONTROL)));
+			return(Localize("TXT_CONTROL"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_STOP_OBJECT_DESC));
+			return(Localize("TXT_STOP_OBJECT_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -3747,13 +3773,13 @@ class DeployCommandClass : public CommandClass
 			return("DeployObject");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_DEPLOY_OBJECT));
+			return(Localize("TXT_DEPLOY_OBJECT"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_CONTROL)));
+			return(Localize("TXT_CONTROL"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_DEPLOY_OBJECT_DESC));
+			return(Localize("TXT_DEPLOY_OBJECT_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -3787,13 +3813,13 @@ class GuardCommandClass : public CommandClass
 			return("GuardObject");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_GUARD));
+			return(Localize("TXT_GUARD"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_CONTROL)));
+			return(Localize("TXT_CONTROL"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_GUARD_DESC));
+			return(Localize("TXT_GUARD_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -3820,13 +3846,13 @@ class ScatterCommandClass : public CommandClass
 			return("ScatterObject");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_SCATTER));
+			return(Localize("TXT_SCATTER"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_CONTROL)));
+			return(Localize("TXT_CONTROL"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_SCATTER_DESC));
+			return(Localize("TXT_SCATTER_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -3851,13 +3877,13 @@ class CenterViewCommandClass : public CommandClass
 			return("CenterView");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_CENTER_VIEW));
+			return(Localize("TXT_CENTER_VIEW"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_SELECTION)));
+			return(Localize("TXT_SELECTION"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_CENTER_VIEW_DESC));
+			return(Localize("TXT_CENTER_VIEW_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -3876,13 +3902,13 @@ class CenterBaseCommandClass : public CommandClass
 			return("CenterBase");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_CENTER_BASE));
+			return(Localize("TXT_CENTER_BASE"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_SELECTION)));
+			return(Localize("TXT_SELECTION"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_CENTER_BASE_DESC));
+			return(Localize("TXT_CENTER_BASE_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -3951,13 +3977,13 @@ class AllianceCommandClass : public CommandClass
 			return("ToggleAlliance");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_ALLIANCE));
+			return(Localize("TXT_ALLIANCE"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_CONTROL)));
+			return(Localize("TXT_CONTROL"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_ALLIANCE_DESC));
+			return(Localize("TXT_ALLIANCE_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -3979,13 +4005,13 @@ class SelectViewCommandClass : public CommandClass
 			return("SelectView");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_SELECT_VIEW));
+			return(Localize("TXT_SELECT_VIEW"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_SELECTION)));
+			return(Localize("TXT_SELECTION"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_SELECT_VIEW_DESC));
+			return(Localize("TXT_SELECT_VIEW_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4002,13 +4028,13 @@ class ToggleRepairCommandClass : public CommandClass
 			return("ToggleRepair");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_REPAIR_MODE));
+			return(Localize("TXT_REPAIR_MODE"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_REPAIR_MODE_DESC));
+			return(Localize("TXT_REPAIR_MODE_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4024,13 +4050,13 @@ class ToggleSellCommandClass : public CommandClass
 			return("ToggleSell");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_SELL_MODE));
+			return(Localize("TXT_SELL_MODE"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_SELL_MODE_DESC));
+			return(Localize("TXT_SELL_MODE_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4046,13 +4072,13 @@ class TogglePowerCommandClass : public CommandClass
 			return("TogglePower");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_POWER_MODE));
+			return(Localize("TXT_POWER_MODE"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_POWER_MODE_DESC));
+			return(Localize("TXT_POWER_MODE_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4068,13 +4094,13 @@ class CenterREventCommandClass : public CommandClass
 			return("CenterOnRadarEvent");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_RADAR_EVENT));
+			return(Localize("TXT_RADAR_EVENT"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_RADAR_EVENT_DESC));
+			return(Localize("TXT_RADAR_EVENT_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4101,13 +4127,13 @@ class ToggleRadarCommandClass : public CommandClass
 			return("ToggleRadar");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_RADAR_TOGGLE));
+			return(Localize("TXT_RADAR_TOGGLE"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_RADAR_TOGGLE_DESC));
+			return(Localize("TXT_RADAR_TOGGLE_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4123,13 +4149,13 @@ class SidebarUpCommandClass : public CommandClass
 			return("SidebarUp");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_SIDEBAR_UP));
+			return(Localize("TXT_SIDEBAR_UP"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_SIDEBAR_UP_DESC));
+			return(Localize("TXT_SIDEBAR_UP_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4145,13 +4171,13 @@ class LSidebarUpCommandClass : public CommandClass
 			return("LeftSidebarUp");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_LSIDEBAR_UP));
+			return(Localize("TXT_LSIDEBAR_UP"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_LSIDEBAR_UP_DESC));
+			return(Localize("TXT_LSIDEBAR_UP_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4167,13 +4193,13 @@ class RSidebarUpCommandClass : public CommandClass
 			return("RightSidebarUp");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_RSIDEBAR_UP));
+			return(Localize("TXT_RSIDEBAR_UP"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_RSIDEBAR_UP_DESC));
+			return(Localize("TXT_RSIDEBAR_UP_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4189,13 +4215,13 @@ class SidebarPageUpCommandClass : public CommandClass
 			return("SidebarPageUp");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_SIDEBAR_PGUP));
+			return(Localize("TXT_SIDEBAR_PGUP"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_SIDEBAR_PGUP_DESC));
+			return(Localize("TXT_SIDEBAR_PGUP_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4211,13 +4237,13 @@ class LSidebarPageUpCommandClass : public CommandClass
 			return("LeftSidebarPageUp");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_LSIDEBAR_PGUP));
+			return(Localize("TXT_LSIDEBAR_PGUP"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_LSIDEBAR_PGUP_DESC));
+			return(Localize("TXT_LSIDEBAR_PGUP_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4233,13 +4259,13 @@ class RSidebarPageUpCommandClass : public CommandClass
 			return("RightSidebarPageUp");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_RSIDEBAR_PGUP));
+			return(Localize("TXT_RSIDEBAR_PGUP"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_RSIDEBAR_PGUP_DESC));
+			return(Localize("TXT_RSIDEBAR_PGUP_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4255,13 +4281,13 @@ class SidebarDownCommandClass : public CommandClass
 			return("SidebarDown");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_SIDEBAR_DOWN));
+			return(Localize("TXT_SIDEBAR_DOWN"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_SIDEBAR_DOWN_DESC));
+			return(Localize("TXT_SIDEBAR_DOWN_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4277,13 +4303,13 @@ class LSidebarDownCommandClass : public CommandClass
 			return("LeftSidebarDown");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_LSIDEBAR_DOWN));
+			return(Localize("TXT_LSIDEBAR_DOWN"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_LSIDEBAR_DOWN_DESC));
+			return(Localize("TXT_LSIDEBAR_DOWN_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4299,13 +4325,13 @@ class RSidebarDownCommandClass : public CommandClass
 			return("RightSidebarDown");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_RSIDEBAR_DOWN));
+			return(Localize("TXT_RSIDEBAR_DOWN"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_RSIDEBAR_DOWN_DESC));
+			return(Localize("TXT_RSIDEBAR_DOWN_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4321,13 +4347,13 @@ class SidebarPageDownCommandClass : public CommandClass
 			return("SidebarPageDown");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_SIDEBAR_PGDN));
+			return(Localize("TXT_SIDEBAR_PGDN"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_SIDEBAR_PGDN_DESC));
+			return(Localize("TXT_SIDEBAR_PGDN_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4343,13 +4369,13 @@ class LSidebarPageDownCommandClass : public CommandClass
 			return("LeftSidebarPageDown");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_LSIDEBAR_PGDN));
+			return(Localize("TXT_LSIDEBAR_PGDN"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_LSIDEBAR_PGDN_DESC));
+			return(Localize("TXT_LSIDEBAR_PGDN_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4365,13 +4391,13 @@ class RSidebarPageDownCommandClass : public CommandClass
 			return("RightSidebarPageDown");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_RSIDEBAR_PGDN));
+			return(Localize("TXT_RSIDEBAR_PGDN"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_RSIDEBAR_PGDN_DESC));
+			return(Localize("TXT_RSIDEBAR_PGDN_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4387,13 +4413,13 @@ class OptionsCommandClass : public CommandClass
 			return("Options");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_OPTIONS));
+			return(Localize("TXT_OPTIONS"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_OPTIONS_DESC));
+			return(Localize("TXT_OPTIONS_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4409,13 +4435,13 @@ class ScrollNCommandClass : public CommandClass
 			return("ScrollNorth");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_SCROLL_N));
+			return(Localize("TXT_SCROLL_N"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_SCROLL_N_DESC));
+			return(Localize("TXT_SCROLL_N_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4432,13 +4458,13 @@ class ScrollSCommandClass : public CommandClass
 			return("ScrollSouth");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_SCROLL_S));
+			return(Localize("TXT_SCROLL_S"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_SCROLL_S_DESC));
+			return(Localize("TXT_SCROLL_S_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4455,13 +4481,13 @@ class ScrollECommandClass : public CommandClass
 			return("ScrollEast");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_SCROLL_E));
+			return(Localize("TXT_SCROLL_E"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_SCROLL_E_DESC));
+			return(Localize("TXT_SCROLL_E_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4478,13 +4504,13 @@ class ScrollWCommandClass : public CommandClass
 			return("ScrollWest");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_SCROLL_W));
+			return(Localize("TXT_SCROLL_W"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_SCROLL_W_DESC));
+			return(Localize("TXT_SCROLL_W_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4501,13 +4527,13 @@ class View1CommandClass : public CommandClass
 			return("View1");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_VIEW_BOOKMARK1));
+			return(Localize("TXT_VIEW_BOOKMARK1"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_VIEW_BOOKMARK1_DESC));
+			return(Localize("TXT_VIEW_BOOKMARK1_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4528,13 +4554,13 @@ class View2CommandClass : public CommandClass
 			return("View2");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_VIEW_BOOKMARK2));
+			return(Localize("TXT_VIEW_BOOKMARK2"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_VIEW_BOOKMARK2_DESC));
+			return(Localize("TXT_VIEW_BOOKMARK2_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4555,13 +4581,13 @@ class View3CommandClass : public CommandClass
 			return("View3");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_VIEW_BOOKMARK3));
+			return(Localize("TXT_VIEW_BOOKMARK3"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_VIEW_BOOKMARK3_DESC));
+			return(Localize("TXT_VIEW_BOOKMARK3_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4582,13 +4608,13 @@ class View4CommandClass : public CommandClass
 			return("View4");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_VIEW_BOOKMARK4));
+			return(Localize("TXT_VIEW_BOOKMARK4"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_VIEW_BOOKMARK4_DESC));
+			return(Localize("TXT_VIEW_BOOKMARK4_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4609,13 +4635,13 @@ class SetView1CommandClass : public CommandClass
 			return("SetView1");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_SET_BOOKMARK1));
+			return(Localize("TXT_SET_BOOKMARK1"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_SET_BOOKMARK1_DESC));
+			return(Localize("TXT_SET_BOOKMARK1_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4632,13 +4658,13 @@ class SetView2CommandClass : public CommandClass
 			return("SetView2");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_SET_BOOKMARK2));
+			return(Localize("TXT_SET_BOOKMARK2"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_SET_BOOKMARK2_DESC));
+			return(Localize("TXT_SET_BOOKMARK2_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4655,13 +4681,13 @@ class SetView3CommandClass : public CommandClass
 			return("SetView3");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_SET_BOOKMARK3));
+			return(Localize("TXT_SET_BOOKMARK3"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_SET_BOOKMARK3_DESC));
+			return(Localize("TXT_SET_BOOKMARK3_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4678,13 +4704,13 @@ class SetView4CommandClass : public CommandClass
 			return("SetView4");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_SET_BOOKMARK4));
+			return(Localize("TXT_SET_BOOKMARK4"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_SET_BOOKMARK4_DESC));
+			return(Localize("TXT_SET_BOOKMARK4_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4701,13 +4727,13 @@ class FollowCommandClass : public CommandClass
 			return("Follow");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_FOLLOW));
+			return(Localize("TXT_FOLLOW"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_FOLLOW_DESC));
+			return(Localize("TXT_FOLLOW_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4727,13 +4753,13 @@ class NextObjectCommandClass : public CommandClass
 			return("NextObject");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_NEXT_OBJECT));
+			return(Localize("TXT_NEXT_OBJECT"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_SELECTION)));
+			return(Localize("TXT_SELECTION"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_NEXT_OBJECT_DESC));
+			return(Localize("TXT_NEXT_OBJECT_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4763,13 +4789,13 @@ class WaypointCommandClass : public CommandClass
 			return("WaypointMode");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_WAYPOINTMODE));
+			return(Localize("TXT_WAYPOINTMODE"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_WAYPOINTMODE_DESC));
+			return(Localize("TXT_WAYPOINTMODE_DESC"));
 		}
 		virtual void Execute(void) const {
 			Map.Waypoint_Mode_Control(-1);
@@ -4786,13 +4812,13 @@ class ScreenCaptureCommandClass : public CommandClass
 			return("ScreenCapture");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_SCRNCAP));
+			return(Localize("TXT_SCRNCAP"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_SCRNCAP_DESC));
+			return(Localize("TXT_SCRNCAP_DESC"));
 		}
 		virtual void Execute(void) const {
 			{
@@ -4833,13 +4859,13 @@ class PageUserCommandClass : public CommandClass
 			return("PageUser");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_PAGEUSER));
+			return(Localize("TXT_PAGEUSER"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_PAGEUSER_DESC));
+			return(Localize("TXT_PAGEUSER_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4857,13 +4883,13 @@ class SelectSameTypeCommandClass : public CommandClass
 			return("SelectType");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_SELECT_TYPE));
+			return(Localize("TXT_SELECT_TYPE"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_SELECTION)));
+			return(Localize("TXT_SELECTION"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_SELECT_TYPE_DESC));
+			return(Localize("TXT_SELECT_TYPE_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4925,13 +4951,13 @@ class ManualPlaceCommandClass : public CommandClass
 			return("ManualPlace");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_MANUAL_PLACE));
+			return(Localize("TXT_MANUAL_PLACE"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_MANUAL_PLACE_DESC));
+			return(Localize("TXT_MANUAL_PLACE_DESC"));
 		}
 
 		virtual void Execute(void) const {
@@ -4969,13 +4995,13 @@ class DeleteWaypointCommandClass : public CommandClass
 			return("DeleteWaypoint");
 		}
 		virtual char const * Get_Display_Name(void) const {
-			return(Fetch_String(TXT_DEL_WAYPOINT));
+			return(Localize("TXT_DEL_WAYPOINT"));
 		}
 		virtual char const * Get_Category(void) const {
-			return(Fetch_String((TXT_INTERFACE)));
+			return(Localize("TXT_INTERFACE"));
 		}
 		virtual char const * Get_Description(void) const {
-			return(Fetch_String(TXT_DEL_WAYPOINT_DESC));
+			return(Localize("TXT_DEL_WAYPOINT_DESC"));
 		}
 
 		virtual void Execute(void) const {

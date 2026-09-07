@@ -413,7 +413,7 @@ void __cdecl MonoClass::Printf(int text, ...)
 	if (!Enabled || Handle == INVALID_HANDLE_VALUE) return;
 
 	va_start(va, text);
-	vsprintf(buffer, Fetch_String(text), va);
+	vsprintf(buffer, Localize(text), va);
 	buffer[sizeof(buffer)-1] = '\0';
 
 	Print(buffer);
@@ -532,7 +532,7 @@ void MonoClass::Text_Print(int text, int x, int y, MonoAttribute attrib)
 {
 	if (!Enabled || Handle == INVALID_HANDLE_VALUE) return;
 
-	Text_Print(Fetch_String(text), x, y, attrib);
+	Text_Print(Localize(text), x, y, attrib);
 }
 
 
@@ -554,7 +554,7 @@ void MonoClass::Print(int text)
 {
 	if (!Enabled || Handle == INVALID_HANDLE_VALUE) return;
 
-	Print(Fetch_String(text));
+	Print(Localize(text));
 }
 
 

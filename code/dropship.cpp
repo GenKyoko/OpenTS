@@ -924,7 +924,7 @@ void Dropship_Screen(void)
 				}
 
 				money_display += delta;
-				Draw_Cost(money_display, previous_display, *background_surface, Point2D(x + _money_x, y + _money_y), Fetch_String(TXT_CREDITS_COLON), false, *drawer_dropship, plain_blitter);
+				Draw_Cost(money_display, previous_display, *background_surface, Point2D(x + _money_x, y + _money_y), Localize("TXT_CREDITS_COLON"), false, *drawer_dropship, plain_blitter);
 				redraw = true;
 				money_display_time = now;
 			}

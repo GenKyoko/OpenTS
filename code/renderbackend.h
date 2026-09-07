@@ -7,9 +7,9 @@
  * See LICENSE.md for applicable additional terms and warranty disclaimers.
  ******************************************************************************/
 
-// The renderer's private interface. Only bgfxbackend.cpp includes bgfx, so no bgfx type
-// appears here and no other translation unit needs the library's headers or its build
-// settings. video.cpp is the only caller.
+// The renderer's private interface. Only the renderer implementation includes SDL, so
+// no SDL type appears here and no other translation unit needs the library's headers.
+// video.cpp is the only caller.
 
 #pragma once
 

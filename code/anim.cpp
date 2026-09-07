@@ -501,6 +501,16 @@ void AnimClass::Draw_It(Point2D const & point, Rect const & cliprect) const
 			int shapenum = Class->Start + Fetch_Stage();
 
 			/*
+			**	A transient stage can push the frame number outside the shape set
+			**	(negative, or past its last frame). Drawing such a frame is neither
+			**	possible nor needed -- skip it instead of tripping over the shape
+			**	routine's assertion.
+			*/
+			if (shapenum < 0 || shapenum >= shapefile->Get_Count()) {
+				return;
+			}
+
+			/*
 			**	If the translucent table hasn't been determined yet, then check to see if it
 			**	should use the white or normal translucent tables.
 			*/

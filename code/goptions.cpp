@@ -267,7 +267,7 @@ BOOL CALLBACK Game_Options_Dialog_Proc(HWND window, UINT message, WPARAM wparam,
 				}
 
 				if (handle) {
-					Static_SetText(handle, Fetch_String(textid));
+					Static_SetText(handle, Localize(textid));
 				}
 			}
 			break;
@@ -384,7 +384,7 @@ BOOL CALLBACK Abort_Dialog_Proc(HWND window, UINT message, WPARAM wparam, LPARAM
 			case WM_INITDIALOG:
 				handle = GetDlgItem(window, IDC_RESTART_MISSION);
 				if (Session.Type != GAME_NORMAL) {
-					SetWindowText(handle, Fetch_String(TXT_SURRENDER));
+					SetWindowText(handle, Localize("TXT_SURRENDER"));
 					if (PlayerPtr->IsDefeated || PlayerPtr->IsToWin || PlayerPtr->IsToLose || PlayerPtr->IsToDie) {
 						EnableWindow(handle, FALSE);
 					}

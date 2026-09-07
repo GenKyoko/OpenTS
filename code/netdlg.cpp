@@ -254,9 +254,9 @@ void Destroy_Connection(int id, int error)
 	//------------------------------------------------------------------------
 	txt[0] = '\0';
 	if (error==1) {
-		sprintf(txt,Fetch_String(TXT_CONNECTION_LOST), housep->IniName.c_str());
+		sprintf(txt,Localize("TXT_CONNECTION_LOST"), housep->IniName.c_str());
 	} else if (error==0) {
-		sprintf(txt,Fetch_String(TXT_LEFT_GAME), housep->IniName.c_str());
+		sprintf(txt,Localize("TXT_LEFT_GAME"), housep->IniName.c_str());
 	}
 
 	if (strlen(txt)) {
@@ -302,7 +302,7 @@ void Destroy_Connection(int id, int error)
 	// If we're the last player left, tell the user.
 	//------------------------------------------------------------------------
 	if (Session.NumPlayers == 1) {
-		sprintf(txt,"%s",Fetch_String(TXT_JUST_YOU_AND_ME));
+		sprintf(txt,"%s",Localize("TXT_JUST_YOU_AND_ME"));
 		Session.Messages.Add_Message (NULL, 0, txt, housep->Class->Scheme,
 			TextPrintType(TPF_6PT_GRAD|TPF_FULLSHADOW|TPF_USE_GRAD_PAL), int(Rule->MessageDelay * TICKS_PER_MINUTE));
 		Map.Flag_To_Redraw();

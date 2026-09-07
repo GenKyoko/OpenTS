@@ -239,8 +239,8 @@ void Message_Box_On_WM_COMMAND(HWND window, int id, int control, int notify_code
  *=============================================================================================*/
 int WWMessageBox::_Process(int msg, int defresponse, int b1txt, int b2txt, int b3txt, bool preserve)
 {
-	const char *message = Fetch_String(msg);
-	return(_Process(message, defresponse, Fetch_String(b1txt), Fetch_String(b2txt), Fetch_String(b3txt), preserve));
+	const char *message = Localize(msg);
+	return(_Process(message, defresponse, Localize(b1txt), Localize(b2txt), Localize(b3txt), preserve));
 }
 
 
@@ -266,5 +266,5 @@ int WWMessageBox::_Process(int msg, int defresponse, int b1txt, int b2txt, int b
  *=============================================================================================*/
 int WWMessageBox::_Process(char const * msg, int defresponse, int b1txt, int b2txt, int b3txt, bool preserve)
 {
-	return(_Process(msg, defresponse, Fetch_String(b1txt), Fetch_String(b2txt), Fetch_String(b3txt), preserve));
+	return(_Process(msg, defresponse, Localize(b1txt), Localize(b2txt), Localize(b3txt), preserve));
 }

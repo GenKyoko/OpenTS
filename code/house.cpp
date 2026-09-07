@@ -366,6 +366,14 @@ HouseClass::HouseClass(HouseTypeClass const * type) :
 
 	Create_ID();
 
+	/*
+	**	A default name keeps the name string valid for every house; spawn, the
+	**	scenario code and takeover logic overwrite it for the real participants.
+	**	Neutral and special houses would otherwise carry an unassigned name, and
+	**	anything printing it would walk off into uninitialized memory.
+	*/
+	IniName = "House";
+
 	if (Class) {
 		Scheme = Class->Scheme;
 	}
@@ -404,7 +412,7 @@ HouseClass::HouseClass(HouseTypeClass const * type) :
 
 	memset(UnitsKilled, 0, sizeof(UnitsKilled));
 	memset(BuildingsKilled, 0, sizeof(BuildingsKilled));
-	IniName = Fetch_String(TXT_COMPUTER);	// Default computer name.
+	IniName = Localize("TXT_COMPUTER");	// Default computer name.
 	memset((void *)&Regions[0], 0x00, sizeof(Regions));
 	//Allies |= (1L << HeapID);
 	Control.Allies |= (1L << HeapID);
@@ -1263,6 +1271,18 @@ void HouseClass::AI(void)
 		IsBaseBuilding = true;
 		IsStarted = true;
 		IsAlerted = true;
+
+		/*
+		**	Enable the AI trigger processing once the computer house is up and
+		**	building. The AI trigger types (rules.ini AITriggerTypes) are what
+		**	launch the attack, probe and harassment teams -- without this flag
+		**	the computer house only maintains its defensive pools and never
+		**	sends anything at the enemy.
+		*/
+		if (!IsAITriggersOn) {
+			IsAITriggersOn = true;
+			DebugString("House %s: AI triggers enabled\n", IniName.c_str());
+		}
 	}
 
 	/*
@@ -1390,9 +1410,11 @@ void HouseClass::AI(void)
 	**	Create teams for this house if necessary.
 	** (Use the same timer for some extra capture-the-flag logic.)
 	*/
-	if (/*!IsAlerted &&*/ !TeamTime) {
+	if (/*!IsAlerted &&*/ !TeamTime && !Class->IsMultiplayPassive) {
 
 		SUGGESTED_TEAM_LIST team = Suggested_New_Team(false);
+		DebugString("Team creation tick (h%d): difficulty=%d, delay=%d, suggested=%d\n",
+			HeapID, Difficulty, Rule->TeamDelays[Difficulty], team.Count());
 		if (team.Count() > 0) {
 			for (int i = 0; i < team.Count(); i++) {
 				team[i]->Create_One_Of(this);
@@ -1461,7 +1483,7 @@ void HouseClass::AI(void)
 				Speak(VOX_LOW_POWER);
 				SpeakPowerDelay = Options.Normalize_Delay(int(TICKS_PER_MINUTE * Rule->SpeakDelay));
 //				Map.Flash_Power();
-				Session.Messages.Add_Message(NULL, 0, Fetch_String(TXT_LOW_POWER), Scheme, TextPrintType(TPF_6PT_GRAD|TPF_USE_GRAD_PAL|TPF_FULLSHADOW), int(Rule->MessageDelay * TICKS_PER_MINUTE));
+				Session.Messages.Add_Message(NULL, 0, Localize("TXT_LOW_POWER"), Scheme, TextPrintType(TPF_6PT_GRAD|TPF_USE_GRAD_PAL|TPF_FULLSHADOW), int(Rule->MessageDelay * TICKS_PER_MINUTE));
 			}
 		}
 	}
@@ -1646,6 +1668,16 @@ void HouseClass::AI(void)
 			if (build_buildings) {
 				AI_Building();
 			}
+		}
+
+		/*
+		**	Debug: the production state of the computer house, at a low rate and
+		**	staggered per house so the log stays readable.
+		*/
+		if ((Frame % 900) == (HeapID * 13) % 900) {
+			DebugString("AI production %s (h%d): struct=%d unit=%d inf=%d air=%d money=%d teams=%d buildings=%d started=%d\n",
+				IniName.c_str(), HeapID, BuildStructure, BuildUnit, BuildInfantry, BuildAircraft,
+				Available_Money(), Teams.Count(), Buildings.Count(), IsStarted);
 		}
 	}
 
@@ -2187,7 +2219,7 @@ void HouseClass::Make_Ally(HouseClass * house)
 			}
 
 			if (Is_Human_Player() && Session.Type != GAME_NORMAL && !house->Class->IsMultiplayPassive) {
-				wsprintf(buffer, Fetch_String(TXT_HAS_ALLIED), (char const *)IniName, (char const *)house->IniName);
+				wsprintf(buffer, Localize("TXT_HAS_ALLIED"), (char const *)IniName, (char const *)house->IniName);
 				Session.Messages.Add_Message(NULL, 0, buffer, Class->Scheme, TextPrintType(TPF_6PT_GRAD|TPF_USE_GRAD_PAL|TPF_FULLSHADOW), int(TICKS_PER_MINUTE * Rule->MessageDelay));
 
 				if (Is_Player_Control()) {
@@ -2260,7 +2292,7 @@ void HouseClass::Make_Enemy(HouseClass * house)
 			if (Session.Type != GAME_NORMAL && !ScenarioInit && IsHuman) {
 				char buffer[80];
 
-				wsprintf(buffer, Fetch_String(TXT_AT_WAR), (char const *)IniName, (char const *)house->IniName);
+				wsprintf(buffer, Localize("TXT_AT_WAR"), (char const *)IniName, (char const *)house->IniName);
 				Session.Messages.Add_Message(NULL, 0, buffer, Class->Scheme, TextPrintType(TPF_6PT_GRAD|TPF_USE_GRAD_PAL|TPF_FULLSHADOW), int(TICKS_PER_MINUTE * Rule->MessageDelay));
 				Map.Flag_To_Redraw();
 				if (Is_Player_Control()) {
@@ -3296,7 +3328,7 @@ void HouseClass::MPlayer_Defeated(void)
 		/*
 		**	Pop up a message showing that I was defeated
 		*/
-		wsprintf(txt, Fetch_String(TXT_PLAYER_DEFEATED), (char const *)IniName);
+		wsprintf(txt, Localize("TXT_PLAYER_DEFEATED"), (char const *)IniName);
 		Session.Messages.Add_Message(NULL, 0, txt, Session.ColorIdx,
 		TextPrintType(TPF_6PT_GRAD|TPF_USE_GRAD_PAL|TPF_FULLSHADOW), int(Rule->MessageDelay * TICKS_PER_MINUTE));
 
@@ -3310,7 +3342,7 @@ void HouseClass::MPlayer_Defeated(void)
 		**	If it wasn't me, find out who was defeated
 		*/
 		if (!Class->IsMultiplayPassive) {
-			wsprintf(txt, Fetch_String(TXT_PLAYER_DEFEATED), (char const *)IniName);
+			wsprintf(txt, Localize("TXT_PLAYER_DEFEATED"), (char const *)IniName);
 
 			Session.Messages.Add_Message(NULL, 0, txt, Scheme,
 				TextPrintType(TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_FULLSHADOW), int(Rule->MessageDelay * TICKS_PER_MINUTE));
@@ -8792,7 +8824,7 @@ void HouseClass::AI_Takeover(void)
 	/*
 	 * Rename the house to the generic computer name.
 	 */
-	IniName = Fetch_String(TXT_COMPUTER);
+	IniName = Localize("TXT_COMPUTER");
 
 	/*
 	 * Disown and disband any factories this house controls.

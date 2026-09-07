@@ -66,6 +66,8 @@
 
 #include <algorithm>
 
+extern bool GameInFocus;
+
 
 // for some reason in wave..
 extern FacingType Facing_Between_Points(Point2D const & pt1, Point2D const & pt2);
@@ -530,7 +532,7 @@ void ScrollClass::Scroll_Edge(Point2D const & point)
 /// </summary>
 void ScrollClass::Scroll_AI(void)
 {
-	if (!IgnoreInput) {
+	if (!IgnoreInput && GameInFocus) {
 		Point2D tacti = TacticalRect.Top_Left();
 		Point2D mouse = MouseCursor->Get_Mouse_Point();
 		Point2D point = mouse - tacti;

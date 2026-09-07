@@ -78,8 +78,8 @@ class CDFileClass : public BufferIOFileClass
 		**	path. There can be many such search paths available.
 		*/
 		struct SearchDriveType {
-			void * Next;        // Pointer to next search record.
-			char const * Path;  // Pointer to path string.
+			void * Next;          // Pointer to next search record.
+			char const * Path;    // Pointer to path string.
 		};
 
 		/*

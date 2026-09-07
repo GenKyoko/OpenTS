@@ -1203,7 +1203,7 @@ void BuildingClass::Draw_Overlays(Point2D const & point, Rect const & cliprect) 
 	if (IsSelected && can_view_info && Class->Power > 0 && !Map.Is_Shrouded(Center_Coord())
 		&& (!Scen->Special.IsFogOfWar || !IsFogged)) {
 		char buffer[128];
-		sprintf(buffer, Fetch_String(TXT_POWER_DRAIN), House->Power_Output(), House->Power_Drain());
+		sprintf(buffer, Localize("TXT_POWER_DRAIN"), House->Power_Output(), House->Power_Drain());
 		Plain_Text_Print(buffer, *LogicalSurface, cliprect, point,
 			WHITE, TBLACK, TextPrintType(TPF_CENTER|TPF_FULLSHADOW|TPF_EFNT), 0, 1);
 	}
@@ -1217,9 +1217,9 @@ void BuildingClass::Draw_Overlays(Point2D const & point, Rect const & cliprect) 
 		&& !Map.Is_Shrouded(Center_Coord()) && (!Scen->Special.IsFogOfWar || !IsFogged)) {
 		char buffer[128];
 		if (Class->Capacity > 0) {
-			sprintf(buffer, Fetch_String(TXT_CREDITS_STORAGE), House->Available_Money(), Storage.Get_Total_Value());
+			sprintf(buffer, Localize("TXT_CREDITS_STORAGE"), House->Available_Money(), Storage.Get_Total_Value());
 		} else {
-			sprintf(buffer, Fetch_String(TXT_CREDITS), House->Available_Money());
+			sprintf(buffer, Localize("TXT_CREDITS"), House->Available_Money());
 		}
 		Plain_Text_Print(buffer, *LogicalSurface, cliprect, point,
 			WHITE, TBLACK, TextPrintType(TPF_CENTER|TPF_FULLSHADOW|TPF_EFNT), 0, 1);
@@ -4609,8 +4609,18 @@ int BuildingClass::Do_MISSION_GUARD(void)
 			**	If there is no target available, then search for one.
 			*/
 			if (TarCom == NULL) {
+				/*
+				**	Assemble the threat types this building's weapons can address and scan
+				**	for a target within weapon range. Without target-type bits (e.g. a bare
+				**	THREAT_NORMAL mask) Greatest_Threat excludes every object class and can
+				**	never locate an enemy.
+				*/
 				ThreatType threat = THREAT_NORMAL;
-				Assign_Target(Greatest_Threat(threat, PositionCoord, false));
+				if (PrimaryWeapon != NULL) threat = ThreatType(threat | PrimaryWeapon->Allowed_Threats());
+				if (SecondaryWeapon != NULL) threat = ThreatType(threat | SecondaryWeapon->Allowed_Threats());
+				if (House->Is_Human_Player()) threat = ThreatType(threat & ~THREAT_BUILDINGS);
+				threat = ThreatType(threat | THREAT_RANGE);
+				Assign_Target(BASECLASS::Greatest_Threat(threat, PositionCoord, false));
 			}
 
 			/*
@@ -10317,7 +10327,7 @@ RTTIType BuildingClass::Fetch_RTTI(void) const
 /// <returns>Returns with a pointer to the human readable name of this building.</returns>
 char const * BuildingClass::Full_Name(void) const
 {
-	return(Class->GivenName);
+	return(Class->Full_Name());
 }
 
 

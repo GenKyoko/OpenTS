@@ -109,56 +109,15 @@ DSurface::DSurface(int width, int height) :
 	GDIDC(NULL),
 	GDIOldBitmap(NULL),
 	GDIBuffer(NULL),
-	Pitch(0)
+	Pitch(0),
+	MirrorBuffer(NULL)
 {
 	/*
-	 * BITMAPINFO carries room for a single color entry, but a bitfields bitmap is
-	 * described by three masks following the header, so the header is declared with
-	 * room for them rather than written past its end.
+	 * The pixels are the engine's own allocation. The rows stay packed -- no GDI
+	 * four byte rounding -- so the stride is simply the width times the pixel size.
 	 */
-	struct {
-		BITMAPINFOHEADER Header;
-		unsigned long Masks[3];
-	} info;
-
-	memset(&info, 0, sizeof(info));
-
-	/*
-	 * A negative height asks for the rows in the order the engine expects, with the top
-	 * one first. The masks spell out the 565 layout.
-	 */
-	info.Header.biSize = sizeof(BITMAPINFOHEADER);
-	info.Header.biWidth = width;
-	info.Header.biHeight = -height;
-	info.Header.biPlanes = 1;
-	info.Header.biBitCount = 16;
-	info.Header.biCompression = BI_BITFIELDS;
-
-	info.Masks[0] = 0xF800;
-	info.Masks[1] = 0x07E0;
-	info.Masks[2] = 0x001F;
-
-	GDIDC = CreateCompatibleDC(NULL);
-	if (GDIDC == NULL) {
-		return;
-	}
-
-	GDIBitmap = CreateDIBSection(GDIDC, (BITMAPINFO *)&info, DIB_RGB_COLORS, &GDIBuffer, NULL, 0);
-	if (GDIBitmap == NULL) {
-		DeleteDC(GDIDC);
-		GDIDC = NULL;
-		GDIBuffer = NULL;
-		return;
-	}
-
-	GDIOldBitmap = SelectObject(GDIDC, GDIBitmap);
-
-	DIBSECTION section;
-	if (GetObject(GDIBitmap, sizeof(section), &section) == sizeof(section)) {
-		Pitch = section.dsBm.bmWidthBytes;
-	} else {
-		Pitch = width * 2;
-	}
+	Pitch = width * BytesPerPixel;
+	GDIBuffer = new char[Pitch * height];
 }
 
 
@@ -179,14 +138,10 @@ DSurface::DSurface(int width, int height) :
 DSurface::~DSurface(void)
 {
 	/*
-	 * GDI will not free a bitmap that is still selected into a context, so the one the
-	 * context started with has to go back first.
+	 * The mirror context, when one was minted, goes away with its bitmap still
+	 * selected, which is safe for a context being destroyed outright.
 	 */
 	if (GDIDC != NULL) {
-		if (GDIOldBitmap != NULL) {
-			SelectObject(GDIDC, GDIOldBitmap);
-			GDIOldBitmap = NULL;
-		}
 		DeleteDC(GDIDC);
 		GDIDC = NULL;
 	}
@@ -196,7 +151,10 @@ DSurface::~DSurface(void)
 		GDIBitmap = NULL;
 	}
 
-	GDIBuffer = NULL;
+	if (GDIBuffer != NULL) {
+		delete [] (char *)GDIBuffer;
+		GDIBuffer = NULL;
+	}
 }
 
 
@@ -253,8 +211,57 @@ DSurface * DSurface::Create_Primary(void)
  *=============================================================================================*/
 HDC DSurface::GetDC(void)
 {
-	if (GDIDC == NULL) {
+	if (GDIBuffer == NULL) {
 		return(NULL);
+	}
+
+	/*
+	 * The mirror is minted on demand, since the only callers left are the few text
+	 * draws that still go through GDI. Drawing lands in the mirror; ReleaseDC copies
+	 * it onto the surface's own pixels.
+	 */
+	if (GDIDC == NULL) {
+		/*
+		 * BITMAPINFO carries room for a single color entry, but a bitfields bitmap is
+		 * described by three masks following the header, so the header is declared
+		 * with room for them rather than written past its end.
+		 */
+		struct {
+			BITMAPINFOHEADER Header;
+			unsigned long Masks[3];
+		} info;
+
+		memset(&info, 0, sizeof(info));
+
+		/*
+		 * A negative height asks for the rows in the order the engine expects, with
+		 * the top one first. The masks spell out the 565 layout.
+		 */
+		info.Header.biSize = sizeof(BITMAPINFOHEADER);
+		info.Header.biWidth = Get_Width();
+		info.Header.biHeight = -Get_Height();
+		info.Header.biPlanes = 1;
+		info.Header.biBitCount = 16;
+		info.Header.biCompression = BI_BITFIELDS;
+
+		info.Masks[0] = 0xF800;
+		info.Masks[1] = 0x07E0;
+		info.Masks[2] = 0x001F;
+
+		GDIDC = CreateCompatibleDC(NULL);
+		if (GDIDC == NULL) {
+			return(NULL);
+		}
+
+		GDIBitmap = CreateDIBSection(GDIDC, (BITMAPINFO *)&info, DIB_RGB_COLORS, &MirrorBuffer, NULL, 0);
+		if (GDIBitmap == NULL) {
+			DeleteDC(GDIDC);
+			GDIDC = NULL;
+			MirrorBuffer = NULL;
+			return(NULL);
+		}
+
+		GDIOldBitmap = SelectObject(GDIDC, GDIBitmap);
 	}
 
 	/*
@@ -262,6 +269,8 @@ HDC DSurface::GetDC(void)
 	 * drawing on them, which is what it did when this context came from DirectDraw.
 	 */
 	LockCount++;
+
+	memcpy(MirrorBuffer, GDIBuffer, (size_t)Pitch * Get_Height());
 	return(GDIDC);
 }
 
@@ -273,11 +282,15 @@ HDC DSurface::GetDC(void)
 /// <returns>int; Always one. The context outlives the call and is reused.</returns>
 int DSurface::ReleaseDC(HDC hdc)
 {
-	/*
-	 * GDI batches its drawing, so the pixels are not all there until it is flushed.
-	 * Everything else reads them directly.
-	 */
-	GdiFlush();
+	if (GDIDC != NULL && MirrorBuffer != NULL && GDIBuffer != NULL) {
+		/*
+		 * GDI batches its drawing, so the mirror does not hold all of the drawing
+		 * until it is flushed. Everything else reads the surface's own pixels
+		 * directly, which is why the mirror is copied back here.
+		 */
+		GdiFlush();
+		memcpy(GDIBuffer, MirrorBuffer, (size_t)Pitch * Get_Height());
+	}
 
 	if (LockCount > 0) {
 		LockCount--;
@@ -477,8 +490,9 @@ bool DSurface::Blit_From(Rect const & dcliprect, Rect const & destrect, Surface 
 	bool samesize = (sourcerect.Width == destrect.Width && sourcerect.Height == destrect.Height);
 
 	/*
-	 * The software blitter handles everything except a size change between two of these
-	 * surfaces, which GDI stretches instead.
+	 * The stretch below reads the source as a DSurface's own 565 buffer. A plain
+	 * Surface -- a palette picture in a load buffer, say -- has no such buffer, so
+	 * it keeps to the base class like any other blit the stretch cannot serve.
 	 */
 	if (trans || !ssource.Is_GDI_Backed() || samesize) {
 		bool result = BASECLASS::Blit_From(dcliprect, destrect, ssource, scliprect, sourcerect, trans, unknown);
@@ -488,9 +502,14 @@ bool DSurface::Blit_From(Rect const & dcliprect, Rect const & destrect, Surface 
 		return(result);
 	}
 
+	/*
+	 * A size change between two 565 surfaces is resampled in software with a nearest
+	 * neighbor step, which is what the movie player and the briefing screens ask for
+	 * when they stretch their frames to the full screen.
+	 */
 	DSurface const & source = (DSurface const &)ssource;
 
-	if (GDIDC == NULL || source.GDIDC == NULL) {
+	if (GDIBuffer == NULL || source.GDIBuffer == NULL) {
 		return(false);
 	}
 
@@ -500,23 +519,27 @@ bool DSurface::Blit_From(Rect const & dcliprect, Rect const & destrect, Surface 
 	drect = Intersect(drect, Intersect(dcliprect, Get_Rect()));
 	if (!drect.Is_Valid()) return(false);
 
-	/*
-	 * Both sets of pixels are read and written directly elsewhere, so any drawing GDI
-	 * still holds has to land first.
-	 */
-	GdiFlush();
+	unsigned short * dst = (unsigned short *)GDIBuffer;
+	unsigned short const * src = (unsigned short const *)source.GDIBuffer;
+	int dst_stride = Stride() / 2;
+	int src_stride = source.Stride() / 2;
 
-	SetStretchBltMode(GDIDC, COLORONCOLOR);
-	bool result = StretchBlt(GDIDC, drect.X, drect.Y, drect.Width, drect.Height,
-		source.GDIDC, srect.X, srect.Y, srect.Width, srect.Height, SRCCOPY) != 0;
+	for (int y = 0; y < drect.Height; y++) {
+		int sy = srect.Y + (int)(((__int64)y * srect.Height) / drect.Height);
+		unsigned short * drow = dst + (drect.Y + y) * dst_stride + drect.X;
+		unsigned short const * srow = src + (srect.Y + sy) * src_stride + srect.X;
 
-	GdiFlush();
+		for (int x = 0; x < drect.Width; x++) {
+			int sx = (int)(((__int64)x * srect.Width) / drect.Width);
+			drow[x] = srow[sx];
+		}
+	}
 
-	if (result && IsPrimary) {
+	if (IsPrimary) {
 		Video_Mark_Dirty();
 	}
 
-	return(result);
+	return(true);
 }
 
 

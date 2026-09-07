@@ -3197,7 +3197,7 @@ MapSeedClass::MapSeedClass(void) :
 {
 	Extension = "SED";
 	memset(MapDescription, 0, sizeof(MapDescription));
-	strcpy(MapDescription, Fetch_String(TXT_RANDOM_MAP_DESCRIPTION));
+	strcpy(MapDescription, Localize("TXT_RANDOM_MAP_DESCRIPTION"));
 	Description = MapDescription;
 }
 
@@ -3449,7 +3449,7 @@ void Do_Random_Map(HWND dialog, bool (*callback)())
 	RandomMapGen.MapSeeder = new MapSeedClass;
 	memcpy(RandomMapGen.MapSeeder, &RandomMapGen.SeedData, sizeof(RandomMapGen.SeedData));
 
-	Scen->Set_Scenario_Name(Fetch_String(TXT_RANDOM_MAP_DESCRIPTION));
+	Scen->Set_Scenario_Name(Localize("TXT_RANDOM_MAP_DESCRIPTION"));
 	Title_Screen_Restore();
 
 	if (RandomMapGen.MapPreview != NULL) {
@@ -3547,13 +3547,13 @@ BOOL CALLBACK Map_Seed_Dialog_Proc(HWND window, UINT message, WPARAM wparam, LPA
 					RandomMapGen.SeedData.Get_Settings(window);
 					if (Debug_Map) {
 						RandomMapGen.Generate_Random_Map(false, window);
-						Scen->Set_Scenario_Name(Fetch_String(TXT_RANDOM_MAP_DESCRIPTION));
+						Scen->Set_Scenario_Name(Localize("TXT_RANDOM_MAP_DESCRIPTION"));
 						Write_Scenario_INI("RandMap.Map", true);
 					} else {
 						if (RandomMapGen.MapPreview == NULL || RandomMapGen.MapPreview->Get_Preview_Surface() == NULL) {
 							RandomMapGen.Generate_Random_Map(true, window);
 							if (Debug_Map) {
-								Scen->Set_Scenario_Name(Fetch_String(TXT_RANDOM_MAP_DESCRIPTION));
+								Scen->Set_Scenario_Name(Localize("TXT_RANDOM_MAP_DESCRIPTION"));
 								Write_Scenario_INI("RandMap.Map", true);
 							}
 						}
@@ -3804,11 +3804,11 @@ void MapSeedClass::Set_Settings(HWND dialog)
 	}
 	for (i = BIOME_FIRST; i < BIOME_COUNT; i++) {
 		if (i != BIOME_MUTATED || Addon_Enabled(ADDON_FIRESTORM)) {
-			item = SendMessageA(handle, CB_ADDSTRING, 0, (LPARAM)Fetch_String(_biome_names[i]));
+			item = SendMessageA(handle, CB_ADDSTRING, 0, (LPARAM)Localize(_biome_names[i]));
 			SendMessageA(handle, CB_SETITEMDATA, item, i);
 		}
 	}
-	item = SendMessageA(handle, CB_FINDSTRING, 0, (LPARAM)Fetch_String(_biome_names[Biome]));
+	item = SendMessageA(handle, CB_FINDSTRING, 0, (LPARAM)Localize(_biome_names[Biome]));
 	SendMessageA(handle, CB_SETCURSEL, item, 0);
 
 	handle = GetDlgItem(dialog, IDC_MAPGEN_TIME_OF_DAY);
@@ -3816,10 +3816,10 @@ void MapSeedClass::Set_Settings(HWND dialog)
 		SendMessageA(handle, CB_DELETESTRING, 0, 0);
 	}
 	for (i = TIME_OF_DAY_FIRST; i < TIME_OF_DAY_COUNT; i++) {
-		item = SendMessageA(handle, CB_ADDSTRING, 0, (LPARAM)Fetch_String(_time_names[i]));
+		item = SendMessageA(handle, CB_ADDSTRING, 0, (LPARAM)Localize(_time_names[i]));
 		SendMessageA(handle, CB_SETITEMDATA, item, i);
 	}
-	item = SendMessageA(handle, CB_FINDSTRING, 0, (LPARAM)Fetch_String(_time_names[Time]));
+	item = SendMessageA(handle, CB_FINDSTRING, 0, (LPARAM)Localize(_time_names[Time]));
 	SendMessageA(handle, CB_SETCURSEL, item, 0);
 
 	handle = GetDlgItem(dialog, IDC_MAPGEN_MAP_WIDTH);
@@ -3827,10 +3827,10 @@ void MapSeedClass::Set_Settings(HWND dialog)
 		SendMessageA(handle, CB_DELETESTRING, 0, 0);
 	}
 	for (i = 0; i < MAPSIZE_COUNT; i++) {
-		item = SendMessageA(handle, CB_ADDSTRING, 0, (LPARAM)Fetch_String(_map_size_names[i]));
+		item = SendMessageA(handle, CB_ADDSTRING, 0, (LPARAM)Localize(_map_size_names[i]));
 		SendMessageA(handle, CB_SETITEMDATA, item, i);
 	}
-	item = SendMessageA(handle, CB_FINDSTRING, 0, (LPARAM)Fetch_String(_map_size_names[Width]));
+	item = SendMessageA(handle, CB_FINDSTRING, 0, (LPARAM)Localize(_map_size_names[Width]));
 	SendMessageA(handle, CB_SETCURSEL, item, 0);
 
 	handle = GetDlgItem(dialog, IDC_MAPGEN_MAP_HEIGHT);
@@ -3838,10 +3838,10 @@ void MapSeedClass::Set_Settings(HWND dialog)
 		SendMessageA(handle, CB_DELETESTRING, 0, 0);
 	}
 	for (i = 0; i < MAPSIZE_COUNT; i++) {
-		item = SendMessageA(handle, CB_ADDSTRING, 0, (LPARAM)Fetch_String(_map_size_names[i]));
+		item = SendMessageA(handle, CB_ADDSTRING, 0, (LPARAM)Localize(_map_size_names[i]));
 		SendMessageA(handle, CB_SETITEMDATA, item, i);
 	}
-	item = SendMessageA(handle, CB_FINDSTRING, 0, (LPARAM)Fetch_String(_map_size_names[Height]));
+	item = SendMessageA(handle, CB_FINDSTRING, 0, (LPARAM)Localize(_map_size_names[Height]));
 	SendMessageA(handle, CB_SETCURSEL, item, 0);
 
 	handle = GetDlgItem(dialog, IDC_MAPGEN_DIMENSION_EDIT);
@@ -4444,7 +4444,7 @@ bool MapSeedClass::Load_File(const char * file_name)
 
 		if (ini.Load(file)) {
 			memset(MapDescription, 0, sizeof(MapDescription));
-			ini.Get_String("RandomMap", "Description", Fetch_String(TXT_RANDOM_MAP_DESCRIPTION), MapDescription, sizeof(MapDescription));
+			ini.Get_String("RandomMap", "Description", Localize("TXT_RANDOM_MAP_DESCRIPTION"), MapDescription, sizeof(MapDescription));
 			Width = ini.Get_Int("RandomMap", "Width", Width);
 			Height = ini.Get_Int("RandomMap", "Height", Height);
 			NumPlayers = ini.Get_Int("RandomMap", "NumPlayers", NumPlayers);

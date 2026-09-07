@@ -16,14 +16,17 @@
 #include "video.h"
 
 #include "_surface.h"
-#include "bgfxbackend.h"
 #include "dbgprint.h"
 #include "dsurface.h"
 #include "globals.h"
 #include "goptions.h"
 #include "misc.h"
+#include "renderbackend.h"
+#include "sdlplatform.h"
 #include "surface.h"
 #include "wincursor.h"
+
+#include <SDL3/SDL.h>
 
 #include <cstdlib>
 
@@ -62,13 +65,7 @@ static bool _Presenting = false;
 /// </summary>
 static void Update_Present_Interval(void)
 {
-	int refresh = 0;
-	HDC dc = GetDC(_Window);
-
-	if (dc != NULL) {
-		refresh = GetDeviceCaps(dc, VREFRESH);
-		ReleaseDC(_Window, dc);
-	}
+	int refresh = SDL_Display_Refresh_Rate();
 
 	if (refresh <= 1) {
 		refresh = 60;
@@ -130,6 +127,15 @@ static void Update_Scale_Info(void)
 	_ScaleInfo.DestY = (_ScaleInfo.WindowHeight - _ScaleInfo.DestHeight) / 2;
 	_ScaleInfo.ScaleX = (float)((double)_ScaleInfo.DestWidth / (double)_ScaleInfo.GameWidth);
 	_ScaleInfo.ScaleY = (float)((double)_ScaleInfo.DestHeight / (double)_ScaleInfo.GameHeight);
+
+	static bool logged = false;
+	if (!logged) {
+		logged = true;
+		DebugString("Scale: game %dx%d, window %dx%d, dest %d,%d %dx%d\n",
+					_ScaleInfo.GameWidth, _ScaleInfo.GameHeight,
+					_ScaleInfo.WindowWidth, _ScaleInfo.WindowHeight,
+					_ScaleInfo.DestX, _ScaleInfo.DestY, _ScaleInfo.DestWidth, _ScaleInfo.DestHeight);
+	}
 }
 
 
@@ -225,6 +231,12 @@ bool Video_Set_Mode(int width, int height)
 	if (!Backend_Set_Frame_Size(width, height)) {
 		return(false);
 	}
+
+	/*
+	 * The window's client area carries the game resolution with it, so the dialogs --
+	 * laid out in client coordinates -- stay aligned with the content on the surfaces.
+	 */
+	SDL_Platform_Set_Client_Size(width, height);
 
 	VideoModeWidth = width;
 	VideoModeHeight = height;
@@ -361,7 +373,6 @@ static int __cdecl Compare_Modes(void const * left, void const * right)
 /// when nothing matched.</returns>
 int * EnumDisplayModes(int minwidth, int minheight, int maxwidth, int maxheight)
 {
-	DEVMODE devmode;
 	int count = 0;
 	int capacity = 0;
 	int * modes = NULL;
@@ -370,31 +381,45 @@ int * EnumDisplayModes(int minwidth, int minheight, int maxwidth, int maxheight)
 
 		count = 0;
 
-		for (int index = 0; ; index++) {
-			memset(&devmode, 0, sizeof(devmode));
-			devmode.dmSize = sizeof(devmode);
+		/*
+		 * Every display reports its fullscreen modes; the caller only cares about
+		 * sizes, so modes from all displays pool into one list.
+		 */
+		int display_count = 0;
+		SDL_DisplayID * displays = SDL_GetDisplays(&display_count);
 
-			if (!EnumDisplaySettings(NULL, index, &devmode)) {
-				break;
-			}
+		for (int index = 0; index < display_count; index++) {
+			int mode_count = 0;
+			SDL_DisplayMode const * const * display_modes = SDL_GetFullscreenDisplayModes(displays[index], &mode_count);
 
-			int width = (int)devmode.dmPelsWidth;
-			int height = (int)devmode.dmPelsHeight;
+			for (int mode = 0; mode < mode_count; mode++) {
+				int width = display_modes[mode]->w;
+				int height = display_modes[mode]->h;
 
-			if (width < minwidth || width > maxwidth || height < minheight || height > maxheight) {
-				continue;
-			}
-
-			if (modes != NULL) {
-				// The list is being filled from a second enumeration; should it have
-				// grown since the one that sized the array, the extra modes are dropped.
-				if (count >= capacity) {
-					break;
+				if (width < minwidth || width > maxwidth || height < minheight || height > maxheight) {
+					continue;
 				}
-				modes[count * 2] = width;
-				modes[count * 2 + 1] = height;
+
+				if (modes != NULL) {
+					// The list is being filled from a second enumeration; should it
+					// have grown since the one that sized the array, the extra modes
+					// are dropped.
+					if (count >= capacity) {
+						break;
+					}
+					modes[count * 2] = width;
+					modes[count * 2 + 1] = height;
+				}
+				count++;
 			}
-			count++;
+
+			if (display_modes != NULL) {
+				SDL_free((void *)display_modes);
+			}
+		}
+
+		if (displays != NULL) {
+			SDL_free(displays);
 		}
 
 		if (modes != NULL) {

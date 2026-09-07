@@ -18,6 +18,8 @@
 #include "opents_build.h"
 #include "win.h"
 
+#include <SDL3/SDL_version.h>
+
 #include <shellapi.h>
 
 #include <algorithm>
@@ -417,6 +419,17 @@ R"ART(
 
 	snprintf(line, sizeof(line), "System   : %s\n", system);
 	Write_Message_Locked(line, false);
+
+	// SDL3 rides along in the binary; naming its version proves the library linked
+	// and dates the runtime when subsystems move onto it. SDL_GetVersion is a
+	// compile-time constant read, no library initialization involved.
+	{
+		int const sdl = SDL_GetVersion();
+
+		snprintf(line, sizeof(line), "SDL      : %d.%d.%d\n",
+					SDL_VERSIONNUM_MAJOR(sdl), SDL_VERSIONNUM_MINOR(sdl), SDL_VERSIONNUM_MICRO(sdl));
+		Write_Message_Locked(line, false);
+	}
 
 	// The arguments only. The executable path usually carries the account name, and re-joining
 	// the arguments loses the shell's original quoting, which a diagnostic can live without.

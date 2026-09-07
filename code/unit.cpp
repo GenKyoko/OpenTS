@@ -6661,7 +6661,7 @@ RTTIType UnitClass::Fetch_RTTI(void) const
 /// <returns>Returns with a pointer to the name to present to the player.</returns>
 char const * UnitClass::Full_Name(void) const
 {
-	return(Class->GivenName);
+	return(Class->Full_Name());
 }
 
 

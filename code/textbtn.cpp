@@ -248,7 +248,7 @@ void TextButtonClass::Set_Text(char const * text, bool resize)
 void TextButtonClass::Set_Text(int text, bool resize)
 {
 	if (text != TXT_NONE) {
-		Set_Text(Fetch_String(text), resize);
+		Set_Text(Localize(text), resize);
 	}
 }
 

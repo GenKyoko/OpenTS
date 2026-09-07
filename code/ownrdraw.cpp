@@ -43,6 +43,8 @@
 #include "theme.h"
 #include "voc.h"
 #include "vox.h"
+
+#include <cmath>
 #include "windlg.h"
 
 #include <commctrl.h>
@@ -289,7 +291,7 @@ static LRESULT CALLBACK ComboDropWinCtrlProc_Internal(HWND hWnd, UINT Msg, WPARA
 	(void)SolidBrush;
 
 	RECT rect;
-	Get_Display_Rect(hWnd, &rect);
+	Get_Game_Rect(hWnd, &rect);
 
 	RECT client;
 	GetClientRect(hWnd, &client);
@@ -310,7 +312,7 @@ static LRESULT CALLBACK ComboDropWinCtrlProc_Internal(HWND hWnd, UINT Msg, WPARA
 
 	if (hWndParent) {
 		ODWinData.getPointer(hWndParent, &parent_data);
-		Get_Display_Rect(hWndParent, &parent_rect);
+		Get_Game_Rect(hWndParent, &parent_rect);
 	}
 
 	_dropdown_owner = hWndParent;
@@ -649,10 +651,10 @@ static LRESULT CALLBACK ComboDropWinCtrlProc_Internal(HWND hWnd, UINT Msg, WPARA
 			hWndParent = GetParent(hWnd);
 
 			RECT parent_display_rect;
-			Get_Display_Rect(hWndParent, &parent_display_rect);
+			Get_Game_Rect(hWndParent, &parent_display_rect);
 
 			RECT drop_display_rect;
-			Get_Display_Rect(hWnd, &drop_display_rect);
+			Get_Game_Rect(hWnd, &drop_display_rect);
 
 			int left = drop_display_rect.left - parent_display_rect.left;
 			int top = drop_display_rect.top - parent_display_rect.top;
@@ -737,7 +739,7 @@ static LRESULT CALLBACK ComboDropWinCtrlProc_Internal(HWND hWnd, UINT Msg, WPARA
 			SWP_NOMOVE);
 
 		hWndParent = GetParent(hWnd);
-		Get_Display_Rect(hWndParent, &parent_rect);
+		Get_Game_Rect(hWndParent, &parent_rect);
 
 		RECT validate_rect;
 		validate_rect.left = rect.left - parent_rect.left - 1;
@@ -813,7 +815,7 @@ BOOL CALLBACK InitializeCtrl(HWND window, LPARAM lparam)
 	LONG style = GetWindowLong(window, GWL_STYLE);
 
 	RECT rect1;
-	Get_Display_Rect(window, &rect1);
+	Get_Game_Rect(window, &rect1);
 	RECT rect2;
 	GetClientRect(window, &rect2);
 
@@ -1149,7 +1151,7 @@ static LRESULT CALLBACK CtrlProc_Internal(HWND window, UINT message, WPARAM wpar
 	key.message = message;
 
 	RECT display_rect;
-	Get_Display_Rect(window, &display_rect);
+	Get_Game_Rect(window, &display_rect);
 	RECT window_rect;
 	GetWindowRect(window, &window_rect);
 	int offset_x = 0;
@@ -1224,7 +1226,7 @@ static LRESULT CALLBACK CtrlProc_Internal(HWND window, UINT message, WPARAM wpar
 	RECT client_rect;
 	GetClientRect(window, &client_rect);
 	RECT disp_rect;
-	Get_Display_Rect(window, &disp_rect);
+	Get_Game_Rect(window, &disp_rect);
 
 	bool in_focus = GameInFocus;
 
@@ -1676,7 +1678,7 @@ static LRESULT CALLBACK CtrlProc_Internal(HWND window, UINT message, WPARAM wpar
 					} else if (_dropdown_window != NULL) {
 						if (_dropdown_owner == owner) {
 							Rect drop_rect;
-							Get_Display_Rect(_dropdown_window, (LPRECT)&drop_rect);
+							Get_Game_Rect(_dropdown_window, (LPRECT)&drop_rect);
 							RECT intersect;
 							if (IntersectRect(&intersect, &disp_rect, (const RECT *)&drop_rect)) {
 								InvalidateRect(_dropdown_window, NULL, FALSE);
@@ -1702,7 +1704,7 @@ static LRESULT CALLBACK CtrlProc_Internal(HWND window, UINT message, WPARAM wpar
 					}
 					if (GetWindowLong(sibling, DWL_DLGPROC)) {
 						Rect sibling_rect;
-						Get_Display_Rect(sibling, (LPRECT)&sibling_rect);
+						Get_Game_Rect(sibling, (LPRECT)&sibling_rect);
 						RECT intersect;
 						if (IntersectRect(&intersect, &disp_rect, (const RECT *)&sibling_rect)) {
 							InvalidateRect(sibling, NULL, FALSE);
@@ -1883,7 +1885,8 @@ cleanup:
 
 							/*
 							 * The whole animation runs inside one paint, so each step
-							 * has to reach the screen from here.
+							 * has to reach the screen from here. The popups mirror
+							 * from the presented frame inside the present itself.
 							 */
 							Video_Present_If_Dirty();
 
@@ -1972,7 +1975,7 @@ LRESULT CALLBACK DefaultCtrlProc(HWND window, UINT message, WPARAM wparam, LPARA
 	OriginalWndProcs.getValue(window, proc);
 
 	RECT rect1;
-	Get_Display_Rect(window, &rect1);
+	Get_Game_Rect(window, &rect1);
 
 	RECT rect2;
 	GetClientRect(window, &rect2);
@@ -2013,7 +2016,7 @@ LRESULT CALLBACK ButtonCtrlProc(HWND window, UINT message, WPARAM wparam, LPARAM
 
 	RECT drect;
 	memset(&drect, 0, sizeof(drect));
-	Get_Display_Rect(window, &drect);
+	Get_Game_Rect(window, &drect);
 
 	Rect origin(drect.left, drect.top, drect.right - drect.left, drect.bottom - drect.top);
 
@@ -2229,7 +2232,7 @@ LRESULT CALLBACK TextBoxCtrlProc(HWND window, UINT message, WPARAM wparam, LPARA
 
 	if (message == OD_SUBCLASSED) {
 		RECT rect;
-		Get_Display_Rect(window, &rect);
+		Get_Game_Rect(window, &rect);
 
 		Surface * surf = SurfaceCache.GetSurface("tab_tlu.pcx");
 		SendMessage(window, TCM_SETITEMSIZE, 0, MAKELPARAM(89, surf->Get_Height() - 1));
@@ -2242,7 +2245,7 @@ LRESULT CALLBACK TextBoxCtrlProc(HWND window, UINT message, WPARAM wparam, LPARA
 
 	if (message == WM_PAINT) {
 		RECT winrect;
-		Get_Display_Rect(window, &winrect);
+		Get_Game_Rect(window, &winrect);
 
 		TabCtrl_GetItemCount(window);
 
@@ -2378,7 +2381,7 @@ LRESULT CALLBACK TextBoxCtrlProc(HWND window, UINT message, WPARAM wparam, LPARA
 		}
 
 		int current = TabCtrl_GetCurSel(window);
-		Get_Display_Rect(window, &winrect);
+		Get_Game_Rect(window, &winrect);
 		int tab = current + 1;
 		int itab = tab;
 
@@ -2617,7 +2620,7 @@ LRESULT CALLBACK EditBoxCtrlProc(HWND window, UINT message, WPARAM wparam, LPARA
 		else {
 			if (message == WM_PAINT || message == WM_ERASEBKGND) {
 				RECT display_rect;
-				Get_Display_Rect(window, &display_rect);
+				Get_Game_Rect(window, &display_rect);
 
 				GetClassName(GetParent(window), class_name, sizeof(class_name)/2);
 				bool is_combo = strcmp(class_name, "ComboBox") == 0;
@@ -2728,7 +2731,7 @@ LRESULT CALLBACK StaticCtrlProc(HWND window, UINT message, WPARAM wparam, LPARAM
 			Surface * cachedSurf = data->cachedSurface;
 			if (cachedSurf != NULL) {
 				RECT drect;
-				Get_Display_Rect(window, &drect);
+				Get_Game_Rect(window, &drect);
 
 				RECT crect;
 				GetClientRect(window, &crect);
@@ -2797,7 +2800,7 @@ LRESULT CALLBACK StaticCtrlProc(HWND window, UINT message, WPARAM wparam, LPARAM
 
 			if (data->cachedSurface == NULL) {
 				RECT drect;
-				Get_Display_Rect(window, &drect);
+				Get_Game_Rect(window, &drect);
 
 				RECT crect;
 				GetClientRect(window, &crect);
@@ -2822,7 +2825,7 @@ LRESULT CALLBACK StaticCtrlProc(HWND window, UINT message, WPARAM wparam, LPARAM
 			}
 
 			Rect text_rect;
-			Get_Display_Rect(window, (LPRECT)&text_rect);
+			Get_Game_Rect(window, (LPRECT)&text_rect);
 
 			GetWindowText(window, text, 2047);
 
@@ -2921,13 +2924,13 @@ LRESULT CALLBACK CheckBoxCtrlProc(HWND window, UINT message, WPARAM wparam, LPAR
 			RECT cr;
 			GetClientRect(window, &cr);
 			Rect trect;
-			Get_Display_Rect(window, (LPRECT)&trect);
+			Get_Game_Rect(window, (LPRECT)&trect);
 			int somebool = 0;
 			if (data->CheckBox.checkState == 1) {
 				somebool = 1;
 			}
 			RECT disprect;
-			Get_Display_Rect(window, (LPRECT)&disprect);
+			Get_Game_Rect(window, (LPRECT)&disprect);
 			Rect drect;
 			drect.X = disprect.left;
 			drect.Y = disprect.top;
@@ -3018,7 +3021,7 @@ LRESULT CALLBACK ComboBoxCtrlProc(HWND window, UINT message, WPARAM wparam, LPAR
 	RECT display_rect;
 	RECT client_rect;
 	RECT window_rect;
-	Get_Display_Rect(window, &display_rect);
+	Get_Game_Rect(window, &display_rect);
 	GetClientRect(window, &client_rect);
 	GetWindowRect(window, &window_rect);
 
@@ -3069,7 +3072,7 @@ LRESULT CALLBACK ComboBoxCtrlProc(HWND window, UINT message, WPARAM wparam, LPAR
 			}
 
 			RECT parent_rect;
-			Get_Display_Rect(parent, &parent_rect);
+			Get_Game_Rect(parent, &parent_rect);
 
 			Rect dst_rect(0, 0, width, height);
 			Rect src_rect(0, 0, width, height);
@@ -3197,7 +3200,7 @@ LRESULT CALLBACK ComboBoxCtrlProc(HWND window, UINT message, WPARAM wparam, LPAR
 			SetFocus(window);
 
 			RECT parent_rect;
-			Get_Display_Rect(GetParent(window), &parent_rect);
+			Get_Game_Rect(GetParent(window), &parent_rect);
 
 			int count = (int)SendMessage(window, CB_GETCOUNT, 0, 0);
 			int item_height = (int)SendMessage(window, CB_GETITEMHEIGHT, 0, 0);
@@ -3213,8 +3216,8 @@ LRESULT CALLBACK ComboBoxCtrlProc(HWND window, UINT message, WPARAM wparam, LPAR
 
 			RECT parent_display;
 			RECT combo_display;
-			Get_Display_Rect(GetParent(window), &parent_display);
-			Get_Display_Rect(window, &combo_display);
+			Get_Game_Rect(GetParent(window), &parent_display);
+			Get_Game_Rect(window, &combo_display);
 
 			int x = combo_display.left - parent_display.left;
 			int y = client_rect.bottom + combo_display.top - parent_display.top + 2;
@@ -3303,7 +3306,7 @@ LRESULT CALLBACK ListBoxCtrlProc(HWND window, UINT message, WPARAM wparam, LPARA
 	RECT client_rect;
 	GetClientRect(window, &client_rect);
 	RECT display_rect;
-	Get_Display_Rect(window, &display_rect);
+	Get_Game_Rect(window, &display_rect);
 	display_rect.right -= ODBorderThickness;
 	display_rect.left += ODBorderThickness;
 
@@ -3523,9 +3526,9 @@ LRESULT CALLBACK ListBoxCtrlProc(HWND window, UINT message, WPARAM wparam, LPARA
 		case WM_SIZE: {
 			if ((int)data->attachedWindow > 1) {
 				RECT parent_display;
-				Get_Display_Rect(GetParent(window), &parent_display);
+				Get_Game_Rect(GetParent(window), &parent_display);
 				Rect win_display;
-				Get_Display_Rect(window, (LPRECT)&win_display);
+				Get_Game_Rect(window, (LPRECT)&win_display);
 				MoveWindow(data->attachedWindow, win_display.Width - parent_display.left, win_display.Y - parent_display.top, scrollbar_width, win_display.Height - win_display.Y, TRUE);
 			}
 			Surface * surface = data->cachedSurface;
@@ -4022,9 +4025,9 @@ LRESULT CALLBACK ListBoxCtrlProc(HWND window, UINT message, WPARAM wparam, LPARA
 			GetWindowLong(window, GWL_WNDPROC);
 			parent = GetParent(window);
 			RECT parent_display;
-			Get_Display_Rect(parent, &parent_display);
+			Get_Game_Rect(parent, &parent_display);
 			RECT win_display;
-			Get_Display_Rect(window, &win_display);
+			Get_Game_Rect(window, &win_display);
 			int x = win_display.left - parent_display.left;
 			int y = win_display.top - parent_display.top;
 			data->attachedWindow = CreateWindowEx(0, "Scrollbar", NULL, 0x50010001,
@@ -4069,7 +4072,7 @@ LRESULT CALLBACK ListBoxCtrlProc(HWND window, UINT message, WPARAM wparam, LPARA
 		SetWindowPos(window, NULL, 0, 0, client_rect.right + ODBorderThickness - client_rect.left + scrollbar_width + 1, client_rect.bottom + 2 * ODBorderThickness - client_rect.top, SWP_NOMOVE);
 		parent = GetParent(window);
 		RECT parent_display;
-		Get_Display_Rect(parent, &parent_display);
+		Get_Game_Rect(parent, &parent_display);
 		Rect validate_rect;
 		validate_rect.X = display_rect.left - parent_display.left - 1;
 		validate_rect.Y = display_rect.top - parent_display.top - 1;
@@ -4112,7 +4115,7 @@ LRESULT CALLBACK ScrollBarCtrlProc(HWND window, UINT message, WPARAM wparam, LPA
 	RECT client_rect;
 	RECT display_rect;
 	GetClientRect(window, &client_rect);
-	Get_Display_Rect(window, &display_rect);
+	Get_Game_Rect(window, &display_rect);
 
 	client_rect.right -= 2 * ODBorderThickness;
 	client_rect.bottom -= 2 * ODBorderThickness;
@@ -4240,7 +4243,7 @@ LRESULT CALLBACK ScrollBarCtrlProc(HWND window, UINT message, WPARAM wparam, LPA
 			}
 
 			RECT parent_display;
-			Get_Display_Rect(parent, &parent_display);
+			Get_Game_Rect(parent, &parent_display);
 
 			Rect source_rect = src_rect;
 			if (parent_data != NULL && parent_data->cachedSurface != NULL) {
@@ -4530,7 +4533,7 @@ LRESULT CALLBACK ScrollBarCtrlProc(HWND window, UINT message, WPARAM wparam, LPA
 LRESULT CALLBACK ProgressBarCtrlProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam)
 {
 	RECT rect;
-	Get_Display_Rect(window, &rect);
+	Get_Game_Rect(window, &rect);
 
 	OwnerDraw::WinData * data = NULL;
 
@@ -4601,7 +4604,7 @@ LRESULT CALLBACK TrackBarCtrlProc(HWND window, UINT message, WPARAM wparam, LPAR
 	RECT client_rect;
 	RECT display_rect;
 	GetClientRect(window, &client_rect);
-	Get_Display_Rect(window, &display_rect);
+	Get_Game_Rect(window, &display_rect);
 	int number_width = 50;
 
 	WinData * data = NULL;
@@ -4696,14 +4699,14 @@ LRESULT CALLBACK TrackBarCtrlProc(HWND window, UINT message, WPARAM wparam, LPAR
 			break;
 
 		case WM_PAINT: {
-			Get_Display_Rect(window, &display_rect);
+			Get_Game_Rect(window, &display_rect);
 			Rect disp_rect(display_rect.left, display_rect.top, display_rect.right - display_rect.left, display_rect.bottom - display_rect.top);
 			LONG style = GetWindowLong(window, GWL_STYLE);
 
 			if (data->cachedSurface == NULL) {
 				RECT disp_copy;
 				RECT client_copy;
-				Get_Display_Rect(window, &disp_copy);
+				Get_Game_Rect(window, &disp_copy);
 				GetClientRect(window, &client_copy);
 
 				BSurface * surf = new BSurface(client_copy.right + 1, client_copy.bottom + 1, 2);
@@ -4719,7 +4722,7 @@ LRESULT CALLBACK TrackBarCtrlProc(HWND window, UINT message, WPARAM wparam, LPAR
 			if (data->cachedSurface != NULL) {
 				RECT disp_copy;
 				RECT client_copy;
-				Get_Display_Rect(window, &disp_copy);
+				Get_Game_Rect(window, &disp_copy);
 				GetClientRect(window, &client_copy);
 
 				Rect src_rect(0, 0, client_copy.right + 1, client_copy.bottom + 1);
@@ -4949,7 +4952,7 @@ LRESULT CALLBACK GroupBoxCtrlProc(HWND window, UINT message, WPARAM wparam, LPAR
 			GetTextExtentPoint32(hdc, text, strlen(text), &text_size);
 
 			RECT rect;
-			Get_Display_Rect(window, &rect);
+			Get_Game_Rect(window, &rect);
 
 			int y = rect.top + text_size.cy / 2;
 			TextOut(hdc, rect.left + 10, rect.top, text, strlen(text));
@@ -5008,7 +5011,7 @@ LRESULT CALLBACK HotkeyCtrlProc(HWND window, UINT message, WPARAM wparam, LPARAM
 		case WM_PAINT: {
 			WinData* data = NULL;
 			RECT rect;
-			Get_Display_Rect(window, &rect);
+			Get_Game_Rect(window, &rect);
 			Rect alternate_rect(rect.left, rect.top, rect.right - rect.left + 1, rect.bottom - rect.top + 1);
 			Rect win_rect(0, 0, alternate_rect.Width, alternate_rect.Height);
 			ODWinData.getPointer(window, &data);
@@ -6205,7 +6208,7 @@ void OwnerDraw::Draw_Item(LPDRAWITEMSTRUCT drawit)
 {
 	if (VisibleSurface != NULL && AlternateSurface != NULL) {
 		RECT rect1;
-		Get_Display_Rect(drawit->hwndItem, &rect1);
+		Get_Game_Rect(drawit->hwndItem, &rect1);
 		RECT rect2;
 		GetClientRect(drawit->hwndItem, &rect2);
 
@@ -6250,7 +6253,7 @@ void ODDrawDimmedBackground(Rect const & rect, HWND hWnd)
 	GetClientRect(hWnd, &rcClient);
 
 	RECT dispChild;
-	Get_Display_Rect(hWnd, &dispChild);
+	Get_Game_Rect(hWnd, &dispChild);
 
 	Surface * surface = winData->cachedSurface;
 	if (surface == NULL) {
@@ -6266,7 +6269,7 @@ void ODDrawDimmedBackground(Rect const & rect, HWND hWnd)
 		Surface * parentSurf = parentWinData->cachedSurface;
 		if (parentSurf) {
 			RECT dispParent;
-			Get_Display_Rect(parent, &dispParent);
+			Get_Game_Rect(parent, &dispParent);
 
 			Rect srcRel;
 			srcRel.X = dispChild.left - dispParent.left;
@@ -6492,7 +6495,7 @@ void OwnerDraw::Draw_Dialog_Back(HWND window)
 	::GetClientRect(window, &rcClient);
 
 	RECT rcDisp;
-	Get_Display_Rect(window, &rcDisp);
+	Get_Game_Rect(window, &rcDisp);
 
 	Rect rFull;
 	rFull.Set(rcDisp.left, rcDisp.top, rcDisp.right - rcDisp.left, rcDisp.bottom - rcDisp.top);
@@ -6903,6 +6906,13 @@ int OwnerDraw::Move_Dialog(HWND window, int x, int y)
 	int xpos;
 	int ypos;
 
+	/*
+	 * The x and y arguments are frame coordinates, and the frame is presented scaled
+	 * and letterboxed inside the client, so they are carried over to client
+	 * coordinates before use. With no scaling in force this is the identity.
+	 */
+	VideoScaleInfo const & scale = Video_Get_Scale_Info();
+
 	RECT rect1;
 	rect1.left = 0;
 	rect1.top = 0;
@@ -6920,6 +6930,8 @@ int OwnerDraw::Move_Dialog(HWND window, int x, int y)
 
 	if (x == -1) {
 		xpos = rect2.left - rect1.left;
+	} else if (scale.DestWidth > 0 && scale.GameWidth > 0) {
+		xpos = scale.DestX + (int)floor(x * (double)scale.DestWidth / scale.GameWidth);
 	} else {
 		xpos = x;
 	}
@@ -6927,10 +6939,22 @@ int OwnerDraw::Move_Dialog(HWND window, int x, int y)
 
 	if (y == -1) {
 		ypos = rect2.top - rect1.top;
+	} else if (scale.DestHeight > 0 && scale.GameHeight > 0) {
+		ypos = scale.DestY + (int)floor(y * (double)scale.DestHeight / scale.GameHeight);
 	} else {
 		ypos = y;
 	}
 	rect2.top = ypos;
+
+	/*
+	 * A popup window is positioned in screen coordinates, so the position computed
+	 * against the client area's origin carries that origin back in. A child window
+	 * needed the raw value.
+	 */
+	if (GetWindowLong(window, GWL_STYLE) & WS_POPUP) {
+		rect2.left += rect1.left;
+		rect2.top += rect1.top;
+	}
 
 	return(MoveWindow(window, rect2.left, rect2.top, rect2.right, rect2.bottom, FALSE));
 }

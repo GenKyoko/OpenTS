@@ -236,7 +236,7 @@ void IonStormClass::Ion_Storm_Begin(int duration, int warning)
 
 			Map.Update_Cell_Colors();
 			Theme.Play_Song(Theme.From_Name("IONSTORM"));
-			Session.Messages.Add_Message(NULL, 0, Fetch_String(TXT_ION_STORM), GREEN, TextPrintType(TPF_USE_GRAD_PAL|TPF_FULLSHADOW|TPF_LED|TPF_8POINT), TICKS_PER_SECOND * 10);
+			Session.Messages.Add_Message(NULL, 0, Localize("TXT_ION_STORM"), GREEN, TextPrintType(TPF_USE_GRAD_PAL|TPF_FULLSHADOW|TPF_LED|TPF_8POINT), TICKS_PER_SECOND * 10);
 			Map.Flag_To_Redraw(GS_REDRAW_TACTICAL);
 		}
 	}
@@ -441,7 +441,7 @@ void IonStormClass::AI(void)
 			} else {
 				if (Deferment % (TICKS_PER_SECOND * 15) == 0) {
 					Speak(VOX_ION_STORM_APPROACHING);
-					Session.Messages.Add_Message(NULL, 0, Fetch_String(TXT_ION_STORM_APPROACHING), GREEN, TextPrintType(TPF_FULLSHADOW|TPF_LED|TPF_8POINT), TICKS_PER_SECOND * 10);
+					Session.Messages.Add_Message(NULL, 0, Localize("TXT_ION_STORM_APPROACHING"), GREEN, TextPrintType(TPF_FULLSHADOW|TPF_LED|TPF_8POINT), TICKS_PER_SECOND * 10);
 				}
 			}
 		}

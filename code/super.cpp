@@ -546,29 +546,29 @@ char const * SuperClass::State_String(void) const
 		if (Class->UseChargeDrain) {
 			switch (ChargeDrainState) {
 				case CHARGING:
-					return(Fetch_String(TXT_CHARGING));
+					return(Localize("TXT_CHARGING"));
 				case READY:
-					return(Fetch_String(TXT_READY));
+					return(Localize("TXT_READY"));
 				case FIRESTORM_ON:
-					return(Fetch_String(TXT_FIRESTORM_ON));
+					return(Localize("TXT_FIRESTORM_ON"));
 				default:
 					return(NULL);
 			}
 		}
 		if (Class->Type == SUPER_HUNTER_SEEKER) {
 			if (IsReady) {
-				return(Fetch_String(TXT_RELEASE_THE_HOUNDS));
+				return(Localize("TXT_RELEASE_THE_HOUNDS"));
 			} else {
 				return(NULL);
 			}
 		}
 		if (IsReady) {
-			return(Fetch_String(TXT_READY));
+			return(Localize("TXT_READY"));
 		} else {
 			return(NULL);
 		}
 	} else {
-		return(Fetch_String(TXT_HOLD));
+		return(Localize("TXT_HOLD"));
 	}
 }
 

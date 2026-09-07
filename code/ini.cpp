@@ -385,7 +385,6 @@ int INIClass::Load(Straw & ffile, bool keepcomments)
 				**	care of it.
 				*/
 				int len = Read_Line(file, buffer, sizeof(buffer), end_of_file);
-				if (end_of_file) break;
 				if (Is_A_Section(buffer)) break;
 
 				if (keepcomments) {

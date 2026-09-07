@@ -371,6 +371,9 @@ bool CDFileClass::Find_First_File(char *fname)
 			return(true);
 		}
 
+		/*
+		**	Search the configured drives for the file.
+		*/
 		entry = First;
 
 		if (entry != NULL) {

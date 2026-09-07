@@ -27,6 +27,7 @@
 #include "coord.h"
 #include "globals.h"
 #include "house.h"
+#include "localization.h"
 #include "mixfile.h"
 #include "rules.h"
 #include "savestream.h"
@@ -70,7 +71,9 @@ DynamicVectorClass<ObjectTypeClass *> ObjectTypeClass::ObjectTypes;
  *=============================================================================================*/
 ObjectTypeClass::ObjectTypeClass(char const * ininame) :
 	BASECLASS(ininame),
+	UIName(),
 	MaxSize(0),
+	ImageDataIsOwned(false),
 	CrushSound(VOC_NONE),
 	GraphicName(),
 	AlphaGraphicName(),
@@ -618,7 +621,11 @@ void ObjectTypeClass::Fetch_Normal_Image(void)
 
 	ShapeSet const * image = (ShapeSet const *)MFCD::Retrieve(fullname);
 	if (image) {
+		if (ImageData != NULL && ImageDataIsOwned) {
+			delete [] (char *)ImageData;
+		}
 		ImageData = image;
+		ImageDataIsOwned = false;
 		int maxsize = std::max(image->Get_Width(), image->Get_Height());
 		maxsize = std::max(maxsize, 8);
 		MaxSize = maxsize;
@@ -627,6 +634,22 @@ void ObjectTypeClass::Fetch_Normal_Image(void)
 
 
 /// <summary>
+/// <summary>
+/// Fetches the name this object type shows in the user interface.
+/// When the type's INI section carries a UIName entry, the name comes from the
+/// localization tables under that key; otherwise the literal Name tag is shown, as
+/// before.
+/// </summary>
+/// <returns>The display name of the object type.</returns>
+char const * ObjectTypeClass::Full_Name(void) const
+{
+	if (!UIName.empty()) {
+		return(Localize(UIName));
+	}
+	return(BASECLASS::Full_Name());
+}
+
+
 /// Fetches the object type's data from the INI database.
 /// This routine will read the attributes common to every object -- armor, strength,
 /// crushability, and the targeting flags -- from the rules database, and the artwork
@@ -642,6 +665,7 @@ bool ObjectTypeClass::Read_INI(CCINIClass const & ini)
 
 		ini.Get_String(IniName, "Image", GraphicName);
 		ini.Get_String(IniName, "AlphaImage", AlphaGraphicName);
+		ini.Get_String(IniName, "UIName", UIName);
 
 		CrushSound = ini.Get_VocType(IniName, "CrushSound", CrushSound);
 
@@ -726,6 +750,7 @@ void ObjectTypeClass::Serialize(SaveStreamClass & stream)
 	BASECLASS::Serialize(stream);
 
 	stream.Serialize(RadialColor);
+	stream.Serialize(UIName);
 	stream.Serialize(Armor);
 	stream.Serialize(MaxStrength);
 	// ImageData -- artwork, loaded on demand.

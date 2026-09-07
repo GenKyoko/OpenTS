@@ -312,7 +312,7 @@ MapStage::MapStage(INIClass const & ini, char const * label) :
 				}
 			}
 		} else {
-			char const * desc = Fetch_String(txt);
+			char const * desc = Localize(txt);
 			Description = strdup(desc);
 		}
 	}

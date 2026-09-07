@@ -45,9 +45,10 @@ enum DSurfaceColorMode {
 };
 
 
-// A concrete surface whose pixels are a GDI device independent bitmap in system memory.
-// The bitmap is permanently selected into a memory device context, so the surface can be
-// drawn to either as raw 16 bit pixels through Lock or with GDI through GetDC.
+// A concrete surface whose pixels are a plain block of 16 bit 565 memory.
+// The pixels are reached directly through Lock or Get_Buffer; a device context that
+// draws onto them is only minted on demand through GetDC, for the few callers that
+// still draw text the GDI way.
 class DSurface : public XSurface
 {
 		typedef XSurface BASECLASS;
@@ -173,12 +174,19 @@ class DSurface : public XSurface
 		HGDIOBJ GDIOldBitmap;
 
 		/*
-		 * The pixels themselves, owned by the bitmap, and the bytes from one row of them
-		 * to the next. GDI rounds that up to a multiple of four, so it is not always the
-		 * width times the pixel size.
+		 * The pixels themselves, owned by the surface, and the bytes from one row of
+		 * them to the next. The stride is the width times the pixel size, since the
+		 * buffer is the engine's own allocation rather than a GDI bitmap's.
 		 */
 		void * GDIBuffer;
 		int Pitch;
+
+		/*
+		 * The mirror bitmap that backs GetDC, created the first time a caller asks
+		 * for a device context. Drawing goes into the mirror, and ReleaseDC copies
+		 * it back onto the surface's own pixels.
+		 */
+		void * MirrorBuffer;
 
 	public:
 		/*

@@ -30,6 +30,7 @@
 #include "conquer.h"
 #include "data.h"
 #include "debug.h"
+#include "dbgprint.h"
 #include "dialog.h"
 #include "dsaudio.h"
 #include "dsurface.h"
@@ -484,6 +485,7 @@ void Keyboard_Process(KeyNumType & input)
 		**	Brings up the options dialog box.
 		*/
 		if (plain == KN_SPACE || plain == KN_ESC) {
+			DebugString("Options queued from key input %08X\n", (unsigned int)input);
 			Queue_Options();
 		}
 
@@ -670,7 +672,7 @@ void Message_Input(KeyNumType &input)
 			if (input==(KN_F1 + Session.MaxPlayers - 1)) {
 
 				Session.MessageAddress = IPXAddressClass(); // set to broadcast
-				strcpy(txt, Fetch_String(TXT_TO_ALL));      // "To All:"
+				strcpy(txt, Localize("TXT_TO_ALL"));      // "To All:"
 
 				Session.Messages.Add_Edit(Session.ColorIdx,
 					TextPrintType(TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_FULLSHADOW), txt, 0, -1);
@@ -681,7 +683,7 @@ void Message_Input(KeyNumType &input)
 
 				id = Ipx.Connection_ID(input - KN_F1);
 				Session.MessageAddress = (*(Ipx.Connection_Address (id)));
-				wsprintf(txt, Fetch_String(TXT_TO), Ipx.Connection_Name(id));
+				wsprintf(txt, Localize("TXT_TO"), Ipx.Connection_Name(id));
 
 				Session.Messages.Add_Edit(Session.ColorIdx,
 					TextPrintType(TPF_6PT_GRAD | TPF_USE_GRAD_PAL | TPF_FULLSHADOW), txt, 0, -1);

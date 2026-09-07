@@ -1063,7 +1063,7 @@ void Process_Pending_Save_Game(void)
 	MultiplayerSavePending = false;
 
 	if (MultiplayerSavingAllowed) {
-		HWND dialog = OwnerDraw::Custom_Message_Box(Fetch_String(TXT_SAVING_GAME), NULL, NULL);
+		HWND dialog = OwnerDraw::Custom_Message_Box(Localize("TXT_SAVING_GAME"), NULL, NULL);
 		if (dialog != 0) {
 			OwnerDraw::Display_Dialog(dialog);
 		}

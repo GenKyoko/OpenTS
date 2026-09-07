@@ -769,7 +769,7 @@ bool MSVQAnim::Has_Finished(void) const
 /// <param name="center">Should the text be centered within its area?</param>
 MSPrintAnim::MSPrintAnim(int text, int x, int y, MSFont * font, Rect const & rect, int start_delay, int print_delay, bool fade_effect, bool center) :
 	MSAnim(x, y, true),
-	String(Fetch_String(text)),
+	String(Localize(text)),
 	PrintDelay(print_delay),
 	Font(font),
 	LineStart(0),

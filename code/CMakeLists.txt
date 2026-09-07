@@ -222,15 +222,6 @@ target_include_directories(OpenTS PRIVATE
 # The generated build stamp has to exist before anything compiles.
 add_dependencies(OpenTS OpenTSBuildStamp)
 
-# Only the renderer's own translation unit sees bgfx, so its headers and the shaders it
-# embeds are put on that file rather than on the whole target.
-set(BGFX_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/bgfx.cmake/bgfx")
-set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/bgfxbackend.cpp" PROPERTIES
-    INCLUDE_DIRECTORIES
-        "${BGFX_ROOT}/include;${CMAKE_SOURCE_DIR}/thirdparty/bgfx.cmake/bx/include;${BGFX_ROOT}/examples/common/imgui"
-    COMPILE_OPTIONS "/Zc:preprocessor"
-)
-
 message(STATUS "${PROJECT_NAME}: Adding compilier definitions...")
 target_compile_definitions(OpenTS PRIVATE
     WIN32
@@ -260,16 +251,11 @@ message(STATUS "${PROJECT_NAME}: Applying linker options...")
 #  + all Win32 libs
 #
 
-# The bgfx targets are linked by file rather than by name. Their interface settings
-# include compiler switches and a directory of headers that shadow the system ones, and
-# the Visual Studio generator would hand all of that to ML.EXE as well, which fails.
-add_dependencies(OpenTS bgfx bx bimg)
+# The renderer lives in renderbackend.cpp and links SDL3, which is set up further down
+# alongside the engine's other third party dependencies.
 target_link_libraries(OpenTS PRIVATE
     VQALib
 
-    $<TARGET_FILE:bgfx>
-    $<TARGET_FILE:bx>
-    $<TARGET_FILE:bimg>
     comctl32
     dbghelp
     dsound
@@ -287,11 +273,11 @@ target_link_libraries(OpenTS PRIVATE
 # HarfBuzz shaping for the wide text path
 # ---------------------------------------------------------
 #
-# The wide text path (widetext.cpp) always draws through the operating system's font
-# engine. With HarfBuzz the shaping stage resolves the text into real font glyph ids,
-# which fixes ligatures, joining forms and glyph substitutions. The sources live in
-# thirdparty/harfbuzz and thirdparty/CMakeLists.txt builds them with the GDI backend
-# that the glyph-id rasterization pairs against.
+# The wide text path (widetext.cpp) rasterizes through FreeType. With HarfBuzz the
+# shaping stage resolves the text into real font glyph ids, which fixes ligatures,
+# joining forms and glyph substitutions. The sources live in thirdparty/harfbuzz and
+# thirdparty/CMakeLists.txt builds them with the FreeType backend, whose glyph ids
+# pair against the FreeType rasterization.
 option(OPENTS_WITH_HARFBUZZ "Shape the wide text path with HarfBuzz" ON)
 
 if (OPENTS_WITH_HARFBUZZ)
@@ -304,6 +290,58 @@ if (OPENTS_WITH_HARFBUZZ)
         "${CMAKE_SOURCE_DIR}/thirdparty/freetype/include")
     target_compile_definitions(OpenTS PRIVATE OPENTS_WITH_HARFBUZZ)
 endif()
+
+#
+# ---------------------------------------------------------
+# AVX2 code generation
+# ---------------------------------------------------------
+#
+# Compiles the engine's own C/C++ sources with AVX2 code generation enabled. The
+# thirdparty libraries keep their own instruction sets, and the MASM assembly files
+# are unaffected. The resulting executable requires a CPU with AVX2 support (Intel
+# Haswell 2013+ / AMD Excavator 2015+ or newer); turn this off with
+# -DOPENTS_USE_AVX2=OFF to build for older processors.
+option(OPENTS_USE_AVX2 "Generate AVX2 code for the engine's C/C++ sources" OFF)
+
+if (OPENTS_USE_AVX2)
+    if (MSVC)
+        #
+        # All assembly sources were ported to C++ and none are part of the build, so
+        # the flag landing on the MASM rule of the generated project is harmless --
+        # ml.exe is never invoked.
+        #
+        target_compile_options(OpenTS PRIVATE /arch:AVX2)
+    else()
+        target_compile_options(OpenTS PRIVATE -mavx2)
+    endif()
+endif()
+
+#
+# ---------------------------------------------------------
+# jsoncpp for JSON data files
+# ---------------------------------------------------------
+#
+# The static library from thirdparty/jsoncpp is linked so the engine can read JSON
+# data files (<json/json.h>). Built in thirdparty/CMakeLists.txt with tests, examples
+# and packaging disabled.
+if (NOT TARGET jsoncpp_static)
+    message(FATAL_ERROR "The jsoncpp_static target is missing. Check that thirdparty/jsoncpp is populated.")
+endif()
+target_link_libraries(OpenTS PRIVATE jsoncpp_static)
+target_include_directories(OpenTS PRIVATE "${CMAKE_SOURCE_DIR}/thirdparty/jsoncpp/include")
+
+#
+# ---------------------------------------------------------
+# SDL3 for windowing, input and events
+# ---------------------------------------------------------
+#
+# The static library from thirdparty/SDL is linked so the engine can use SDL3
+# (<SDL3/SDL.h>). Built in thirdparty/CMakeLists.txt with the shared library,
+# tests and installation disabled; the target carries its own include path.
+if (NOT TARGET SDL3::SDL3-static)
+    message(FATAL_ERROR "The SDL3::SDL3-static target is missing. Check that thirdparty/SDL is populated.")
+endif()
+target_link_libraries(OpenTS PRIVATE SDL3::SDL3-static)
 
 if (MSVC)
     target_link_options(OpenTS PRIVATE

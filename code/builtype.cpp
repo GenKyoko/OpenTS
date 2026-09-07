@@ -221,6 +221,7 @@ BuildingTypeClass::BuildingTypeClass(char const * ininame) :
 	HeapID(STRUCT_NONE),
 	OccupyList(NULL),
 	BuildupData(NULL),
+	BuildupDataIsOwned(false),
 	HalfDamageSmokeLocation1(COORD_NONE),
 	HalfDamageSmokeLocation2(COORD_NONE),
 	GateCloseDelay(0.0),
@@ -366,12 +367,18 @@ BuildingTypeClass::BuildingTypeClass(char const * ininame) :
 BuildingTypeClass::~BuildingTypeClass(void)
 {
 	if (IsDemandLoad && ImageData != NULL) {
-		delete (ShapeSet *)ImageData;
+		if (ImageDataIsOwned) {
+			delete [] (char *)ImageData;
+		}
 		ImageData = NULL;
+		ImageDataIsOwned = false;
 	}
 	if (IsDemandLoadBuildup && BuildupData != NULL) {
-		delete (ShapeSet *)BuildupData;
+		if (BuildupDataIsOwned) {
+			delete [] (char *)BuildupData;
+		}
 		BuildupData = NULL;
+		BuildupDataIsOwned = false;
 	}
 	Detach_This_From_All(this, true);
 	BuildingTypes.Delete(this);
@@ -601,10 +608,14 @@ void BuildingTypeClass::Init(TheaterType theater)
 			if (!classptr->IsDemandLoad) {
 				_makepath(fullname, NULL, NULL, classptr->Graphic_Name(), Theaters[theater].Suffix);
 				classptr->ImageData = MFCD::Retrieve(fullname);
+				classptr->ImageDataIsOwned = false;
 			} else {
 				if (classptr->ImageData != NULL) {
-					delete (ShapeSet *)classptr->ImageData;
+					if (classptr->ImageDataIsOwned) {
+						delete [] (char *)classptr->ImageData;
+					}
 					classptr->ImageData = NULL;
+					classptr->ImageDataIsOwned = false;
 				}
 			}
 
@@ -615,10 +626,14 @@ void BuildingTypeClass::Init(TheaterType theater)
 			if (!classptr->IsDemandLoadBuildup) {
 				_makepath(fullname, NULL, NULL, classptr->BuildupFilename, Theaters[theater].Suffix);
 				classptr->BuildupData = MFCD::Retrieve(fullname);
+				classptr->BuildupDataIsOwned = false;
 			} else {
 				if (classptr->BuildupData != NULL) {
-					delete (ShapeSet *)classptr->BuildupData;
+					if (classptr->BuildupDataIsOwned) {
+						delete [] (char *)classptr->BuildupData;
+					}
 					classptr->BuildupData = NULL;
+					classptr->BuildupDataIsOwned = false;
 				}
 			}
 
@@ -633,14 +648,20 @@ void BuildingTypeClass::Init(TheaterType theater)
 		} else if (classptr->IsNewTheater) {
 			if (classptr->IsDemandLoad) {
 				if (classptr->ImageData != NULL) {
-					delete (ShapeSet *)classptr->ImageData;
+					if (classptr->ImageDataIsOwned) {
+						delete [] (char *)classptr->ImageData;
+					}
 					classptr->ImageData = NULL;
+					classptr->ImageDataIsOwned = false;
 				}
 			}
 			if (classptr->IsDemandLoadBuildup) {
 				if (classptr->BuildupData != NULL) {
-					delete (ShapeSet *)classptr->BuildupData;
+					if (classptr->BuildupDataIsOwned) {
+						delete [] (char *)classptr->BuildupData;
+					}
 					classptr->BuildupData = NULL;
+					classptr->BuildupDataIsOwned = false;
 				}
 			}
 			classptr->Fetch_Building_Normal_Image(theater);
@@ -933,6 +954,7 @@ void const * BuildingTypeClass::Get_Image_Data(void) const
 		if (TheaterImageFile[0] != '\0') {
 			CCFileClass file(TheaterImageFile);
 			(void *&)ImageData = Load_Alloc_Data(file);
+			((bool &)ImageDataIsOwned) = true;
 		}
 		return(ImageData);
 	}
@@ -961,6 +983,7 @@ void BuildingTypeClass::Fetch_Building_Normal_Image(TheaterType theater)
 			_makepath(fullname, NULL, NULL, BuildupFilename, ".SHP");
 			Theater_Naming_Convention(fullname, theater);
 			BuildupData = MFCD::Retrieve(fullname);
+			BuildupDataIsOwned = false;
 			if (BuildupData != NULL) {
 				int timedelay = 1;
 				int count = ((ShapeSet const *)BuildupData)->Get_Count()/2;
@@ -1032,6 +1055,7 @@ void BuildingTypeClass::Fetch_Building_Normal_Image(TheaterType theater)
 	*/
 	if (!IsDemandLoad) {
 		ImageData = MFCD::Retrieve(fullname);
+		ImageDataIsOwned = false;
 	}
 
 	Fetch_Building_Voxel_Image();
@@ -1722,7 +1746,9 @@ void BuildingTypeClass::Post_Load(void)
 	BASECLASS::Post_Load();
 
 	Fetch_Building_Voxel_Image();
-	Fetch_Normal_Image();
+	if (!IsDemandLoad) {
+		Fetch_Normal_Image();
+	}
 
 	ToTile = NULL;
 	OccupyList = OccupyLists[Size];
@@ -2022,6 +2048,7 @@ void const * BuildingTypeClass::Get_Buildup_Data(void) const
 			CCFileClass file(fullname);
 			ShapeSet * data = (ShapeSet *)Load_Alloc_Data(file);
 			((void const *&)BuildupData) = data;
+			((bool &)BuildupDataIsOwned) = true;
 			if (BuildupData != NULL) {
 				int timedelay = 1;
 				int count = ((ShapeSet const *)BuildupData)->Get_Count()/2;

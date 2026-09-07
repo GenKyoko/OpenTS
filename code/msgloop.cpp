@@ -40,8 +40,12 @@
 
 #include "_tooltip.h"
 #include "cctooltip.h"
+#include "sdlplatform.h"
 #include "vector.h"
 #include "video.h"
+#include "winstub.h"
+
+#include <SDL3/SDL_system.h>
 
 
 /*
@@ -75,6 +79,71 @@ static DynamicVectorClass<AcceleratorTracker> _Accelerators;
 bool (*Message_Intercept_Handler)(MSG &msg) = NULL;
 
 
+LRESULT CALLBACK Windows_Procedure(HWND hwnd, UINT message, UINT wParam, LONG lParam);
+
+
+static bool _MessageHookInstalled = false;
+
+
+/// <summary>
+/// Delivers every Windows message SDL pumps to the game's message logic.
+/// SDL owns the message pump now, and it calls this hook for each message it takes
+/// off the queue, before translation and dispatch. The filtering the old pump did --
+/// tooltips, modeless dialogs, accelerators, the intercept handler -- happens here,
+/// and a message one of them consumed returns false so it never dispatches.
+/// The main window's game logic rides on this callback too: its messages used to
+/// arrive at the registered window procedure, so they are handed there directly.
+/// Everything else returns true and is dispatched to the window it names.
+/// </summary>
+/// <returns>bool; Should SDL carry the message on to translation and dispatch?</returns>
+static bool SDLCALL Game_Message_Hook(void * userdata, MSG * msg)
+{
+	if (ToolTips != NULL) {
+		ToolTips->Message_Handler(msg);
+	}
+
+	/*
+	**	Pass the windows message through any modeless dialogs that may
+	**	be active. If one of the dialogs processes the message, then
+	**	it must not be processed any further.
+	*/
+	for (int index = 0; index < _ModelessDialogs.Count(); index++) {
+		if (IsDialogMessage(_ModelessDialogs[index], msg)) {
+			return(false);
+		}
+	}
+
+	/*
+	**	Pass the message through any loaded accelerators. If the message
+	**	was processed by an accelerator, then it doesn't need to be
+	**	processed any further.
+	*/
+	for (int aindex = 0; aindex < _Accelerators.Count(); aindex++) {
+		if (TranslateAccelerator(_Accelerators[aindex].Window, _Accelerators[aindex].Accelerator, msg)) {
+			return(false);
+		}
+	}
+
+	/*
+	**	If the message was not handled by any normal intercept handlers, then
+	**	submit the message to a custom message handler if one has been provided.
+	*/
+	if (Message_Intercept_Handler != NULL && Message_Intercept_Handler(*msg)) {
+		return(false);
+	}
+
+	/*
+	**	The main window's messages are the game's own: mouse routing, the keyboard
+	**	buffer, focus, painting and closing all run out of the window procedure.
+	*/
+	if (msg->hwnd == MainWindow && MainWindow != NULL) {
+		Windows_Procedure(msg->hwnd, msg->message, (UINT)msg->wParam, (LONG)msg->lParam);
+	}
+
+	return(true);
+}
+
+
 /***********************************************************************************************
  * Windows_Message_Handler -- Handles windows message.                                         *
  *                                                                                             *
@@ -98,66 +167,18 @@ void Windows_Message_Handler(void)
 {
 	if (MainWindow == 0) return;
 
-	MSG msg;
-
 	/*
-	**	Process windows messages until the message queue is exhuasted.
+	**	SDL pumps the Windows message queue as it polls its own events, and every
+	**	message it takes off the queue goes through the hook above, which feeds the
+	**	game's message logic and the dialogs. The SDL events themselves carry nothing
+	**	the game still needs, so polling only drains them.
 	*/
-	while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE)) {
-		if (!GetMessage( &msg, NULL, 0, 0 )) {
-			return;
-		}
-
-		if (ToolTips != NULL) {
-			ToolTips->Message_Handler(&msg);
-		}
-
-		/*
-		**	Pass the windows message through any modeless dialogs that may
-		**	be active. If one of the dialogs processes the message, then
-		**	it must not be processed by the normal window message handler.
-		*/
-		bool processed = false;
-		for (int index = 0; index < _ModelessDialogs.Count(); index++) {
-			if (IsDialogMessage(_ModelessDialogs[index], &msg)) {
-				processed = true;
-				break;
-			}
-		}
-		if (processed) continue;
-
-		/*
-		**	Pass the message through any loaded accelerators. If the message
-		**	was processed by an accelerator, then it doesn't need to be
-		**	processed by the normal message handling procedure.
-		*/
-		for (int aindex = 0; aindex < _Accelerators.Count(); aindex++) {
-			//if (_Accelerators[aindex].Window) {
-				if (TranslateAccelerator(_Accelerators[aindex].Window, _Accelerators[aindex].Accelerator, &msg)) {
-					processed = true;
-					break;
-				}
-			//}
-		}
-		if (processed) continue;
-
-		/*
-		**	If the message was not handled by any normal intercept handlers, then
-		**	submit the message to a custom message handler if one has been provided.
-		*/
-		if (Message_Intercept_Handler != NULL) {
-			processed = Message_Intercept_Handler(msg);
-		}
-		if (processed) continue;
-
-		/*
-		**	If the message makes it to this point, then it must be a normal message. Process
-		**	it in the normal fashion. The message will appear in the window message handler
-		**	for the window that it was directed to.
-		*/
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+	if (!_MessageHookInstalled) {
+		SDL_SetWindowsMessageHook(Game_Message_Hook, NULL);
+		_MessageHookInstalled = true;
 	}
+
+	SDL_Pump_Game_Events();
 
 	/*
 	 * The menus, the loading screens and the score screens all draw and then come back

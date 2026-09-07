@@ -41,6 +41,7 @@
 
 class ScoreAnimClass;
 class ScoreFontClass;
+class TtfFontClass;
 class ShapeSet;
 class Straw;
 class Pipe;
@@ -231,6 +232,12 @@ class ScorePrintClass : public ScoreAnimClass {
 		 */
 		int Pos;
 
+		/*
+		 * The reveal front the font's typewriter animation reported on the previous
+		 * pass. Each character the front passes paces one typing sound.
+		 */
+		int LastSeen;
+
 		int Stage;
 
 		/*
@@ -294,6 +301,19 @@ class ScoreFontClass
 		 * from the score screen, which owns it.
 		 */
 		ConvertClass * Drawer;
+
+		/*
+		 * The TrueType backend of the font, shared with the uifonts replacement cache.
+		 * When it is present the shape set above is bypassed and the text draws
+		 * through the vector faces instead; when it could not be built the classic
+		 * bitmap path stays in charge.
+		 */
+		TtfFontClass * Ttf;
+		unsigned char TextRemap[16];
+
+		bool Has_TTF(void) const { return(Ttf != NULL); }
+		TtfFontClass * Get_TTF(void) { return(Ttf); }
+		unsigned char const * Get_Text_Remap(void) const { return(&TextRemap[0]); }
 
 		ScoreFontClass(void);
 		ScoreFontClass(int w, int h, void const * data, ConvertClass * drawer);

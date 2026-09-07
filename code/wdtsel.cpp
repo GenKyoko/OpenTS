@@ -678,7 +678,7 @@ bool Selection::Select_Territory(Territory * territory)
 	}
 
 	char dest[256];
-	sprintf(dest, Fetch_String(TXT_WDT_FORMAT_TWO_LINES), MousedTerritory->Name, MousedTerritory->Description);
+	sprintf(dest, Localize("TXT_WDT_FORMAT_TWO_LINES"), MousedTerritory->Name, MousedTerritory->Description);
 	if (description != NULL) {
 		unsigned int len = strlen(dest);
 		if ((int)(256 - len) > 0) {
@@ -867,11 +867,11 @@ bool Selection::Present_Ticks(int tick_from, int tick_to)
 		if (!Brokeout) {
 			char str1[64];
 			char str2[64];
-			strncpy(str1, Fetch_String(TXT_WDT_REVIEWING_HISTORY), sizeof(str1));
+			strncpy(str1, Localize("TXT_WDT_REVIEWING_HISTORY"), sizeof(str1));
 			if (first) {
 				len = strlen(str1);
 			}
-			sprintf(str2, Fetch_String(TXT_WDT_DAY), i + 1);
+			sprintf(str2, Localize("TXT_WDT_DAY"), i + 1);
 			strcat(str1, str2);
 			if (first) {
 				char *trim = str1 + len;

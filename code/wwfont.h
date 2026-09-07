@@ -64,7 +64,7 @@ class WWFontClass : public FontClass
 		virtual void String_Pixel_Bounds(const char * string, Rect & bounds) const override;
 		virtual int Get_Width(void) const override;
 		virtual int Get_Height(void) const override;
-		virtual Point2D Print(char const * string, Surface & surface, Rect const & cliprect, Point2D const & point, ConvertClass const & converter, unsigned char const * remap=NULL) const override;
+		virtual Point2D Print(char const * string, Surface & surface, Rect const & cliprect, Point2D const & point, ConvertClass const & converter, unsigned char const * remap=NULL, ColorScheme const * scheme=NULL) const override;
 
 		virtual int Set_XSpacing(int x) override;
 		virtual int Set_YSpacing(int y) override;

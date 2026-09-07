@@ -330,8 +330,8 @@ void Main_Game(int argc, char * argv[])
 			params.cbSize = sizeof(MSGBOXPARAMS);
 			params.hwndOwner = MainWindow;
 			params.hInstance = ProgramInstance;
-			params.lpszText = Fetch_String(TXT_INITGAME_FAILED);
-			params.lpszCaption = Fetch_String(TXT_SHORT_TITLE);
+			params.lpszText = Localize("TXT_INITGAME_FAILED");
+			params.lpszCaption = Localize("TXT_SHORT_TITLE");
 			params.dwStyle = (MB_OK | MB_ICONSTOP | MB_SETFOREGROUND | MB_TOPMOST);
 			params.lpszIcon = NULL;
 			params.dwContextHelpId = NULL;
@@ -358,7 +358,7 @@ void Main_Game(int argc, char * argv[])
 		*/
 		if (Spawner::Is_Requested() && !Spawner::Is_Active()) {
 			if (!Spawner::Init()) {
-				MessageBox(MainWindow, "Unable to read SPAWN.INI.", Fetch_String(TXT_SHORT_TITLE), MB_OK | MB_ICONERROR);
+				MessageBox(MainWindow, "Unable to read SPAWN.INI.", Localize("TXT_SHORT_TITLE"), MB_OK | MB_ICONERROR);
 				break;
 			}
 		}

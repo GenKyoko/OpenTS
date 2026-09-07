@@ -53,6 +53,7 @@
 #include "_mixfile.h"
 #include "_rules.h"
 #include "_theater.h"
+#include "dbgprint.h"
 #include "findmake.h"
 #include "globals.h"
 #include "incdec.h"
@@ -188,6 +189,9 @@ void TerrainTypeClass::Init(TheaterType theater)
 				*/
 				_makepath(fullname, NULL, NULL, terrain->Name(), Theaters[theater].Suffix);
 				terrain->ImageData = (ShapeSet const *)MFCD::Retrieve(fullname);
+				if (terrain->ImageData == NULL) {
+					DebugString("Terrain art missing: %s (type %s)\n", fullname, terrain->Name());
+				}
 
 			}
 		}
@@ -332,6 +336,9 @@ bool TerrainTypeClass::Read_INI(CCINIClass const & ini)
 			char filename[512];
 			_makepath(filename, 0, 0, Graphic_Name(), ".SHP");
 			ImageData = (ShapeSet const *)MFCD::Retrieve(filename);
+			if (ImageData == NULL) {
+				DebugString("Terrain art missing: %s (type %s)\n", filename, Name());
+			}
 		}
 
 		ShapeSet const * image = (ShapeSet const *)Get_Image_Data();

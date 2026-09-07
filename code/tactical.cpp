@@ -1306,7 +1306,7 @@ void Tactical::Set_Caption_Text(int text_id)
 	if (text_id == -1) {
 		Clear_Caption_Text();
 	} else {
-		strcpy(ScreenText, Fetch_String(text_id));
+		strcpy(ScreenText, Localize(text_id));
 	}
 }
 

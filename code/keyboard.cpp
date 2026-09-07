@@ -55,6 +55,7 @@
 #include "keyboard.h"
 
 #include "_xmouse.h"
+#include "dbgprint.h"
 #include "msgloop.h"
 #include "vidscale.h"
 
@@ -629,6 +630,7 @@ int WWKeyboardClass::Message_Handler(HWND window, UINT message, UINT wParam, LON
 		*/
 		case WM_SYSKEYDOWN:
 		case WM_KEYDOWN:
+			DebugString("Key down: hwnd=%p vk=%04X lparam=%08X\n", window, wParam, lParam);
 			if (wParam == VK_SCROLL) {
 				Stop_Execution();
 			/*

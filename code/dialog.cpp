@@ -54,6 +54,7 @@
 #include "gadget.h"
 #include "lightcon.h"
 #include "scheme.h"
+#include "uifonts.h"
 #include "surface.h"
 #include "vector.h"
 
@@ -380,7 +381,7 @@ Point2D Simple_Text_Print(char const * text, Surface & surface, Rect const & rec
 
 		fontpalette[fore] = forecolor;
 		fontpalette[TBLACK] = back;
-		_point = font->Print(text, surface, rect, _point, *scheme->Converter, fontpalette);
+		_point = font->Print(text, surface, rect, _point, *scheme->Converter, fontpalette, scheme);
 	}
 	return(_point);
 }
@@ -398,36 +399,58 @@ Point2D Simple_Text_Print(char const * text, Surface & surface, Rect const & rec
 FontClass *Font_From_TPF(TextPrintType flags)
 {
 	FontClass *font = NULL;
+	char const *legacyname = NULL;
 
 	int point = (flags & (TextPrintType)0x000F);
 	switch (point) {
 		case TPF_METAL12:
 			font = Metal12FontPtr;
+			legacyname = "METAL12";
 			break;
 
 		case TPF_MAP:
 			font = MapFontPtr;
+			legacyname = "MAP";
 			break;
 
 		case TPF_6PT_GRAD:
 			font = GradFont6Ptr;
+			legacyname = "6PT_GRAD";
 			break;
 
 		case TPF_6POINT:
 			font = Font6Ptr;
+			legacyname = "6POINT";
 			break;
 
 		case TPF_EFNT:
 			font = EditorFont;
+			legacyname = "EFNT";
 			break;
 
 		case TPF_8POINT:
 			font = Font8Ptr;
+			legacyname = "8POINT";
 			break;
 
 		default:
 			font = Font6Ptr;
+			legacyname = "6POINT";
 			break;
+	}
+
+	/*
+	**	UI.INI's [FontReplacements] section can substitute the embedded bitmap font
+	**	with a registered TrueType face. The replacement rasterizes at the replaced
+	**	font's height, so line metrics stay identical; without an entry the classic
+	**	font is used as before.
+	*/
+	if (legacyname != NULL) {
+		int height = (font != NULL) ? font->Get_Height() : 12;
+		FontClass * replacement = Fetch_TTF_Font_Replacement(legacyname, height);
+		if (replacement != NULL) {
+			return(replacement);
+		}
 	}
 
 	return(font);
@@ -474,7 +497,7 @@ Point2D __cdecl Fancy_Text_Print(int text, Surface & surface, Rect const & rect,
 		**	The text string must be locked since the vsprintf function doesn't know
 		**	how to handle EMS pointers.
 		*/
-		char const * tptr = Fetch_String(text);
+		char const * tptr = Localize(text);
 		vsprintf(buffer, tptr, arg);
 		va_end(arg);
 
@@ -680,7 +703,7 @@ Point2D Conquer_Clip_Text_Print(char const * text, Surface & surface, Rect const
  *=========================================================================*/
 Point2D Plain_Text_Print(int text, Surface & surface, Rect const &rect, Point2D const & xy, int /*fore*/, int back, TextPrintType flag, int scheme, int fore)
 {
-	return(Simple_Text_Print(Fetch_String(text), surface, rect, xy, ColorSchemes[scheme], back, flag, fore));
+	return(Simple_Text_Print(Localize(text), surface, rect, xy, ColorSchemes[scheme], back, flag, fore));
 }
 
 

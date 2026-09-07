@@ -66,6 +66,30 @@ BOOL Get_Display_Rect(HWND window, LPRECT rect)
 
 
 /// <summary>
+/// The display rect mapped into the game surface's coordinate space.
+/// The dialogs draw their content onto the game's surfaces -- AlternateSurface and
+/// VisibleSurface -- which are presented letterboxed and scaled inside the window.
+/// Their coordinates are the game resolution's, while the windows themselves sit in
+/// client coordinates; this mapping carries one into the other.
+/// </summary>
+BOOL Get_Game_Rect(HWND window, LPRECT rect)
+{
+	BOOL res = Get_Display_Rect(window, rect);
+
+	VideoScaleInfo const & scale = Video_Get_Scale_Info();
+
+	if (scale.ScaleX > 0 && scale.ScaleY > 0) {
+		rect->left = (LONG)(((double)rect->left - scale.DestX) / scale.ScaleX);
+		rect->right = (LONG)(((double)rect->right - scale.DestX) / scale.ScaleX);
+		rect->top = (LONG)(((double)rect->top - scale.DestY) / scale.ScaleY);
+		rect->bottom = (LONG)(((double)rect->bottom - scale.DestY) / scale.ScaleY);
+	}
+
+	return(res);
+}
+
+
+/// <summary>
 /// Finds the stack slot a dialog window occupies.
 /// The dialog bookkeeping routines use this routine to turn a window handle back into a
 /// position in the dialog stack.
@@ -110,7 +134,7 @@ HWND WS_Create_Dialog(HINSTANCE instance, int id, HWND parent, DLGPROC proc, BOO
 
 	g_DialogCount++;
 
-	HWND window = CreateDialogIndirectParam(instance, (LPCDLGTEMPLATE)templ, parent, proc, 0);
+	HWND window = CreateDialogIndirectParam(instance, templ, parent, proc, 0);
 
 	if (window == NULL) {
 		g_DialogCount--;
@@ -592,6 +616,27 @@ BOOL CALLBACK Resize_Dialog(HWND window, LPARAM lParam)
 		rcl.right -= wrcl.left;
 		rcl.top -= wrcl.top;
 		rcl.bottom -= wrcl.top;
+	} else {
+		/*
+		 * GetWindowRect returns screen coordinates, and the layout math below works
+		 * in the main window's client space -- the space the templates were written
+		 * to land in -- so the client origin comes off here. A popup that was born at
+		 * its template position sits on the screen at that raw spot, so anything left
+		 * of the client origin is pulled back onto it.
+		 */
+		POINT origin = { 0, 0 };
+		ClientToScreen(MainWindow, &origin);
+		rcl.left -= origin.x;
+		rcl.right -= origin.x;
+		rcl.top -= origin.y;
+		rcl.bottom -= origin.y;
+
+		if (rcl.left < 0) {
+			rcl.left = 0;
+		}
+		if (rcl.top < 0) {
+			rcl.top = 0;
+		}
 	}
 
 	if (resize_dialog_width == 0) {
@@ -617,6 +662,32 @@ BOOL CALLBACK Resize_Dialog(HWND window, LPARAM lParam)
 	rcl.top = y / wheight;
 	rcl.right = width + rcl.left - 1;
 	rcl.bottom = height + rcl.top - 1;
+
+	/*
+	 * The layout above lands in the frame's coordinates, and the frame is presented
+	 * scaled and letterboxed inside the client, so the rect is carried over when the
+	 * two differ. A dialog whose parent is the main window also shifts by the
+	 * letterbox offset; controls are relative to their own dialog and are not.
+	 */
+	VideoScaleInfo const & scale = Video_Get_Scale_Info();
+	if (scale.DestWidth > 0 && scale.DestHeight > 0 && scale.GameWidth > 0 && scale.GameHeight > 0 &&
+		(scale.DestWidth != scale.GameWidth || scale.DestHeight != scale.GameHeight ||
+			scale.DestX != 0 || scale.DestY != 0)) {
+		double frame_scale_x = (double)scale.DestWidth / scale.GameWidth;
+		double frame_scale_y = (double)scale.DestHeight / scale.GameHeight;
+
+		width = (int)(width * frame_scale_x);
+		height = (int)(height * frame_scale_y);
+		rcl.left = (int)(rcl.left * frame_scale_x);
+		rcl.top = (int)(rcl.top * frame_scale_y);
+		rcl.right = width + rcl.left - 1;
+		rcl.bottom = height + rcl.top - 1;
+
+		if (lParam == 0 && (HWND)GetWindowLong(window, GWL_HWNDPARENT) == MainWindow) {
+			rcl.left += scale.DestX;
+			rcl.top += scale.DestY;
+		}
+	}
 
 	MoveWindow(window, rcl.left, rcl.top, width, height, TRUE);
 

@@ -73,6 +73,7 @@
 #include "ipxmgr.h"
 #include "keyboard.h"
 #include "language\language.h"
+#include "localization.h"
 #include "mouse.h"
 #include "msgbox.h"
 #include "ownrdraw.h"
@@ -390,6 +391,17 @@ void OptionsClass::Load_Settings(void)
 	ToolTips = ConfigINI.Get_Bool("Options", "ToolTips", ToolTips);
 	DebugString("ToolTips are %s\n", ToolTips == true ? "ON" : "OFF");
 
+	/*
+	**	Game language region code; Localize tries "<key>.<region>" first and falls
+	**	back to the default, unsuffixed entries. See localization.h. The setting
+	**	lives in SUN.INI's own [Localization] section -- the [Options] Translation
+	**	tag belongs to the CnCNet client, which rewrites it on every launch.
+	*/
+	char language[64];
+	ConfigINI.Get_String("Localization", "Language", "", language, sizeof(language));
+	Set_Localization_Language(language);
+	DebugString("Language region code is '%s'\n", language);
+
 	ScreenWidth = ConfigINI.Get_Int("Video", "ScreenWidth", ScreenWidth);
 	ScreenHeight = ConfigINI.Get_Int("Video", "ScreenHeight", ScreenHeight);
 	DebugString("Resolution = %d X %d\n", ScreenWidth, ScreenHeight);
@@ -475,6 +487,13 @@ void OptionsClass::Save_Settings (void)
 	ConfigINI.Put_Bool("Audio", "IsScoreRepeat", IsScoreRepeat);
 	ConfigINI.Put_Bool("Audio", "IsScoreShuffle", IsScoreShuffle);
 	ConfigINI.Put_Int("Audio", "SoundLatency", SoundLatency);
+
+	/*
+	**	Game language region code, as selected at runtime. Written to SUN.INI's own
+	**	[Localization] section, away from the [Options] Translation tag the CnCNet
+	**	client manages and rewrites on every launch.
+	*/
+	ConfigINI.Put_String("Localization", "Language", (char *)Get_Localization_Language());
 
 	/*
 	**	Write the INI data out to a file.

@@ -314,7 +314,7 @@ BOOL CALLBACK Game_Controls_Dialog_Proc(HWND window, UINT message, WPARAM wparam
 						handle = GetDlgItem(window, IDC_DIFFICULTY_LABEL);
 					}
 					if (handle) {
-						SetWindowText(handle, Fetch_String(name));
+						SetWindowText(handle, Localize(name));
 					}
 				}
 				break;

@@ -89,6 +89,13 @@ class AITriggerTypeClass : public AbstractTypeClass
 		void Record_Success(void);
 		void Record_Failure(void);
 
+		/*
+		** Debug accessors for the trigger state, used by the diagnostics of the
+		** team suggestion code.
+		*/
+		bool Is_Enabled(void) const { return(IsEnabled); }
+		bool Is_Available_In_Skirmish(void) const { return(IsAvailableInSkirmish); }
+
 	private:
 		bool Check_Enemy_Owns(HouseClass *house, HouseClass *enemy);
 		bool Check_House_Owns(HouseClass *house, HouseClass *enemy);

@@ -195,10 +195,10 @@ void _Net2DisplayUsers(void)
 			sprintf(info, "%s", Session.Players[i]->Name);
 
 			if (Session.Players[i]->Player.House == HOUSE_GOOD) {
-				sprintf(hname, "%s", Fetch_String(TXT_GDI));
+				sprintf(hname, "%s", Localize("TXT_GDI"));
 				surf = SurfaceCache.GetSurface("gdii.pcx");
 			} else {
-				sprintf(hname, "%s", Fetch_String(TXT_NOD));
+				sprintf(hname, "%s", Localize("TXT_NOD"));
 				surf = SurfaceCache.GetSurface("nodi.pcx");
 			}
 
@@ -340,14 +340,14 @@ void Net2DisplayGameList(void)
 
 	SendDlgItemMessage(window, IDC_GAMELIST, OD_DISABLEPAINT, 0, 1);
 	SendDlgItemMessage(window, IDC_GAMELIST, LB_RESETCONTENT, 0, 0);
-	SendDlgItemMessage(window, IDC_GAMELIST, LB_INSERTSTRING, -1, (LPARAM)Fetch_String(TXT_LOBBY));
+	SendDlgItemMessage(window, IDC_GAMELIST, LB_INSERTSTRING, -1, (LPARAM)Localize("TXT_LOBBY"));
 
 	for (int i = 1; i < Session.Games.Count(); i++) {
 		NodeNameType *node = Session.Games[i];
 		if (node->Game.IsOpen) {
-			sprintf(buffer, Fetch_String(TXT_THATGUYS_GAME), node);
+			sprintf(buffer, Localize("TXT_THATGUYS_GAME"), node);
 		} else {
-			sprintf(buffer, Fetch_String(TXT_THATGUYS_GAME_BRACKET), node);
+			sprintf(buffer, Localize("TXT_THATGUYS_GAME_BRACKET"), node);
 		}
 		SendDlgItemMessage(window, IDC_GAMELIST, LB_INSERTSTRING, -1, (LPARAM)buffer);
 	}
@@ -813,7 +813,7 @@ bool Net2Remote_Connect(void)
 			// Force user to enter a name
 			//...............................................................
 			if (strlen(Session.Handle) < 1) {
-				ODMessageBox(Fetch_String(TXT_NAME_BLANK), 0, Net2Callback);
+				ODMessageBox(Localize("TXT_NAME_BLANK"), 0, Net2Callback);
 				ok = false;
 			}
 
@@ -822,7 +822,7 @@ bool Net2Remote_Connect(void)
 			//...............................................................
 			for (int i = 0; i < Session.Games.Count(); i++) {
 				if (ok && !strcmp(Session.Games[i]->Name, Session.Handle)) {
-					ODMessageBox(Fetch_String(TXT_GAMENAME_MUSTBE_UNIQUE), 0, Net2Callback);
+					ODMessageBox(Localize("TXT_GAMENAME_MUSTBE_UNIQUE"), 0, Net2Callback);
 					ok = false;
 					break;
 				}
@@ -893,7 +893,7 @@ bool Net2Remote_Connect(void)
 					//	If there are at least 2 players, go ahead & play; error otherwise
 					//...............................................................
 					//if (Session.Players.Count() == 1) {
-					//	PMessagePrintf(-1, Fetch_String(TXT_ONLY_ONE));
+					//	PMessagePrintf(-1, Localize("TXT_ONLY_ONE"));
 					//	_netresponse = 0;
 					//	EnableWindow(GetDlgItem(WS_Top_Window(), IDC_GO), TRUE);
 					//}
@@ -901,7 +901,7 @@ bool Net2Remote_Connect(void)
 					if (_netresponse == IDC_GO) {
 						for (int i = 0; i < Session.Players.Count(); i++) {
 							if (Session.Players[i]->Player.Status == 0) {
-								PMessagePrintf(-1, Fetch_String(TXT_ACCEPTFIRST));
+								PMessagePrintf(-1, Localize("TXT_ACCEPTFIRST"));
 								_netresponse = 0;
 								EnableWindow(GetDlgItem(WS_Top_Window(), IDC_GO), TRUE);
 								break;
@@ -941,7 +941,7 @@ bool Net2Remote_Connect(void)
 
 		int waypoints = RandomMapWaypointCount(Session.Options.ScenarioIndex);
 		if (waypoints < SendDlgItemMessage(game_list_dialog, IDC_AIPLAYERS, TBM_GETPOS, 0, 0) + Session.Players.Count()) {
-			PMessagePrintf(-1, Fetch_String(TXT_SCENARIO_TOO_SMALL));
+			PMessagePrintf(-1, Localize("TXT_SCENARIO_TOO_SMALL"));
 			EnableWindow(GetDlgItem(WS_Top_Window(), IDC_GO), TRUE);
 			_netresponse = 0;
 		} else {
@@ -1484,14 +1484,14 @@ BOOL CALLBACK MPlayer_Host_Dialog_Proc(HWND window, UINT message, WPARAM wparam,
 
 		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_RESETCONTENT, 0, 0);
 
-		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, -1, (LPARAM)Fetch_String(TXT_GOLD));
-		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, -1, (LPARAM)Fetch_String(TXT_RED));
-		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, -1, (LPARAM)Fetch_String(TXT_BLUE));
-		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, -1, (LPARAM)Fetch_String(TXT_GREEN));
-		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, -1, (LPARAM)Fetch_String(TXT_ORANGE));
-		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, -1, (LPARAM)Fetch_String(TXT_SKY_BLUE));
-		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, -1, (LPARAM)Fetch_String(TXT_PURPLE));
-		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, -1, (LPARAM)Fetch_String(TXT_PINK));
+		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, -1, (LPARAM)Localize("TXT_GOLD"));
+		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, -1, (LPARAM)Localize("TXT_RED"));
+		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, -1, (LPARAM)Localize("TXT_BLUE"));
+		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, -1, (LPARAM)Localize("TXT_GREEN"));
+		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, -1, (LPARAM)Localize("TXT_ORANGE"));
+		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, -1, (LPARAM)Localize("TXT_SKY_BLUE"));
+		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, -1, (LPARAM)Localize("TXT_PURPLE"));
+		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, -1, (LPARAM)Localize("TXT_PINK"));
 
 		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_SETCURSEL, Session.ColorIdx, 0);
 
@@ -1630,7 +1630,7 @@ BOOL CALLBACK MPlayer_Host_Dialog_Proc(HWND window, UINT message, WPARAM wparam,
 
 				int resolved = newcolor;
 				if (newcolor != Session.ColorIdx) {
-					PMessagePrintf(ColorSystem, Fetch_String(TXT_COLOR_IN_USE));
+					PMessagePrintf(ColorSystem, Localize("TXT_COLOR_IN_USE"));
 
 					color = old_color;
 					for (;;) {
@@ -1884,12 +1884,12 @@ static int Request_To_Join(int join_index)
 	// Validate join_index
 	//------------------------------------------------------------------------
 	if (CurGame < 1) {
-		PMessagePrintf(ColorSystem, Fetch_String(TXT_MUST_SELECT_GAME));
+		PMessagePrintf(ColorSystem, Localize("TXT_MUST_SELECT_GAME"));
 		Sound_Effect(Rule->SystemError);
 		return(false);
 	}
 	if ( (Session.Games.Count()<=1) || CurGame > Session.Games.Count()) {
-		PMessagePrintf(ColorSystem, Fetch_String(TXT_NOTHING_TO_JOIN));
+		PMessagePrintf(ColorSystem, Localize("TXT_NOTHING_TO_JOIN"));
 		Sound_Effect(Rule->SystemError);
 		return(false);
 	}
@@ -1898,7 +1898,7 @@ static int Request_To_Join(int join_index)
 	// Force user to enter a name
 	//------------------------------------------------------------------------
 	if (strlen(Session.Handle)==0) {
-		PMessagePrintf(ColorSystem, Fetch_String(TXT_NAME_ERROR));
+		PMessagePrintf(ColorSystem, Localize("TXT_NAME_ERROR"));
 		Sound_Effect(Rule->SystemError);
 		return(false);
 	}
@@ -1907,25 +1907,25 @@ static int Request_To_Join(int join_index)
 	// The game must be open
 	//------------------------------------------------------------------------
 	if (!Session.Games[CurGame]->Game.IsOpen) {
-		PMessagePrintf(ColorSystem, Fetch_String(TXT_GAME_IS_CLOSED));
+		PMessagePrintf(ColorSystem, Localize("TXT_GAME_IS_CLOSED"));
 		Sound_Effect(Rule->SystemError);
 		return(false);
 	}
 
 	if (Session.Games[CurGame]->Game.Addon == ADDON_FIRESTORM && Addon_Enabled(ADDON_FIRESTORM) == false) {
 		if (Addon_Installed(ADDON_FIRESTORM) != true) {
-			PMessagePrintf(ColorSystem, Fetch_String(TXT_FIRESTORM_REQUIRED));
+			PMessagePrintf(ColorSystem, Localize("TXT_FIRESTORM_REQUIRED"));
 			Sound_Effect(Rule->SystemError);
 			return(false);
 		} else {
-			PMessagePrintf(ColorSystem, Fetch_String(TXT_FIRESTORM_MUST_ENABLE));
+			PMessagePrintf(ColorSystem, Localize("TXT_FIRESTORM_MUST_ENABLE"));
 			Sound_Effect(Rule->SystemError);
 			return(false);
 		}
 	}
 
 	if (Session.Games[CurGame]->Game.Addon == ADDON_BASE_GAME && Addon_Enabled(ADDON_FIRESTORM) == true) {
-		PMessagePrintf(ColorSystem, Fetch_String(TXT_FIRESTORM_NO_JOIN_TS));
+		PMessagePrintf(ColorSystem, Localize("TXT_FIRESTORM_NO_JOIN_TS"));
 		Sound_Effect(Rule->SystemError);
 		return(false);
 	}
@@ -2367,12 +2367,12 @@ static void Get_Join_Responses(void)
 						//............................................................
 						if (JoinState < JOIN_CONFIRMED) {
 							if (Session.Games[i]->Game.IsOpen) {
-								wsprintf(txt,Fetch_String(TXT_S_FORMED_NEW_GAME),
+								wsprintf(txt,Localize("TXT_S_FORMED_NEW_GAME"),
 									Session.GPacket.Name);
 								Sound_Effect(Rule->GameForming);
 							}
 							else {
-								wsprintf(txt,Fetch_String(TXT_GAME_NOW_IN_PROGRESS),
+								wsprintf(txt,Localize("TXT_GAME_NOW_IN_PROGRESS"),
 									Session.GPacket.Name);
 								Sound_Effect(Rule->GameClosed);
 							}
@@ -2415,7 +2415,7 @@ static void Get_Join_Responses(void)
 				// now available.
 				//..................................................................
 				if (Session.GPacket.GameInfo.IsOpen && JoinState < JOIN_CONFIRMED) {
-					wsprintf(txt,Fetch_String(TXT_S_FORMED_NEW_GAME),
+					wsprintf(txt,Localize("TXT_S_FORMED_NEW_GAME"),
 						Session.GPacket.Name);
 					PMessagePrintf(ColorSystem, txt);
 					Sound_Effect(Rule->GameForming);
@@ -2610,30 +2610,30 @@ static void Get_Join_Responses(void)
 			// chat announcement.
 			//..................................................................
 			if (JoinState == JOIN_REJECTED) {
-				PMessagePrintf(ColorSystem, Fetch_String(TXT_REQUEST_DENIED));
+				PMessagePrintf(ColorSystem, Localize("TXT_REQUEST_DENIED"));
 				Sound_Effect(Rule->SystemError);
 
 				char *item = NULL;
 				if (why==REJECT_DUPLICATE_NAME) {
-					item = (char *)Fetch_String(TXT_NAME_MUSTBE_UNIQUE);
+					item = (char *)Localize("TXT_NAME_MUSTBE_UNIQUE");
 				}
 				else if (why==REJECT_GAME_FULL) {
-					item = (char *)Fetch_String(TXT_GAME_FULL);
+					item = (char *)Localize("TXT_GAME_FULL");
 				}
 				else if (why==REJECT_VERSION_TOO_OLD) {
-					item = (char *)Fetch_String(TXT_YOURGAME_OUTDATED);
+					item = (char *)Localize("TXT_YOURGAME_OUTDATED");
 				}
 				else if (why==REJECT_VERSION_TOO_NEW) {
-					item = (char *)Fetch_String(TXT_DESTGAME_OUTDATED);
+					item = (char *)Localize("TXT_DESTGAME_OUTDATED");
 				}
 				else if (why==REJECT_MISMATCH) {
-					item = (char *)Fetch_String(TXT_MISMATCH);
+					item = (char *)Localize("TXT_MISMATCH");
 				}
 				else if (why==REJECT_DISBANDED) {
-					item = (char *)Fetch_String(TXT_GAME_CANCELLED);
+					item = (char *)Localize("TXT_GAME_CANCELLED");
 				}
 				else if (why==REJECT_DUPLICATE_SERIAL) {
-					item = (char *)Fetch_String(TXT_SERIAL_DUP);
+					item = (char *)Localize("TXT_SERIAL_DUP");
 				}
 				if (item) {
 					ODMessageBox(item, 0, Net2Callback, 0);
@@ -3293,14 +3293,14 @@ BOOL CALLBACK MPlayer_Guest_Dialog_Proc(HWND window, UINT message, WPARAM wparam
 
 		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_RESETCONTENT, 0, 0);
 
-		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_GOLD));
-		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_RED));
-		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_BLUE));
-		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_GREEN));
-		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_ORANGE));
-		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_SKY_BLUE));
-		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_PURPLE));
-		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Fetch_String(TXT_PINK));
+		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_GOLD"));
+		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_RED"));
+		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_BLUE"));
+		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_GREEN"));
+		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_ORANGE"));
+		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_SKY_BLUE"));
+		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_PURPLE"));
+		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_INSERTSTRING, (WPARAM)-1, (LPARAM)Localize("TXT_PINK"));
 
 		SendDlgItemMessage(window, IDC_YOURCOLOR, CB_SETCURSEL, Session.ColorIdx, 0);
 

@@ -133,6 +133,7 @@
 #include "score.h"
 #include "script.h"
 #include "session.h"
+#include "localization.h"
 #include "smudge.h"
 #include "surface.h"
 #include "swizzle.h"
@@ -346,6 +347,14 @@ bool Start_Scenario(char const * name, bool briefing, CampaignType campaign)
 	}
 
 	DebugString("Reading scenario: %s\n", name);
+
+	/*
+	**	Refresh the map localization chain: the previous scenario's JSON files are
+	**	unloaded and the [Localization] section of this map's file (when present)
+	**	lists the replacements. Runs before Read_Scenario so briefing and setup text
+	**	can already come from the map's own documents.
+	*/
+	Load_Map_Localization(name);
 
 	if (!Read_Scenario(name)) {
 		return(false);
@@ -602,7 +611,7 @@ bool Read_Scenario(char const * fname)
 		char prog_msg_buffer[129];
 
 		if (Session.Type == GAME_INTERNET && WestwoodOnline_Tournament) {
-			sprintf(prog_msg_buffer, Fetch_String(TXT_GAME_ID), WestwoodOnline_GameID);
+			sprintf(prog_msg_buffer, Localize("TXT_GAME_ID"), WestwoodOnline_GameID);
 			prog_msg = prog_msg_buffer;
 		}
 
@@ -1777,6 +1786,10 @@ bool Read_Scenario_INI(CCINIClass const & ini, bool is_mapgen)
 	}
 	AITriggerTypeClass::Read_All(ini, SCOPE_LOCAL);
 
+	DebugString("AI data loaded: TeamTypes=%d, TaskForces=%d, Scripts=%d, AITriggers=%d (AI.INI entries: AITriggerTypes=%d)\n",
+		TeamTypes.Count(), TaskForces.Count(), ScriptTypes.Count(), AITriggerTypes.Count(),
+		AIINI.Entry_Count("AITriggerTypes"));
+
 	Session.Update_Progress(60);
 
 	/*
@@ -2222,7 +2235,7 @@ void Assign_Houses(void)
 		housep->Init_Data(color, pref_house, Session.Options.Credits);
 		housep->Scheme = Session.Color_Index_To_Scheme(color);
 		housep->Initialize_Radar_Color();
-		housep->IniName = Fetch_String(TXT_COMPUTER);
+		housep->IniName = Localize("TXT_COMPUTER");
 
 		if (use_slot) {
 			Session.SlotInfo[i].HouseID = housep->HeapID;

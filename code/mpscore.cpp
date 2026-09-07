@@ -299,7 +299,7 @@ bool MultiScore::User_Input(void)
 	int key = VK_NONE;
 	bool running = true;
 
-	char const * text = Fetch_String(TXT_CLICK_CONTINUE);
+	char const * text = Localize("TXT_CLICK_CONTINUE");
 	int x = 320 - Font->Get_String_Width(text) / 2;
 
 	MSWordAnim * anim = new MSWordAnim(text, XPos + x, YPos + 370, Font);
@@ -581,7 +581,7 @@ inline void Format_Time(char * buffer, unsigned time)
 		time -= hours * 3600;
 		unsigned minutes = time / 60;
 		time -= minutes * 60;
-		sprintf(buffer, Fetch_String(TXT_TIME_FORMAT_HOURS), hours, minutes, time);
+		sprintf(buffer, Localize("TXT_TIME_FORMAT_HOURS"), hours, minutes, time);
 	}
 }
 
@@ -597,9 +597,9 @@ void MultiScore::Print_Headings(void)
 	/// Display the number of games played
 	char buffer[256];
 	if (Session.Type == GAME_INTERNET) {
-		sprintf(buffer, Fetch_String(TXT_GAME), WestwoodOnline_GameID);
+		sprintf(buffer, Localize("TXT_GAME"), WestwoodOnline_GameID);
 	} else {
-		sprintf(buffer, Fetch_String(TXT_GAME), Session.GamesPlayed);
+		sprintf(buffer, Localize("TXT_GAME"), Session.GamesPlayed);
 	}
 
 	MSPrintAnim *gameAnim = new MSPrintAnim(buffer, XPos + 15, YPos + 15, Font, RECT_NONE, 0, 4, true, false);
@@ -630,7 +630,7 @@ void MultiScore::Print_Headings(void)
 	AlternateSurface->Fill_Rect_Trans(rect, RGBClass(Font->Get_Red(), Font->Get_Green(), Font->Get_Blue()), 25);
 	HiddenSurface->Blit_From(rect, *AlternateSurface, rect);
 
-	const char *namesLabel = Fetch_String(TXT_NAMES);
+	const char *namesLabel = Localize("TXT_NAMES");
 	int namesLabelXPos = (100 - Font->Get_String_Width(namesLabel)) / 2;
 	Font->Draw_String(ScoreSurface, (unsigned char const *)namesLabel, namesLabelXPos + 15, 45, 2);
 
@@ -651,7 +651,7 @@ void MultiScore::Print_Headings(void)
 	AlternateSurface->Fill_Rect_Trans(rect, RGBClass(Font->Get_Red(), Font->Get_Green(), Font->Get_Blue()), 25);
 	HiddenSurface->Blit_From(rect, *AlternateSurface, rect);
 
-	const char *lossesLabel = Fetch_String(TXT_LOSSES);
+	const char *lossesLabel = Localize("TXT_LOSSES");
 	int lossesLabelXPos = (110 - Font->Get_String_Width(lossesLabel)) / 2;
 	Font->Draw_String(ScoreSurface, (unsigned char const *)lossesLabel, lossesLabelXPos + 147, 45, 2);
 
@@ -672,7 +672,7 @@ void MultiScore::Print_Headings(void)
 	AlternateSurface->Fill_Rect_Trans(rect, RGBClass(Font->Get_Red(), Font->Get_Green(), Font->Get_Blue()), 25);
 	HiddenSurface->Blit_From(rect, *AlternateSurface, rect);
 
-	const char *killsLabel = Fetch_String(TXT_KILLS);
+	const char *killsLabel = Localize("TXT_KILLS");
 	int killsLabelXPos = (110 - Font->Get_String_Width(killsLabel)) / 2;
 	Font->Draw_String(ScoreSurface, (unsigned char const *)killsLabel, killsLabelXPos + 269, 45, 2);
 
@@ -693,7 +693,7 @@ void MultiScore::Print_Headings(void)
 	AlternateSurface->Fill_Rect_Trans(rect, RGBClass(Font->Get_Red(), Font->Get_Green(), Font->Get_Blue()), 25);
 	HiddenSurface->Blit_From(rect, *AlternateSurface, rect);
 
-	const char *economyLabel = Fetch_String(TXT_ECONOMY);
+	const char *economyLabel = Localize("TXT_ECONOMY");
 	int economyLabelXPos = (110 - Font->Get_String_Width(economyLabel)) / 2;
 	Font->Draw_String(ScoreSurface, (unsigned char const *)economyLabel, economyLabelXPos + 391, 45, 2);
 
@@ -714,7 +714,7 @@ void MultiScore::Print_Headings(void)
 	AlternateSurface->Fill_Rect_Trans(rect, RGBClass(Font->Get_Red(), Font->Get_Green(), Font->Get_Blue()), 25);
 	HiddenSurface->Blit_From(rect, *AlternateSurface, rect);
 
-	const char *scoresLabel = Fetch_String(TXT_SCORE);
+	const char *scoresLabel = Localize("TXT_SCORE");
 	int scoresLabelXPos = (90 - Font->Get_String_Width(scoresLabel)) / 2;
 	Font->Draw_String(ScoreSurface, (unsigned char const *)scoresLabel, scoresLabelXPos + 530, 45, 2);
 

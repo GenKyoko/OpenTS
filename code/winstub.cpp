@@ -66,6 +66,7 @@
 #include "msgroute.h"
 #include "pcx.h"
 #include "resource.h"
+#include "sdlplatform.h"
 #include "spawner.h"
 #include "theme.h"
 #include "video.h"
@@ -138,6 +139,18 @@ void Focus_Loss(void)
 	**	being stopped and started over.
 	*/
 	if (Audio_Available()) Audio.Stop_Primary_Sound_Buffer(false);
+
+	/*
+	**	Stop any map scrolling: the coast scroll ends here, the keyboard buffer is
+	**	flushed so a held arrow key cannot keep scrolling the map while the window
+	**	is in the background, and the edge scroll picks the change up on its next
+	**	frame through the GameInFocus check.
+	*/
+	Map.Set_Scroll_Coasting_Allowed(false);
+	if (Keyboard != NULL) {
+		Keyboard->Clear();
+	}
+
 	if (MouseCursor) {
 		_MouseCaptured = MouseCursor->Is_Captured();
 		DebugString("Focus_Loss(): _MouseCaptured = %s\n", _MouseCaptured ? "true" : "false");
@@ -220,6 +233,8 @@ bool Should_Skip_Drawing(void)
  */
 static void Close_Request_Handler(void)
 {
+	DebugString("Close requested (spawner=%s, scenario=%s)\n",
+				Spawner::Is_Active() ? "yes" : "no", ScenarioActive ? "yes" : "no");
 	if (Spawner::Is_Active() && ScenarioActive) {
 		Request_Game_Close();
 	} else {
@@ -327,15 +342,12 @@ LRESULT CALLBACK /*_export*/ Windows_Procedure(HWND hwnd, UINT message, UINT wPa
 			}
 			break;
 
-		case WM_SIZE:
-			if (wParam != SIZE_MINIMIZED) {
-				Video_On_Resize(LOWORD(lParam), HIWORD(lParam));
-				if (MouseCursor != NULL) {
-					((WWMouseClass *)MouseCursor)->Calc_Confining_Rect();
-				}
-			}
-			break;
-
+		/*
+		 * Window sizing and moving are answered from SDL's window events inside the
+		 * pump, because a modal move or size loop dispatches messages without ever
+		 * reaching this procedure, and the frame and the mouse bounds have to keep
+		 * up through those too.
+		 */
 		case WM_DISPLAYCHANGE:
 			Video_On_Display_Change();
 			break;
@@ -343,19 +355,6 @@ LRESULT CALLBACK /*_export*/ Windows_Procedure(HWND hwnd, UINT message, UINT wPa
 		case WM_CLOSE:
 			Close_Request_Handler();
 			return(0);
-
-		case WM_CREATE:
-			ToolTips = new CCToolTip(hwnd);
-			if (ToolTips) {
-				ToolTips->Set_Timer_Delay(500);
-			}
-			break;
-
-		case WM_MOVE:
-			if (WindowedMode == true && MouseCursor != NULL) {
-				((WWMouseClass *)MouseCursor)->Calc_Confining_Rect();
-			}
-			break;
 
 			/*
 			**	Windoze message says we have to shut down. Try and do it cleanly.
@@ -478,9 +477,6 @@ unsigned int Build_Number(void)
  *    10/10/95 4:08PM ST : Created                                                             *
  *=============================================================================================*/
 
-#define CC_ICON		IDI_SUN
-#define CC_CURSOR	IDC_CURSOR1
-
 #define WINDOW_NAME		"Tiberian Sun"
 
 
@@ -488,104 +484,19 @@ void Create_Main_Window ( HINSTANCE instance , int command_show , int width , in
 {
 	InitCommonControls();
 
-	WNDCLASS    	wndclass ;
-	//
-	// Register the window class
-	//
-
 	/*
-	 * The dialog controls are hit tested through the main window, so its class has to
-	 * report the double clicks they expect.
+	 * SDL owns the window now: it registers the window class, creates the real Win32
+	 * window and pumps its messages, and MainWindow points at the native handle, which
+	 * keeps DirectSound, the child controls, the hot key and the renderer working the
+	 * way they always have. The game's message logic is fed from SDL's message hook
+	 * inside msgloop.cpp.
 	 */
-	wndclass.style         = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS ;
-	wndclass.lpfnWndProc   = Windows_Procedure ;
-	wndclass.cbClsExtra    = 0 ;
-	wndclass.cbWndExtra    = 0 ;
-	wndclass.hInstance     = instance ;
-	wndclass.hIcon         = LoadIcon (instance, MAKEINTRESOURCE(CC_ICON)) ;
-	wndclass.hCursor       = LoadCursor(ProgramInstance, MAKEINTRESOURCE(CC_CURSOR));
-	wndclass.hbrBackground = NULL;
-	wndclass.lpszMenuName  = NULL;	///WINDOW_NAME
-	wndclass.lpszClassName = WINDOW_NAME;
-
-	RegisterClass (&wndclass) ;
-
-
-	//
-	// Create our main window
-	//
-	/*
-	 * The dialogs paint themselves onto the game's surfaces rather than into their own
-	 * windows, so clipping their regions out of the main window would leave holes where
-	 * they sit.
-	 */
-	if (WindowedMode) {
-		int clientwidth = (Options.WindowWidth > 0) ? Options.WindowWidth : width;
-		int clientheight = (Options.WindowHeight > 0) ? Options.WindowHeight : height;
-
-		/*
-		 * A window the launcher asked to be frameless is created without a border or a
-		 * title bar, so its drawable area is exactly the requested size.
-		 */
-		DWORD const style = Options.NoWindowFrame ? WS_POPUP : WS_OVERLAPPEDWINDOW;
-
-		MainWindow = CreateWindowEx (
-								0,
-								WINDOW_NAME,
-								WINDOW_NAME,
-								style,
-								0,
-								0,
-								0,
-								0,
-								NULL,
-								NULL,
-								instance,
-								NULL );
-
-		if (Options.NoWindowFrame) {
-			int x = (GetSystemMetrics(SM_CXSCREEN) - clientwidth) / 2;
-			int y = (GetSystemMetrics(SM_CYSCREEN) - clientheight) / 2;
-
-			MoveWindow(MainWindow, std::max(x, 0), std::max(y, 0), clientwidth, clientheight, 1);
-
-		} else {
-			RECT rect;
-			SetRect(&rect, 0, 0, clientwidth, clientheight);
-			AdjustWindowRectEx(&rect, GetWindowLong(MainWindow, GWL_STYLE), FALSE, GetWindowLong(MainWindow, GWL_EXSTYLE));
-
-			int windowwidth = rect.right - rect.left;
-			int windowheight = rect.bottom - rect.top;
-			int x = (GetSystemMetrics(SM_CXSCREEN) - windowwidth) / 2;
-			int y = (GetSystemMetrics(SM_CYSCREEN) - windowheight) / 2;
-
-			MoveWindow(MainWindow, std::max(x, 0), std::max(y, 0), windowwidth, windowheight, 1);
-		}
-
-	} else {
-		/*
-		 * The desktop keeps its own resolution and the window simply covers it. The
-		 * frame is scaled to fit at presentation time.
-		 */
-		MainWindow = CreateWindowEx (
-								0,
-								WINDOW_NAME,
-								WINDOW_NAME,
-								WS_POPUP,
-								0,
-								0,
-								GetSystemMetrics(SM_CXSCREEN),
-								GetSystemMetrics(SM_CYSCREEN),
-								NULL,
-								NULL,
-								instance,
-								NULL );
+	if (!SDL_Platform_Create_Window(width, height)) {
+		MessageBox(NULL, "SDL could not create the game window.", WINDOW_NAME, MB_ICONERROR);
+		ExitProcess(EXIT_FAILURE);
 	}
 
-	ShowWindow (MainWindow, SW_NORMAL);
 	ShowCommand = command_show;
-	UpdateWindow (MainWindow);
-	SetFocus (MainWindow);
 
 	/*
 	 * The game has no Input Method Editor support of its own: an IME left in its native
@@ -603,12 +514,18 @@ void Create_Main_Window ( HINSTANCE instance , int command_show , int width , in
 
 	RegisterHotKey(MainWindow, 1, MOD_ALT|MOD_CONTROL|MOD_SHIFT, VK_M);
 
-	SetCursor(LoadCursor(ProgramInstance, MAKEINTRESOURCE(CC_CURSOR)));
+	/*
+	 * The window exists by the time this returns, so the tooltip tracker is set up here
+	 * rather than in the WM_CREATE branch the old window procedure used to see.
+	 */
+	ToolTips = new CCToolTip(MainWindow);
+	if (ToolTips) {
+		ToolTips->Set_Timer_Delay(500);
+	}
+
 	Audio.Audio_Focus_Loss_Function = Focus_Loss;
 
-	//Misc_Focus_Loss_Function = &Focus_Loss;
-	//Misc_Focus_Restore_Function = &Focus_Restore;
-	//Gbuffer_Focus_Loss_Function = &Focus_Loss;
+	DebugString("Main window is ready\n");
 }
 
 

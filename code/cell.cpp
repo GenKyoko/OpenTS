@@ -415,7 +415,29 @@ void CellClass::Cell_Color(RGBClass & lowcolor, RGBClass & highcolor) const
 		return;
 	}
 
-	IsometricTileTypeClass * itype = (ITType != ISOTILE_NONE) ? IsometricTileTypes[ITType] : IsometricTileTypes[TILE_CLEAR];
+	/*
+	 * A map can reference tile types the current theater does not define — a
+	 * reduced tile set or a mismatched map, for example. Such cells fall back
+	 * to the clear tile rather than indexing past the end of the tile heap.
+	 */
+	int tile_types = IsometricTileTypes.Length();
+	IsometricTileType tile_type = ITType;
+	if (tile_type != ISOTILE_NONE && (tile_type < 0 || tile_type >= tile_types)) {
+		IsometricTileType fallback = (TILE_CLEAR >= 0 && TILE_CLEAR < tile_types) ? (IsometricTileType)TILE_CLEAR : ISOTILE_NONE;
+		tile_type = fallback;
+	}
+
+	IsometricTileTypeClass * itype = NULL;
+	if (tile_type != ISOTILE_NONE) {
+		itype = IsometricTileTypes[tile_type];
+	} else if (TILE_CLEAR >= 0 && TILE_CLEAR < tile_types) {
+		itype = IsometricTileTypes[TILE_CLEAR];
+	}
+
+	if (itype == NULL) {
+		lowcolor = highcolor = RGBClass(0, 0, 0);
+		return;
+	}
 
 	OverlayType overlay = Overlay;
 	if (overlay != OVERLAY_NONE && overlay != OVERLAY_LOWBRIDGE_27 && overlay != OVERLAY_LOWBRIDGE_28) {
@@ -476,12 +498,12 @@ void CellClass::Cell_Color(RGBClass & lowcolor, RGBClass & highcolor) const
 	 * colors, scaled by theater and interpolated toward a brighter shade by cell height.
 	 */
 	int tile = 0;
-	if (ITType != ISOTILE_NONE) {
+	if (tile_type != ISOTILE_NONE) {
 		if (itype->NumTileTypesInSet > 1) {
 			if (itype->Is_Randomized(SubTile)) {
 				tile = IsBridgeDamaged;
 			} else {
-				tile = Clear_Icon(ITType, itype->NumTileTypesInSet);
+				tile = Clear_Icon(tile_type, itype->NumTileTypesInSet);
 			}
 		}
 	} else {
@@ -493,8 +515,17 @@ void CellClass::Cell_Color(RGBClass & lowcolor, RGBClass & highcolor) const
 		next->Load_Tile_Image();
 	}
 
-	if (((IsoTileSet *)next->ImageData)->Fetch_Record_Pointer_Unsafe(SubTile) != NULL) {
-		IsoTileRecord const * record = ((IsoTileSet *)next->ImageData)->Fetch_Record_Pointer_Unsafe(SubTile);
+	/*
+	** The tile may carry no image data at all (theater art unavailable for this
+	** tile set). Fetch_Record_Pointer_Unsafe on such a tile would fabricate a
+	** bogus record pointer, so gate the lookup on the image being present.
+	*/
+	IsoTileRecord const * record = NULL;
+	if (next->ImageData != NULL) {
+		record = ((IsoTileSet *)next->ImageData)->Fetch_Record_Pointer_Unsafe(SubTile);
+	}
+
+	if (record != NULL) {
 		RGBClass lowest(record->LowColor.Red, record->LowColor.Green, record->LowColor.Blue);
 		RGBClass highest(record->HighColor.Red, record->HighColor.Green, record->HighColor.Blue);
 

@@ -133,8 +133,11 @@ OverlayTypeClass::OverlayTypeClass(char const * ininame) :
 OverlayTypeClass::~OverlayTypeClass(void)
 {
 	if (DemandLoad && ImageData != NULL) {
-		delete (ShapeSet *)ImageData;
+		if (ImageDataIsOwned) {
+			delete [] (char *)ImageData;
+		}
 		ImageData = NULL;
+		ImageDataIsOwned = false;
 	}
 	Detach_This_From_All(this, true);
 	OverlayTypes.Delete(this);
@@ -292,17 +295,22 @@ void OverlayTypeClass::Init(TheaterType theater)
 			if (overlay.IsTheater) {
 				_makepath(fullname, NULL, NULL, overlay.GraphicName, Theaters[theater].Suffix);
 				overlay.ImageData = MFCD::Retrieve(fullname);
+				overlay.ImageDataIsOwned = false;
 
 			} else if (overlay.IsNewTheater) {
 				_makepath(fullname, NULL, NULL, overlay.GraphicName, ".SHP");
 				overlay.Theater_Naming_Convention(fullname, theater);
 				overlay.ImageData = MFCD::Retrieve(fullname);
+				overlay.ImageDataIsOwned = false;
 			}
 		} else {
 			if (overlay.IsTheater || overlay.IsNewTheater) {
 				if (overlay.ImageData != NULL) {
-					delete [] (char*) overlay.ImageData;
+					if (overlay.ImageDataIsOwned) {
+						delete [] (char*) overlay.ImageData;
+					}
 					overlay.ImageData = NULL;
+					overlay.ImageDataIsOwned = false;
 				}
 			}
 		}
@@ -347,6 +355,7 @@ bool OverlayTypeClass::Read_INI(CCINIClass const & ini)
 		if (!IsTheater && !DemandLoad) {
 			_makepath(fullname, NULL, NULL, GraphicName, ".SHP");
 			ImageData = MFCD::Retrieve(fullname);
+			ImageDataIsOwned = false;
 		}
 
 		IsNoUseTileLandType = ini.Get_Bool(IniName, "NoUseTileLandType", IsNoUseTileLandType);
@@ -417,7 +426,9 @@ void OverlayTypeClass::Post_Load(void)
 	BASECLASS::Post_Load();
 
 	Fetch_Voxel_Image();
-	Fetch_Normal_Image();
+	if (!DemandLoad) {
+		Fetch_Normal_Image();
+	}
 
 	if (!DemandLoad) {
 		char fullname[_MAX_FNAME+_MAX_EXT];
@@ -429,6 +440,7 @@ void OverlayTypeClass::Post_Load(void)
 		}
 
 		ImageData = MFCD::Retrieve(fullname);
+		ImageDataIsOwned = false;
 	}
 }
 
@@ -557,6 +569,7 @@ void const * OverlayTypeClass::Get_Image_Data(void) const
 	CCFileClass file (fullname);
 
 	_this->ImageData = Load_Alloc_Data(file);
+	_this->ImageDataIsOwned = true;
 
 	return(ImageData);
 }

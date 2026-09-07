@@ -41,6 +41,13 @@ class ObjectTypeClass : public AbstractTypeClass
 		RGBClass RadialColor;
 
 		/*
+		 * This is the localization key for the name this object type shows in the user
+		 * interface. When the INI gives the type a UIName entry, the displayed name comes
+		 * from the localization tables under this key instead of the literal Name tag.
+		 */
+		TStringID<48> UIName;
+
+		/*
 		**	The defense of this object is greatly affected by the type of armor
 		**	it possesses. This value specifies the type of armor.
 		*/
@@ -57,6 +64,15 @@ class ObjectTypeClass : public AbstractTypeClass
 		*/
 		void const * ImageData;
 		void const * AlphaImageData;
+
+		/*
+		**	True when ImageData points at memory this object allocated itself (and
+		**	therefore may delete). Artwork fetched through MFCD::Retrieve can be a
+		**	borrowed pointer into a mix file's cached data block and must never be
+		**	passed to delete. Theater initialization must check this flag before
+		**	releasing an image it no longer wants.
+		*/
+		bool ImageDataIsOwned;
 
 		/*
 		 * These are the voxel models and motion data for this object type -- the body, the
@@ -196,6 +212,8 @@ class ObjectTypeClass : public AbstractTypeClass
 
 		char const * Graphic_Name(void) const {return(GraphicName);}
 		char const * Alpha_Graphic_Name(void) const {return(AlphaGraphicName);}
+
+		virtual char const * Full_Name(void) const override;
 
 		virtual bool Read_INI(CCINIClass const & ini) override;
 		virtual Coord const Coord_Fixup(Coord const & coord) const {return(coord);};

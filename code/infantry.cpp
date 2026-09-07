@@ -2954,14 +2954,14 @@ bool InfantryClass::Active_Click_With(ActionType action, ObjectClass * object, b
 const char * InfantryClass::Full_Name(void) const
 {
 	if (IsTechnician) {
-		return(Fetch_String(TXT_TECHNICIAN));
+		return(Localize("TXT_TECHNICIAN"));
 	}
 
 	if (Class->IsDisguised && !House->Is_Player_Control() && Rule->Disguise != NULL) {
 		return(Rule->Disguise->GivenName);
 	}
 
-	return(Class->GivenName);
+	return(Class->Full_Name());
 }
 
 

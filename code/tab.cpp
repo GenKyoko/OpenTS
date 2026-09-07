@@ -44,6 +44,7 @@
 #include "_mixfile.h"
 #include "_rules.h"
 #include "_surface.h"
+#include "dbgprint.h"
 #include "dialog.h"
 #include "draw.h"
 #include "goptions.h"
@@ -307,6 +308,7 @@ void TabClass::Set_Active(int select)
 {
 	switch (select) {
 		case 0:
+			DebugString("Options queued from tab activation\n");
 			Queue_Options();
 			break;
 
